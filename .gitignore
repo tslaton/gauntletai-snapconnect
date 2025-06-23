@@ -1,0 +1,6 @@
+# Obsidian BrainLift
+_docs/.obsidian
+
+# env files
+.env*
+!.env.example

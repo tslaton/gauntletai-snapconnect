@@ -1,0 +1,4 @@
+- https://docs.expo.dev/guides/using-supabase/
+- [push notifications](https://supabase.com/docs/guides/functions/examples/push-notifications?queryGroups=platform&platform=expo)
+- [using Supabase auth with Expo and React Native](https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native)
+- 
