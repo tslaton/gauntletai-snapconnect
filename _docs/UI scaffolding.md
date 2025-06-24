@@ -1,5 +1,7 @@
 We will feed this info to: [Magic Path](https://www.magicpath.ai/)
 
+We already have a sign up/login flow. This document describes what an authenticated user will see. 
+
 We are building a mobile app like a barebones Snapchat. We are starting by building an MVP with minimal core features in a constrained time, so we should not do anything extraneous. Focus on the features described in this document. We should have the following tabs at the bottom:
 
 1. `Chat`
@@ -30,6 +32,6 @@ From the `Send View`, if we tap a contact, it should send the the composed image
 
 In the `Chat View`, we should see a list of all of the `conversations` we have started (ie, the contacts we have messaged, or those who have messaged us). Above the conversations, at the top of the view we should have filters for and All, Unread. The active one (All by default) should have a faint rounded blue background applied to it. If we tap a conversation, it should load the `Messaging View` for that `conversation`. Each `conversation` should be named according to the contact or contacts involved.
 
-In the `Messaging View`, we should see a stream of all of the text messages and images we have exchanged in that conversation on top, with a text box to compose a next text message, as well as the keyboard, at the bottom. The text and images should be ordered by ascending timestamp and left- or right-aligned to indicate whether the sender was someone else in the conversation (left-aligned) or you (right-aligned). indicating the sender. At the top of the `Messaging View`, we should see the name of the `conversion`.
+In the `Messaging View`, we should see a stream of all of the text messages and images we have exchanged in that conversation on top, with a text box to compose a next text message, as well as the keyboard, at the bottom. The text and images should be ordered by ascending timestamp and left- or right-aligned to indicate whether the sender was someone else in the conversation (left-aligned) or you (right-aligned). indicating the sender. At the top of the `Messaging View`, we should see the name of the `conversion` (eg., the person or group it is with).
 
 Now, thinking about the main tabs at the bottom, if we tap the `Chat` tab, it should display the `Conversations View` we mentioned earlier.
