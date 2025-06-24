@@ -1,3 +1,6 @@
+import Avatar from '@/components/Avatar';
+import { useProfileStore } from '@/stores/profile';
+import { supabase } from '@/utils/supabase';
 import { Session } from '@supabase/supabase-js';
 import React, { useEffect } from 'react';
 import {
@@ -7,8 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useProfileStore } from '../stores/profile';
-import { supabase } from '../utils/supabase';
 
 export default function Account({ session }: { session: Session }) {
   // Select state and actions individually for performance, as recommended.
@@ -18,10 +19,13 @@ export default function Account({ session }: { session: Session }) {
   const error = useProfileStore((state) => state.error);
 
   const fetchProfile = useProfileStore((state) => state.fetchProfile);
-  const updateProfile = useProfileStore((state) => state.updateProfile);
+  const saveProfile = useProfileStore((state) => state.saveProfile);
   const setUsername = useProfileStore((state) => state.setUsername);
   const setWebsite = useProfileStore((state) => state.setWebsite);
   const clearError = useProfileStore((state) => state.clearError);
+
+  const avatarUrl = useProfileStore((state) => state.avatarUrl);
+  const setAvatarUrl = useProfileStore((state) => state.setAvatarUrl);
 
   useEffect(() => {
     if (session) {
@@ -40,6 +44,14 @@ export default function Account({ session }: { session: Session }) {
   return (
     <View className="mt-10 p-4">
       <View className="py-2">
+        <Avatar 
+          url={avatarUrl}
+          size={200}
+          onUpload={(url: string) => {
+            setAvatarUrl(url);
+            saveProfile(session);
+          }}
+        />
         <Text className="text-gray-700 mb-1 ml-1">Email</Text>
         <TextInput
           className="border border-gray-300 rounded-md p-3 bg-gray-100 text-gray-500"
@@ -71,7 +83,7 @@ export default function Account({ session }: { session: Session }) {
       <View className="py-2 mt-4">
         <TouchableOpacity
           disabled={isLoading}
-          onPress={() => updateProfile(session)}
+          onPress={() => saveProfile(session)}
           className="bg-blue-600 rounded-md py-3 items-center justify-center active:bg-blue-700 disabled:bg-gray-400"
         >
           <Text className="text-white text-base font-bold">

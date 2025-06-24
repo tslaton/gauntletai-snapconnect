@@ -18,9 +18,10 @@ interface ProfileState {
   avatarUrl: string | null;
   setUsername: (username: string) => void;
   setWebsite: (website: string) => void;
+  setAvatarUrl: (avatarUrl: string) => void;
   clearError: () => void;
   fetchProfile: (session: Session) => Promise<void>;
-  updateProfile: (session: Session) => Promise<void>;
+  saveProfile: (session: Session) => Promise<void>;
 }
 
 /**
@@ -49,6 +50,12 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
    * @param {string} website - The new website URL.
    */
   setWebsite: (website) => set({ website }),
+
+  /**
+   * Sets the avatar URL in the store.
+   * @param {string} avatarUrl - The new avatar URL.
+   */
+  setAvatarUrl: (avatarUrl) => set({ avatarUrl }),
 
   /**
    * Clears any existing error message from the state.
@@ -96,7 +103,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
    * Updates the user's profile in the database using the current store state.
    * @param {Session} session - The user's current session object.
    */
-  updateProfile: async (session) => {
+  saveProfile: async (session) => {
     set({ isLoading: true, error: null });
     try {
       const { user } = session;
