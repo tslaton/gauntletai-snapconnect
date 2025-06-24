@@ -343,12 +343,14 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <SafeAreaView className="flex-1">
-        {/* Header */}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}                          // it must stretch
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} // header + status-bar
+    >
+      <SafeAreaView style={{ flex: 1 }}>
         {renderHeader()}
 
-        {/* Messages List */}
         {messages.length === 0 ? (
           renderEmptyState()
         ) : (
@@ -363,24 +365,17 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
             onEndReached={handleOnEndReached}
             onEndReachedThreshold={0.1}
             ListFooterComponent={renderLoadMoreIndicator}
-            contentContainerStyle={{ paddingBottom: 10, flexGrow: 1, justifyContent: 'flex-end' }}
+            contentContainerStyle={{ paddingBottom: 20, flexGrow: 1, justifyContent: 'flex-end' }}
           />
         )}
 
-        {/* Message Input */}
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          {conversation && currentUser && (
-            <MessageInput
-              conversationId={conversationId}
-              currentUserId={currentUser.id}
-              placeholder={`Message ${getConversationTitle(conversation)}...`}
-              onMessageSent={handleMessageSent}
-            />
-          )}
-        </KeyboardAvoidingView>
+        <MessageInput
+          conversationId={conversationId}
+          currentUserId={currentUser!.id}
+          placeholder={`Message ${getConversationTitle(conversation!)}…`}
+          onMessageSent={handleMessageSent}
+        />
       </SafeAreaView>
-    </View>
+    </KeyboardAvoidingView>
   );
 } 
