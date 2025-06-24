@@ -1,5 +1,5 @@
 # Obsidian BrainLift
-_docs/.obsidian
+.obsidian
 
 # env files
 .env*
