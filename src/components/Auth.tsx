@@ -1,12 +1,12 @@
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-    Alert,
-    AppState,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  AppState,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { supabase } from '../utils/supabase';
 
@@ -89,10 +89,16 @@ export default function Auth() {
     
     setIsLoading(true);
     try {
-      // First, create the auth user
+      // Create the auth user with metadata for the trigger
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            email: email.trim(),
+          },
+        },
       });
 
       if (authError) {
@@ -105,23 +111,8 @@ export default function Auth() {
         return;
       }
 
-      // Create the user profile in the profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email: email.trim(),
-          full_name: fullName.trim(),
-          username: null, // Will be set later in account setup
-          avatar_url: null,
-          website: null,
-        });
-
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-        // Don't show this error to user as it's not critical and auth user was created
-        // The profile will be created on first login if missing
-      }
+      // Profile will be created automatically by database trigger
+      // No need for manual profile creation here
 
       if (!authData.session) {
         Alert.alert(
