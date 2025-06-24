@@ -79,3 +79,9 @@ See also [[How to — Supabase]]
 [[Perplexity — Managing schemas via Supabase (drizzle) vs. Firebase]]
 
 I still prefer the approach of Supabase with Drizzle ORM
+
+> 8. Are there any gotchas using Zustand with React Native
+
+[[Perplexity — Using Zustand with React Native]]
+
+Not really, aside from different localStorage. But the response gives good general advice.

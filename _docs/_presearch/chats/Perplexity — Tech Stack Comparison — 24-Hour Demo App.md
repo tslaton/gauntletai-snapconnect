@@ -1,4 +1,3 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" class="logo" width="120"/>
 https://www.perplexity.ai/search/what-is-an-easier-tech-stack-t-_gzJ82fOS5uOFEcrB7d6zw
 
 # Tech Stack Comparison: 24-Hour Demo App Development

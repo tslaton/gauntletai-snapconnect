@@ -1,4 +1,3 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" class="logo" width="120"/>
 https://www.perplexity.ai/search/does-firebase-work-well-with-e-dsM86IC4Q6SftvLXBEc7jg
 
 ## Firebase with Expo and React Native

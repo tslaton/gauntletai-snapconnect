@@ -1,4 +1,3 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" class="logo" width="120"/>
 https://www.perplexity.ai/search/what-are-the-pros-and-cons-of-_MA3xm7MTzqq.J5iS568xg
 
 # Firebase vs. Supabase for React Native and Expo Mobile Development
