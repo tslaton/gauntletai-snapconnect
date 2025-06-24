@@ -1,24 +1,26 @@
-import { Button, Text, View } from "react-native";
-import { useStore } from "../stores/demo";
+import Account from '@/components/Account'
+import Auth from '@/components/Auth'
+import { supabase } from '@/utils/supabase'
+import { Session } from '@supabase/supabase-js'
+import { useEffect, useState } from 'react'
+import { View } from 'react-native'
 
-function BearCounter() {
-  const bears = useStore((state) => state.bears);
-  return <Text className="text-lg mb-2">{bears} bears around here...</Text>;
-}
+export default function App() {
+  const [session, setSession] = useState<Session | null>(null)
 
-function Controls() {
-  const increasePopulation = useStore((state) => state.increasePopulation);
-  return <Button onPress={increasePopulation} title="one up" />;
-}
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
 
-export default function Index() {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+  }, [])
+
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-xl font-bold text-red-500 mb-4">
-        Zustand + Nativewind
-      </Text>
-      <BearCounter />
-      <Controls />
+    <View>
+      {session && session.user ? <Account key={session.user.id} session={session} /> : <Auth />}
     </View>
-  );
+  )
 }

@@ -50,3 +50,8 @@ app-example
 
 # contains supabase access token
 .cursor/mcp.json
+
+# supabase
+**/supabase/.branches
+**/supabase/.temp
+

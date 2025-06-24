@@ -85,3 +85,7 @@ I still prefer the approach of Supabase with Drizzle ORM
 [[Perplexity — Using Zustand with React Native]]
 
 Not really, aside from different localStorage. But the response gives good general advice.
+
+> 9. How would I get a link to my Expo app and deploy it remotely
+
+[[Perplexity — Deploying Expo apps remotely]]

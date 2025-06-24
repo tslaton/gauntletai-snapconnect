@@ -52,9 +52,6 @@ Join our community of developers creating universal apps.
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
 
-### Supabase
-
-- [How to configure the Supabase MCP server (contains sensitive info)](https://supabase.com/docs/guides/getting-started/mcp)
 
 ### Nativewind
 
@@ -69,3 +66,14 @@ Join our community of developers creating universal apps.
 ### Jest
 
 - [Unit testing Expo with Jest](https://docs.expo.dev/develop/unit-testing/)
+
+### Supabase
+
+- [Using Supabase with Expo](https://docs.expo.dev/guides/using-supabase/)
+- [How to configure the Supabase MCP server (contains sensitive info)](https://supabase.com/docs/guides/getting-started/mcp)
+- [Building User Auth with Expo and React Native](https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native?utm_source=expo&utm_medium=referral&utm_term=expo-react-native&queryGroups=database-method&database-method=sql)
+
+
+### Drizzle
+
+- [Getting started with Drizzle and Supabase](https://orm.drizzle.team/docs/get-started/supabase-new)
