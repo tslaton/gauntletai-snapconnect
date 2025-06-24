@@ -51,8 +51,8 @@
   - [ ] 3.7 Implement effect intensity preview with live adjustment
 
 - [ ] 4.0 Photo Capture and Post-Processing Pipeline
-  - [ ] 4.1 Implement photo capture functionality with full resolution support
-  - [ ] 4.2 Create post-capture editing screen at `src/app/camera/edit.tsx`
+  - [x] 4.1 Implement photo capture functionality with full resolution support
+  - [x] 4.2 Create post-capture editing screen at `src/app/camera/edit.tsx`
   - [ ] 4.3 Build `EffectSlider` component for blur intensity adjustment
   - [ ] 4.4 Implement split-view comparison (original vs. edited) in post-capture screen
   - [ ] 4.5 Add apply/cancel workflow with proper state management
@@ -63,7 +63,7 @@
 - [ ] 5.0 Integration with Sharing and Stories Systems
   - [ ] 5.1 Update existing messaging components to accept camera-captured photos
   - [ ] 5.2 Integrate camera photos with stories system for immediate sharing
-  - [ ] 5.3 Create sharing flow from post-capture edit screen
-  - [ ] 5.4 Update navigation to include camera access from chat and stories screens
+  - [x] 5.3 Create sharing flow from post-capture edit screen
+  - [x] 5.4 Update navigation to include camera access from chat and stories screens
   - [ ] 5.5 Ensure captured photos work with existing Supabase storage integration
   - [ ] 5.6 Add camera state management to Zustand store with proper cleanup 
