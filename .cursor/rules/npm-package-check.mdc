@@ -5,8 +5,10 @@ globs: **/*.{js,jsx,ts,tsx}, **/package.json
 
 # NPM Package Check
 
+```
 // Description: Best practices for checking and installing NPM packages before use
 // Recommended Globs: **/*.{js,jsx,ts,tsx}, **/package.json
+```
 
 ## Overview
 Ensure all required NPM packages are properly installed before use to prevent runtime errors.

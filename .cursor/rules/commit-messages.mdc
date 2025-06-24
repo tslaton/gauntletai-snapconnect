@@ -6,8 +6,10 @@ alwaysApply: false
 
 ## Commit Messages
 
+```
 // Description: Standardized commit message format for consistent version control history
 // Recommended Globs: **/*.{js,jsx,ts,tsx,md,mdx}
+```
 
 ## Format
 Always prefix commit messages in the following format:
