@@ -84,6 +84,17 @@ export default function App() {
 
         {/* Navigation Options */}
         <View className="flex-1 px-4 py-6">
+          {/* Camera Section */}
+          <Text className="text-lg font-semibold text-gray-900 mb-4">Camera</Text>
+          
+          <TouchableOpacity
+            className="bg-indigo-600 p-4 rounded-lg mb-6 flex-row items-center"
+            onPress={() => router.push('/camera')}
+          >
+            <FontAwesome name="camera" size={20} color="white" />
+            <Text className="text-white font-semibold ml-3 text-base">Take Photo</Text>
+          </TouchableOpacity>
+
           <Text className="text-lg font-semibold text-gray-900 mb-4">Friend Management</Text>
           
           <TouchableOpacity
