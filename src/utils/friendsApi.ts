@@ -51,6 +51,23 @@ export interface FriendRequestWithUser {
 }
 
 /**
+ * Interface for friend relationship data
+ */
+export interface Friend {
+  userId: string;
+  friendId: string;
+  createdAt: string;
+  friend: UserSearchResult;
+}
+
+/**
+ * Interface for user search results with relationship status
+ */
+export interface UserSearchResultWithStatus extends UserSearchResult {
+  relationshipStatus: 'none' | 'sent' | 'received' | 'friends';
+}
+
+/**
  * Searches for users by username, full name, or email.
  * Excludes the current user from results and filters out existing friends and pending requests.
  * 
@@ -533,6 +550,262 @@ export async function getCurrentUserProfile(userId: string): Promise<UserSearchR
     };
   } catch (error) {
     console.error('Error fetching current user profile:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches all friends for the current user with their profile information
+ * 
+ * @param currentUserId - The current user's ID
+ * @returns Promise resolving to array of friends with user profile data
+ */
+export async function fetchFriends(currentUserId: string): Promise<Friend[]> {
+  try {
+    const { data, error } = await supabase
+      .from('friends')
+      .select(`
+        user_id,
+        friend_id,
+        created_at,
+        profiles!friends_friend_id_profiles_id_fk (
+          id,
+          username,
+          full_name,
+          email,
+          avatar_url
+        )
+      `)
+      .eq('user_id', currentUserId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).map(friendship => ({
+      userId: friendship.user_id,
+      friendId: friendship.friend_id,
+      createdAt: friendship.created_at,
+      friend: {
+        id: (friendship.profiles as any).id,
+        username: (friendship.profiles as any).username,
+        fullName: (friendship.profiles as any).full_name,
+        email: (friendship.profiles as any).email,
+        avatarUrl: (friendship.profiles as any).avatar_url,
+      },
+    }));
+  } catch (error) {
+    console.error('Error fetching friends:', error);
+    throw error;
+  }
+}
+
+/**
+ * Removes a friend relationship (bidirectional)
+ * 
+ * @param currentUserId - The current user's ID
+ * @param friendId - The friend's user ID to remove
+ * @returns Promise resolving when friendship is removed
+ */
+export async function removeFriend(
+  currentUserId: string,
+  friendId: string
+): Promise<void> {
+  try {
+    // First verify that the friendship exists
+    const { data: friendshipData, error: friendshipError } = await supabase
+      .from('friends')
+      .select('user_id')
+      .eq('user_id', currentUserId)
+      .eq('friend_id', friendId)
+      .single();
+
+    if (friendshipError && friendshipError.code !== 'PGRST116') {
+      throw friendshipError;
+    }
+
+    if (!friendshipData) {
+      throw new Error('Friendship does not exist');
+    }
+
+    // Remove both sides of the friendship (bidirectional)
+    const { error: removeError } = await supabase
+      .from('friends')
+      .delete()
+      .or(`and(user_id.eq.${currentUserId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${currentUserId})`);
+
+    if (removeError) {
+      throw removeError;
+    }
+  } catch (error) {
+    console.error('Error removing friend:', error);
+    throw error;
+  }
+}
+
+/**
+ * Searches friends by name or username for the current user
+ * 
+ * @param currentUserId - The current user's ID
+ * @param searchQuery - The search term to match against friend's name or username
+ * @returns Promise resolving to array of matching friends
+ */
+export async function searchFriends(
+  currentUserId: string,
+  searchQuery: string
+): Promise<Friend[]> {
+  try {
+    if (!searchQuery.trim()) {
+      // If no search query, return all friends
+      return fetchFriends(currentUserId);
+    }
+
+    // Fetch all friends first, then filter in JavaScript
+    // This is more reliable than complex database filtering on joined tables
+    const allFriends = await fetchFriends(currentUserId);
+    
+    const searchTerm = searchQuery.trim().toLowerCase();
+    
+    // Filter friends based on search term
+    const filteredFriends = allFriends.filter(friend => {
+      const fullName = friend.friend.fullName?.toLowerCase() || '';
+      const username = friend.friend.username?.toLowerCase() || '';
+      const email = friend.friend.email?.toLowerCase() || '';
+      
+      return fullName.includes(searchTerm) || 
+             username.includes(searchTerm) || 
+             email.includes(searchTerm);
+    });
+
+    return filteredFriends;
+  } catch (error) {
+    console.error('Error searching friends:', error);
+    throw error;
+  }
+}
+
+/**
+ * Gets a random sample of users for discovery (excluding current user)
+ * 
+ * @param currentUserId - The ID of the current user to exclude from results
+ * @param limit - Maximum number of users to return (default: 20)
+ * @returns Promise resolving to array of random users with relationship status
+ */
+export async function getRandomUsers(
+  currentUserId: string,
+  limit: number = 20
+): Promise<UserSearchResultWithStatus[]> {
+  try {
+    // Get random users from the database
+    const { data: randomUsers, error: usersError } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, email, avatar_url')
+      .neq('id', currentUserId)
+      .limit(limit);
+
+    if (usersError) {
+      throw usersError;
+    }
+
+    if (!randomUsers || randomUsers.length === 0) {
+      return [];
+    }
+
+    // Get relationship status for each user
+    const usersWithStatus = await Promise.all(
+      randomUsers.map(async (user) => {
+        const relationshipStatus = await checkRelationshipStatus(currentUserId, user.id);
+        
+        let status: 'none' | 'sent' | 'received' | 'friends' = 'none';
+        if (relationshipStatus.isFriend) {
+          status = 'friends';
+        } else if (relationshipStatus.hasPendingRequest) {
+          status = relationshipStatus.sentByCurrentUser ? 'sent' : 'received';
+        }
+
+        return {
+          id: user.id,
+          username: user.username,
+          fullName: user.full_name,
+          email: user.email,
+          avatarUrl: user.avatar_url,
+          relationshipStatus: status,
+        };
+      })
+    );
+
+    return usersWithStatus;
+  } catch (error) {
+    console.error('Error fetching random users:', error);
+    throw error;
+  }
+}
+
+/**
+ * Searches for users by username, full name, or email.
+ * Includes all users with their relationship status instead of filtering them out.
+ * 
+ * @param searchQuery - The search term to match against username, fullName, or email
+ * @param currentUserId - The ID of the current user to exclude from results
+ * @returns Promise resolving to array of matching users with relationship status
+ */
+export async function searchUsersWithStatus(
+  searchQuery: string,
+  currentUserId: string
+): Promise<UserSearchResultWithStatus[]> {
+  console.log('searchUsersWithStatus called with: ', searchQuery, currentUserId);
+
+  if (!searchQuery.trim()) {
+    // Return random users when no search query
+    return getRandomUsers(currentUserId);
+  }
+
+  const searchTerm = `%${searchQuery.trim()}%`;
+
+  try {
+    // Get all users matching the search query (don't filter out friends)
+    const { data: searchResults, error: searchError } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, email, avatar_url')
+      .neq('id', currentUserId)
+      .or(`username.ilike.${searchTerm},full_name.ilike.${searchTerm},email.ilike.${searchTerm}`)
+      .limit(20);
+
+    if (searchError) {
+      throw searchError;
+    }
+
+    if (!searchResults || searchResults.length === 0) {
+      return [];
+    }
+
+    // Get relationship status for each user
+    const usersWithStatus = await Promise.all(
+      searchResults.map(async (user) => {
+        const relationshipStatus = await checkRelationshipStatus(currentUserId, user.id);
+        
+        let status: 'none' | 'sent' | 'received' | 'friends' = 'none';
+        if (relationshipStatus.isFriend) {
+          status = 'friends';
+        } else if (relationshipStatus.hasPendingRequest) {
+          status = relationshipStatus.sentByCurrentUser ? 'sent' : 'received';
+        }
+
+        return {
+          id: user.id,
+          username: user.username,
+          fullName: user.full_name,
+          email: user.email,
+          avatarUrl: user.avatar_url,
+          relationshipStatus: status,
+        };
+      })
+    );
+
+    return usersWithStatus;
+  } catch (error) {
+    console.error('Error searching users with status:', error);
     throw error;
   }
 } 

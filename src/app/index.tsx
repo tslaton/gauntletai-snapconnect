@@ -102,6 +102,14 @@ export default function App() {
             <Text className="text-white font-semibold ml-3 text-base">Friend Requests</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            className="bg-purple-600 p-4 rounded-lg mb-3 flex-row items-center"
+            onPress={() => router.push('/friends')}
+          >
+            <FontAwesome name="users" size={20} color="white" />
+            <Text className="text-white font-semibold ml-3 text-base">My Friends</Text>
+          </TouchableOpacity>
+
           {/* Welcome Message */}
           <View className="mt-8 bg-white p-4 rounded-lg">
             <Text className="text-lg font-semibold text-gray-900">

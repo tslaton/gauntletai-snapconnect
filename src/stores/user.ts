@@ -95,6 +95,45 @@ export const useUserStore = create<UserState>((set, get) => ({
         .eq('id', user.id)
         .single();
 
+      // If profile doesn't exist (404), create it with auth user email
+      if (error && status === 406) {
+        console.log('Profile not found, creating new profile for user:', user.id);
+        
+        const { error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email || null,
+            full_name: null,
+            username: null,
+            avatar_url: null,
+            website: null,
+          });
+
+        if (createError) {
+          console.error('Failed to create profile:', createError);
+          // Continue anyway, we'll use auth data
+        }
+
+        // Use auth user data since profile was just created or failed to create
+        const currentUser: CurrentUser = {
+          id: user.id,
+          username: null,
+          fullName: null,
+          email: user.email || null,
+          avatarUrl: null,
+          website: null,
+        };
+
+        set({ 
+          currentUser, 
+          isLoading: false, 
+          isInitialized: true,
+          error: null
+        });
+        return;
+      }
+
       if (error && status !== 406) {
         throw error;
       }

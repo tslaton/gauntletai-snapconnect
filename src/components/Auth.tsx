@@ -1,12 +1,12 @@
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-  Alert,
-  AppState,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    AppState,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { supabase } from '../utils/supabase';
 
@@ -25,38 +25,166 @@ AppState.addEventListener('change', (state) => {
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
+  /**
+   * Validates the form inputs
+   */
+  const validateForm = () => {
+    if (!email.trim()) {
+      Alert.alert('Validation Error', 'Email is required');
+      return false;
+    }
+    if (!password.trim()) {
+      Alert.alert('Validation Error', 'Password is required');
+      return false;
+    }
+    if (isSignUp && !fullName.trim()) {
+      Alert.alert('Validation Error', 'Full Name is required');
+      return false;
+    }
+    if (password.length < 6) {
+      Alert.alert('Validation Error', 'Password must be at least 6 characters');
+      return false;
+    }
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Validation Error', 'Please enter a valid email address');
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Signs in existing user with email and password
+   */
   async function signInWithEmail() {
+    if (!validateForm()) return;
+    
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
 
-    if (error) Alert.alert(error.message);
-    setIsLoading(false);
+      if (error) {
+        Alert.alert('Sign In Error', error.message);
+      }
+    } catch (error) {
+      Alert.alert('Sign In Error', 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
+  /**
+   * Signs up new user and creates their profile
+   */
   async function signUpWithEmail() {
+    if (!validateForm()) return;
+    
     setIsLoading(true);
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
+    try {
+      // First, create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password,
+      });
 
-    if (error) Alert.alert(error.message);
-    if (!session) Alert.alert('Please check your inbox for email verification!');
-    setIsLoading(false);
+      if (authError) {
+        Alert.alert('Sign Up Error', authError.message);
+        return;
+      }
+
+      if (!authData.user) {
+        Alert.alert('Sign Up Error', 'Failed to create user account');
+        return;
+      }
+
+      // Create the user profile in the profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          email: email.trim(),
+          full_name: fullName.trim(),
+          username: null, // Will be set later in account setup
+          avatar_url: null,
+          website: null,
+        });
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        // Don't show this error to user as it's not critical and auth user was created
+        // The profile will be created on first login if missing
+      }
+
+      if (!authData.session) {
+        Alert.alert(
+          'Check Your Email', 
+          'Please check your inbox for an email verification link before signing in.'
+        );
+        // Switch to sign in mode after successful signup
+        setIsSignUp(false);
+        setPassword(''); // Clear password for security
+      }
+    } catch (error) {
+      console.error('Unexpected sign up error:', error);
+      Alert.alert('Sign Up Error', 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   }
+
+  /**
+   * Toggles between sign in and sign up modes
+   */
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp);
+    setPassword(''); // Clear password when switching modes
+    if (!isSignUp) {
+      setFullName(''); // Clear full name when switching to sign in
+    }
+  };
 
   return (
     <View className="mt-10 p-4 justify-center">
+      <View className="mb-6">
+        <Text className="text-2xl font-bold text-center text-gray-900">
+          {isSignUp ? 'Create Account' : 'Welcome Back'}
+        </Text>
+        <Text className="text-center text-gray-600 mt-2">
+          {isSignUp ? 'Sign up to get started' : 'Sign in to your account'}
+        </Text>
+      </View>
+
+      {/* Full Name Field - Only shown during sign up */}
+      {isSignUp && (
+        <View className="py-2">
+          <Text className="text-gray-700 mb-1 ml-1">Full Name *</Text>
+          <View className="flex-row items-center border border-gray-300 rounded-md p-3 bg-white">
+            <View className="w-8 items-center">
+              <FontAwesome name="user" size={20} color="gray" />
+            </View>
+            <TextInput
+              className="flex-1 text-base ml-2"
+              onChangeText={(text) => setFullName(text)}
+              value={fullName}
+              placeholder="Enter your full name"
+              autoCapitalize="words"
+              returnKeyType="next"
+            />
+          </View>
+        </View>
+      )}
+
+      {/* Email Field */}
       <View className="py-2">
-        <Text className="text-gray-700 mb-1 ml-1">Email</Text>
+        <Text className="text-gray-700 mb-1 ml-1">Email *</Text>
         <View className="flex-row items-center border border-gray-300 rounded-md p-3 bg-white">
           <View className="w-8 items-center">
             <FontAwesome name="envelope" size={20} color="gray" />
@@ -65,15 +193,18 @@ export default function Auth() {
             className="flex-1 text-base ml-2"
             onChangeText={(text) => setEmail(text)}
             value={email}
-            placeholder="email@address.com"
-            autoCapitalize={'none'}
+            placeholder="email@example.com"
+            autoCapitalize="none"
             keyboardType="email-address"
+            returnKeyType="next"
+            autoComplete="email"
           />
         </View>
       </View>
 
+      {/* Password Field */}
       <View className="py-2">
-        <Text className="text-gray-700 mb-1 ml-1">Password</Text>
+        <Text className="text-gray-700 mb-1 ml-1">Password *</Text>
         <View className="flex-row items-center border border-gray-300 rounded-md p-3 bg-white">
           <View className="w-8 items-center">
             <FontAwesome name="lock" size={24} color="gray" />
@@ -83,30 +214,48 @@ export default function Auth() {
             onChangeText={(text) => setPassword(text)}
             value={password}
             secureTextEntry={true}
-            placeholder="Password"
-            autoCapitalize={'none'}
+            placeholder={isSignUp ? "At least 6 characters" : "Enter password"}
+            autoCapitalize="none"
+            returnKeyType="done"
+            autoComplete="password"
           />
         </View>
       </View>
 
-      <View className="py-2 mt-4">
+      {/* Sign In/Sign Up Button */}
+      <View className="py-2 mt-6">
         <TouchableOpacity
           disabled={isLoading}
-          onPress={() => signInWithEmail()}
+          onPress={isSignUp ? signUpWithEmail : signInWithEmail}
           className="bg-blue-600 rounded-md py-3 items-center justify-center active:bg-blue-700 disabled:bg-gray-400"
         >
-          <Text className="text-white text-base font-bold">Sign in</Text>
+          <Text className="text-white text-base font-bold">
+            {isLoading ? 'Loading...' : (isSignUp ? 'Sign up' : 'Sign in')}
+          </Text>
         </TouchableOpacity>
       </View>
 
+      {/* Toggle Between Sign In/Sign Up */}
       <View className="py-2">
         <TouchableOpacity
           disabled={isLoading}
-          onPress={() => signUpWithEmail()}
-          className="bg-gray-700 rounded-md py-3 items-center justify-center active:bg-gray-800 disabled:bg-gray-400"
+          onPress={toggleMode}
+          className="py-3 items-center justify-center"
         >
-          <Text className="text-white text-base font-bold">Sign up</Text>
+          <Text className="text-gray-600 text-base">
+            {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+            <Text className="text-blue-600 font-semibold">
+              {isSignUp ? 'Sign in' : 'Sign up'}
+            </Text>
+          </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Required Fields Note */}
+      <View className="mt-4">
+        <Text className="text-xs text-gray-500 text-center">
+          * Required fields
+        </Text>
       </View>
     </View>
   );

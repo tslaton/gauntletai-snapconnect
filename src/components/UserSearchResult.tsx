@@ -12,16 +12,16 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { type UserSearchResult } from '../utils/friendsApi';
+import { type UserSearchResultWithStatus } from '../utils/friendsApi';
 
 /**
  * Props for the UserSearchResult component
  */
 interface UserSearchResultProps {
   /** User data to display */
-  user: UserSearchResult;
+  user: UserSearchResultWithStatus;
   /** Callback when send friend request is pressed */
-  onSendFriendRequest: (user: UserSearchResult) => void;
+  onSendFriendRequest: (user: UserSearchResultWithStatus) => void;
   /** Whether the send request action is loading */
   isLoading?: boolean;
   /** Current request status with this user */
@@ -135,8 +135,9 @@ export default function UserSearchResult({
 
       case 'friends':
         return (
-          <View className="bg-gray-100 px-4 py-2 rounded-lg">
-            <Text className="text-gray-600 font-medium text-sm">Friends</Text>
+          <View className="bg-green-100 px-4 py-2 rounded-lg flex-row items-center">
+            <FontAwesome name="check" size={12} color="#16A34A" />
+            <Text className="text-green-800 font-medium text-sm ml-1">Friends</Text>
           </View>
         );
 

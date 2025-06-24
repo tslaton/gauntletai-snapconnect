@@ -4,13 +4,27 @@
  */
 
 import { create } from 'zustand';
-import { searchUsers, type UserSearchResult } from '../utils/friendsApi';
+import {
+    fetchFriends as apiFetchFriends,
+    removeFriend as apiRemoveFriend,
+    searchFriends as apiSearchFriends,
+    searchUsersWithStatus,
+    type Friend as ApiFriend,
+    type UserSearchResultWithStatus
+} from '../utils/friendsApi';
 
 /**
- * Interface for friend data (extends UserSearchResult)
+ * Interface for friend data (from API)
  */
-export interface Friend extends UserSearchResult {
-  createdAt: string; // When friendship was established
+export interface Friend extends ApiFriend {}
+
+/**
+ * Interface for friend actions states
+ */
+interface FriendActions {
+  [friendId: string]: {
+    isRemoving?: boolean;
+  };
 }
 
 /**
@@ -21,9 +35,11 @@ interface FriendsState {
   friends: Friend[];
   isFriendsLoading: boolean;
   friendsError: string | null;
+  friendsSearchQuery: string;
+  actionStates: FriendActions;
   
-  // Search state
-  searchResults: UserSearchResult[];
+  // Search state (for finding new users)
+  searchResults: UserSearchResultWithStatus[];
   searchQuery: string;
   isSearchLoading: boolean;
   searchError: string | null;
@@ -34,10 +50,17 @@ interface FriendsState {
   clearSearch: () => void;
   clearSearchError: () => void;
   
-  // Friend management actions (placeholder for future implementation)
+  // Friend management actions
   fetchFriends: (userId: string) => Promise<void>;
+  searchFriends: (userId: string, query: string) => Promise<void>;
+  removeFriend: (currentUserId: string, friendId: string) => Promise<{ success: boolean; error?: string }>;
   clearFriends: () => void;
   clearFriendsError: () => void;
+  setFriendsSearchQuery: (query: string) => void;
+  
+  // Helper methods
+  getFriendById: (friendId: string) => Friend | undefined;
+  isFriendRemovalInProgress: (friendId: string) => boolean;
 }
 
 /**
@@ -50,13 +73,15 @@ export const useFriendsStore = create<FriendsState>((set, get) => ({
   friends: [],
   isFriendsLoading: false,
   friendsError: null,
+  friendsSearchQuery: '',
+  actionStates: {},
   
   searchResults: [],
   searchQuery: '',
   isSearchLoading: false,
   searchError: null,
 
-  // --- SEARCH ACTIONS ---
+  // --- SEARCH ACTIONS (for finding new users) ---
 
   /**
    * Sets the search query in the store
@@ -74,15 +99,10 @@ export const useFriendsStore = create<FriendsState>((set, get) => ({
    * @param currentUserId - The current user's ID to exclude from results
    */
   fetchSearchResults: async (query, currentUserId) => {
-    if (!query.trim()) {
-      set({ searchResults: [], isSearchLoading: false });
-      return;
-    }
-
     set({ isSearchLoading: true, searchError: null });
 
     try {
-      const results = await searchUsers(query, currentUserId);
+      const results = await searchUsersWithStatus(query, currentUserId);
       set({ 
         searchResults: results, 
         isSearchLoading: false,
@@ -118,7 +138,7 @@ export const useFriendsStore = create<FriendsState>((set, get) => ({
     set({ searchError: null });
   },
 
-  // --- FRIENDS ACTIONS (Placeholder for future implementation) ---
+  // --- FRIENDS ACTIONS ---
 
   /**
    * Fetches the user's friends list
@@ -129,12 +149,8 @@ export const useFriendsStore = create<FriendsState>((set, get) => ({
     set({ isFriendsLoading: true, friendsError: null });
     
     try {
-      // TODO: Implement actual friends API call
-      // const friends = await getFriends(userId);
-      // set({ friends, isFriendsLoading: false });
-      
-      // Placeholder implementation
-      set({ friends: [], isFriendsLoading: false });
+      const friends = await apiFetchFriends(userId);
+      set({ friends, isFriendsLoading: false });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch friends';
       console.error('Error fetching friends:', error);
@@ -146,12 +162,93 @@ export const useFriendsStore = create<FriendsState>((set, get) => ({
   },
 
   /**
+   * Searches through the user's friends list
+   * 
+   * @param userId - The user's ID
+   * @param query - The search query
+   */
+  searchFriends: async (userId, query) => {
+    set({ isFriendsLoading: true, friendsError: null, friendsSearchQuery: query });
+    
+    try {
+      const friends = await apiSearchFriends(userId, query);
+      set({ friends, isFriendsLoading: false });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to search friends';
+      console.error('Error searching friends:', error);
+      set({ 
+        friendsError: message, 
+        isFriendsLoading: false 
+      });
+    }
+  },
+
+  /**
+   * Removes a friend from the user's friends list
+   * 
+   * @param currentUserId - The current user's ID
+   * @param friendId - The friend's user ID to remove
+   * @returns Promise with success status and optional error message
+   */
+  removeFriend: async (currentUserId, friendId) => {
+    const { actionStates } = get();
+    
+    try {
+      // Set loading state
+      set({
+        actionStates: {
+          ...actionStates,
+          [friendId]: { ...actionStates[friendId], isRemoving: true },
+        },
+      });
+
+      // Call API to remove friend
+      await apiRemoveFriend(currentUserId, friendId);
+
+      // Remove friend from local state
+      set((state) => ({
+        friends: state.friends.filter(friend => friend.friendId !== friendId),
+        actionStates: {
+          ...state.actionStates,
+          [friendId]: { ...state.actionStates[friendId], isRemoving: false },
+        },
+      }));
+
+      return { success: true };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to remove friend';
+      console.error('Error removing friend:', error);
+      
+      // Clear loading state
+      set((state) => ({
+        actionStates: {
+          ...state.actionStates,
+          [friendId]: { ...state.actionStates[friendId], isRemoving: false },
+        },
+      }));
+
+      return { success: false, error: message };
+    }
+  },
+
+  /**
+   * Sets the friends search query
+   * 
+   * @param query - The search query string
+   */
+  setFriendsSearchQuery: (query) => {
+    set({ friendsSearchQuery: query });
+  },
+
+  /**
    * Clears friends data
    */
   clearFriends: () => {
     set({ 
       friends: [], 
-      friendsError: null 
+      friendsError: null,
+      friendsSearchQuery: '',
+      actionStates: {}
     });
   },
 
@@ -160,5 +257,29 @@ export const useFriendsStore = create<FriendsState>((set, get) => ({
    */
   clearFriendsError: () => {
     set({ friendsError: null });
+  },
+
+  // --- HELPER METHODS ---
+
+  /**
+   * Gets a friend by their user ID
+   * 
+   * @param friendId - The friend's user ID
+   * @returns The friend object or undefined
+   */
+  getFriendById: (friendId) => {
+    const { friends } = get();
+    return friends.find(friend => friend.friendId === friendId);
+  },
+
+  /**
+   * Checks if a friend removal is in progress
+   * 
+   * @param friendId - The friend's user ID
+   * @returns Whether removal is in progress
+   */
+  isFriendRemovalInProgress: (friendId) => {
+    const { actionStates } = get();
+    return actionStates[friendId]?.isRemoving || false;
   },
 })); 

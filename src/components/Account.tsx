@@ -167,7 +167,7 @@ export default function Account({ session }: { session: Session }) {
         </View>
       </View>
       
-      <Text className="text-xs text-gray-500 mt-1 text-center">
+      <Text className="text-xs text-gray-600 mt-1 text-center">
         {isUploading ? 'Uploading...' : 'Tap to change photo'}
       </Text>
     </TouchableOpacity>
@@ -184,35 +184,38 @@ export default function Account({ session }: { session: Session }) {
       <View className="space-y-4">
         {/* Email Field */}
         <View>
-          <Text className="text-sm font-medium text-gray-700 mb-1">Email</Text>
+          <Text className="text-sm font-semibold text-gray-900 mb-1">Email</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-500 text-sm"
+            className="border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-600 text-sm"
             value={session?.user?.email}
             editable={false}
+            placeholderTextColor="#6B7280"
           />
         </View>
 
         {/* Username Field */}
         <View>
-          <Text className="text-sm font-medium text-gray-700 mb-1">Username</Text>
+          <Text className="text-sm font-semibold text-gray-900 mb-1">Username</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm"
+            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900 text-sm"
             value={username || ''}
             onChangeText={setUsername}
             autoCapitalize="none"
             placeholder="Enter username"
+            placeholderTextColor="#6B7280"
           />
         </View>
 
         {/* Website Field */}
         <View>
-          <Text className="text-sm font-medium text-gray-700 mb-1">Website</Text>
+          <Text className="text-sm font-semibold text-gray-900 mb-1">Website</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm"
+            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900 text-sm"
             value={website || ''}
             onChangeText={setWebsite}
             autoCapitalize="none"
             placeholder="Enter website URL"
+            placeholderTextColor="#6B7280"
           />
         </View>
       </View>

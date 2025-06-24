@@ -41,18 +41,18 @@
   - [x] 2.3 Create UserSearchResult component for individual search results
   - [x] 2.4 Implement friend discovery screen with search interface
   - [x] 2.5 Add logic to prevent self-requests and duplicate requests in search results
-- [ ] 3.0 Friend Request Management System
+- [x] 3.0 Friend Request Management System
   - [x] 3.1 Create API functions for sending, accepting, and declining friend requests
   - [x] 3.2 Build FriendRequestCard component for displaying request details
   - [x] 3.3 Create friend requests screen with sent/received sections
   - [x] 3.4 Implement friend request status management and validation
-  - [ ] 3.5 Add friend request notification system integration
-- [ ] 4.0 Friends List and Management Interface
-  - [ ] 4.1 Create API functions for fetching and managing friends list
-  - [ ] 4.2 Build FriendsList component with alphabetical sorting and search
-  - [ ] 4.3 Implement friends list screen with search and navigation
-  - [ ] 4.4 Add friend removal functionality with confirmation
-  - [ ] 4.5 Create navigation between friends list, search, and requests screens
+  - [x] 3.5 Add friend request notification system integration
+- [x] 4.0 Friends List and Management Interface
+  - [x] 4.1 Create API functions for fetching and managing friends list
+  - [x] 4.2 Build FriendsList component with alphabetical sorting and search
+  - [x] 4.3 Implement friends list screen with search and navigation
+  - [x] 4.4 Add friend removal functionality with confirmation
+  - [x] 4.5 Create navigation between friends list, search, and requests screens
 - [ ] 5.0 Real-time Notifications and State Management
   - [ ] 5.1 Set up Zustand stores for friends and friend requests management
   - [ ] 5.2 Implement Supabase Realtime subscriptions for friend request notifications
