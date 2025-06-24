@@ -6,6 +6,7 @@
 import { sql } from 'drizzle-orm';
 import {
   check,
+  index,
   pgSchema,
   pgTable,
   text,
@@ -48,12 +49,24 @@ export const profiles = pgTable('profiles', {
   // The user's full name.
   fullName: text('full_name'),
 
+  // The user's email address for contact purposes.
+  email: text('email'),
+
   // URL for the user's avatar image.
   avatarUrl: text('avatar_url'),
 
   // URL for the user's personal website.
   website: text('website'),
-});
+}, (table) => ({
+  // Index for efficient full name searches
+  fullNameIdx: index('profiles_full_name_idx').on(table.fullName),
+  
+  // Index for efficient email searches
+  emailIdx: index('profiles_email_idx').on(table.email),
+  
+  // Composite index for efficient username + full name searches
+  usernameFullNameIdx: index('profiles_username_full_name_idx').on(table.username, table.fullName),
+}));
 
 /**
  * Defines a check constraint on the `profiles` table to ensure that
