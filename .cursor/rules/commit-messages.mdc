@@ -1,0 +1,65 @@
+---
+description: Standardized commit message format for consistent version control history
+globs: **/*.{js,jsx,ts,tsx,md,mdx}
+alwaysApply: false
+---
+
+## Commit Messages
+
+// Description: Standardized commit message format for consistent version control history
+// Recommended Globs: **/*.{js,jsx,ts,tsx,md,mdx}
+
+## Format
+Always prefix commit messages in the following format:
+
+```
+# Separate commands
+git add <changed_files>
+git commit -m "Type(scope): description"
+
+# Combined command (shorthand)
+git add . && git commit -m "Type(scope): description"
+```
+
+## Types
+- `feat`: New feature or enhancement
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style/formatting changes
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks, dependencies, etc.
+
+## Examples
+```bash
+# Single file
+git add src/components/Button.tsx
+git commit -m "feat(component): add new Button component"
+
+# Multiple files
+git add src/api/auth.ts src/hooks/useAuth.ts
+git commit -m "fix(auth): resolve login session issues"
+
+# All changes
+git add .
+git commit -m "style(css): update global theme colors"
+```
+
+## Guidelines
+- Use imperative mood in descriptions ("add", not "added")
+- Keep descriptions concise but meaningful
+- Always include both type and scope
+- Use lowercase for descriptions
+- No period at the end of the message
+
+## Common Patterns
+- Documentation: `docs(readme): update installation steps`
+- Dependencies: `chore(deps): update package versions`
+- Bug fixes: `fix(api): resolve undefined user error`
+- New features: `feat(auth): add Google OAuth login`
+
+Don't forget to commit! Here's a template:
+```bash
+git add .
+git commit -m "type(scope): description"
+```
