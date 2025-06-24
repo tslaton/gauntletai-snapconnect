@@ -54,3 +54,7 @@ Join our community of developers creating universal apps.
 
 ### Supabase
 [How to configure the Supabase MCP server (contains sensitive info)](https://supabase.com/docs/guides/getting-started/mcp)
+
+### Nativewind
+[Installation](https://www.nativewind.dev/docs/getting-started/installation)
+for later: https://www.nativewind.dev/docs/getting-started/editor-setup
