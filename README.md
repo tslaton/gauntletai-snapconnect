@@ -53,8 +53,19 @@ Join our community of developers creating universal apps.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
 
 ### Supabase
-[How to configure the Supabase MCP server (contains sensitive info)](https://supabase.com/docs/guides/getting-started/mcp)
+
+- [How to configure the Supabase MCP server (contains sensitive info)](https://supabase.com/docs/guides/getting-started/mcp)
 
 ### Nativewind
-[Installation](https://www.nativewind.dev/docs/getting-started/installation)
-for later: https://www.nativewind.dev/docs/getting-started/editor-setup
+
+- [Installation](https://www.nativewind.dev/docs/getting-started/installation)
+- for later: https://www.nativewind.dev/docs/getting-started/editor-setup
+
+### Zustand
+
+- [Introduction](https://zustand.docs.pmnd.rs/getting-started/introduction)
+- [Typescript guide](https://github.com/pmndrs/zustand/blob/main/docs/guides/typescript.md)
+
+### Jest
+
+- [Unit testing Expo with Jest](https://docs.expo.dev/develop/unit-testing/)
