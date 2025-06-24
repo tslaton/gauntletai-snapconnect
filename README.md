@@ -77,3 +77,8 @@ Join our community of developers creating universal apps.
 ### Drizzle
 
 - [Getting started with Drizzle and Supabase](https://orm.drizzle.team/docs/get-started/supabase-new)
+
+## Building
+
+- https://docs.expo.dev/build/setup/
+- https://expo.dev/accounts/tslaton/projects/snapconnect/builds
