@@ -4,3 +4,9 @@ _docs/.obsidian
 # env files
 .env*
 !.env.example
+
+# secrets
+.secrets.md
+
+# contains supabase access token
+.cursor/mcp.json 
