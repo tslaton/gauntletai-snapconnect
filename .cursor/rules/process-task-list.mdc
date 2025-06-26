@@ -1,13 +1,13 @@
 ---
 description: Guidelines for managing task lists in markdown files to track progress on completing a PRD
-globs: **/_tasks/**/*.md, **/_tasks-*.md
+globs: **/_docs/tasks/**/*.md, **/_docs/tasks-*.md
 ---
 
 # Task List Management
 
 ```
 // Description: Guidelines for managing task lists in markdown files to track progress on completing a PRD
-// Recommended Globs: **/_tasks/**/*.md, **/_tasks-*.md
+// Recommended Globs: **/_docs/tasks/**/*.md, **/_docs/tasks-*.md
 ```
 
 Guidelines for managing task lists in markdown files to track progress on completing a PRD
