@@ -142,102 +142,105 @@ export default function Account({ session }: { session: Session }) {
     <TouchableOpacity 
       onPress={uploadAvatar}
       disabled={isUploading}
-      className="items-center mb-4"
+      className="items-center"
     >
       <View className="relative">
         {displayAvatarUrl ? (
           <Image
             source={{ uri: displayAvatarUrl }}
-            className="w-20 h-20 rounded-full"
+            className="w-24 h-24 rounded-full"
             resizeMode="cover"
           />
         ) : (
-          <View className="w-20 h-20 bg-gray-300 rounded-full items-center justify-center">
-            <FontAwesome name="user" size={32} color="#6B7280" />
+          <View className="w-24 h-24 bg-gray-200 rounded-full items-center justify-center">
+            <FontAwesome name="user" size={40} color="#9CA3AF" />
           </View>
         )}
         
         {/* Upload indicator overlay */}
-        <View className="absolute bottom-0 right-0 w-6 h-6 bg-blue-600 rounded-full items-center justify-center border-2 border-white">
+        <View className="absolute bottom-0 right-0 w-8 h-8 bg-indigo-600 rounded-full items-center justify-center border-2 border-white shadow-sm">
           {isUploading ? (
             <ActivityIndicator size="small" color="white" />
           ) : (
-            <FontAwesome name="camera" size={12} color="white" />
+            <FontAwesome name="camera" size={14} color="white" />
           )}
         </View>
       </View>
       
-      <Text className="text-xs text-gray-600 mt-1 text-center">
+      <Text className="text-sm text-gray-500 mt-3 text-center">
         {isUploading ? 'Uploading...' : 'Tap to change photo'}
       </Text>
     </TouchableOpacity>
   );
 
   return (
-    <View className="flex-1 px-4 pt-4">
-      {/* Compact Avatar Section */}
-      <View className="items-center mb-6">
-        {renderAvatar()}
-      </View>
-
-      {/* Compact Form Fields */}
-      <View className="space-y-4">
-        {/* Email Field */}
-        <View>
-          <Text className="text-sm font-semibold text-gray-900 mb-1">Email</Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-600 text-sm"
-            value={session?.user?.email}
-            editable={false}
-            placeholderTextColor="#6B7280"
-          />
+    <View className="flex-1 px-6 py-8">
+      {/* Centered container with max width */}
+      <View className="flex-1 justify-center max-w-sm mx-auto w-full">
+        {/* Avatar Section */}
+        <View className="items-center mb-8">
+          {renderAvatar()}
         </View>
 
-        {/* Username Field */}
-        <View>
-          <Text className="text-sm font-semibold text-gray-900 mb-1">Username</Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900 text-sm"
-            value={username || ''}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-            placeholder="Enter username"
-            placeholderTextColor="#6B7280"
-          />
+        {/* Form Fields with better spacing */}
+        <View className="space-y-5">
+          {/* Email Field */}
+          <View>
+            <Text className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Email</Text>
+            <TextInput
+              className="border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-gray-600 text-base"
+              value={session?.user?.email}
+              editable={false}
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          {/* Username Field */}
+          <View>
+            <Text className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Username</Text>
+            <TextInput
+              className="border border-gray-200 rounded-xl px-4 py-3 bg-white text-gray-900 text-base"
+              value={username || ''}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              placeholder="Enter username"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          {/* Website Field */}
+          <View>
+            <Text className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Website</Text>
+            <TextInput
+              className="border border-gray-200 rounded-xl px-4 py-3 bg-white text-gray-900 text-base"
+              value={website || ''}
+              onChangeText={setWebsite}
+              autoCapitalize="none"
+              placeholder="Enter website URL"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
         </View>
 
-        {/* Website Field */}
-        <View>
-          <Text className="text-sm font-semibold text-gray-900 mb-1">Website</Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900 text-sm"
-            value={website || ''}
-            onChangeText={setWebsite}
-            autoCapitalize="none"
-            placeholder="Enter website URL"
-            placeholderTextColor="#6B7280"
-          />
+        {/* Action Buttons with better styling */}
+        <View className="mt-8 space-y-3">
+          <TouchableOpacity
+            disabled={isLoading}
+            onPress={() => saveProfile(session)}
+            className="bg-indigo-600 rounded-xl py-4 items-center justify-center active:bg-indigo-700 disabled:bg-gray-400 shadow-sm"
+          >
+            <Text className="text-white text-base font-semibold">
+              {isLoading ? 'Updating...' : 'Update Profile'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleSignOut}
+            className="bg-white border border-gray-200 rounded-xl py-4 items-center justify-center active:bg-gray-50"
+          >
+            <Text className="text-gray-700 text-base font-semibold">Sign Out</Text>
+          </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Compact Action Buttons */}
-      <View className="mt-6 space-y-3">
-        <TouchableOpacity
-          disabled={isLoading}
-          onPress={() => saveProfile(session)}
-          className="bg-blue-600 rounded-lg py-3 items-center justify-center active:bg-blue-700 disabled:bg-gray-400"
-        >
-          <Text className="text-white text-sm font-semibold">
-            {isLoading ? 'Updating...' : 'Update Profile'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleSignOut}
-          className="bg-gray-600 rounded-lg py-3 items-center justify-center active:bg-gray-700"
-        >
-          <Text className="text-white text-sm font-semibold">Sign Out</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );

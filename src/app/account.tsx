@@ -6,7 +6,7 @@
 import { Session } from '@supabase/supabase-js';
 import { router, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView } from 'react-native';
 import Account from '../components/Account';
 import { supabase } from '../utils/supabase';
 
@@ -46,26 +46,39 @@ export default function AccountScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Screen header configuration - simple overlay style */}
+    <SafeAreaView className="flex-1 bg-white">
+      {/* Screen header configuration - clean style */}
       <Stack.Screen 
         options={{
           title: 'Account',
           headerStyle: {
             backgroundColor: '#ffffff',
           },
-          headerTintColor: '#1f2937',
+          headerTintColor: '#4F46E5',
           headerTitleStyle: {
             fontWeight: '600',
+            fontSize: 18,
           },
           headerBackTitle: 'Back',
+          headerShadowVisible: false,
         }} 
       />
       
-      {/* Main content */}
-      <View className="flex-1">
-        <Account key={session.user.id} session={session} />
-      </View>
+      {/* Main content with keyboard avoiding behavior */}
+      <KeyboardAvoidingView 
+        className="flex-1" 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView 
+          className="flex-1"
+          contentContainerClassName="flex-grow"
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Account key={session.user.id} session={session} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 } 

@@ -143,7 +143,7 @@ export default function Auth() {
   };
 
   return (
-    <View className="mt-10 p-4 justify-center">
+    <View className="flex-1 justify-center p-4">
       <View className="mb-6">
         <Text className="text-2xl font-bold text-center text-gray-900">
           {isSignUp ? 'Create Account' : 'Welcome Back'}
@@ -166,6 +166,7 @@ export default function Auth() {
               onChangeText={(text) => setFullName(text)}
               value={fullName}
               placeholder="Enter your full name"
+              placeholderTextColor="#6B7280"
               autoCapitalize="words"
               returnKeyType="next"
             />
@@ -185,6 +186,7 @@ export default function Auth() {
             onChangeText={(text) => setEmail(text)}
             value={email}
             placeholder="email@example.com"
+            placeholderTextColor="#6B7280"
             autoCapitalize="none"
             keyboardType="email-address"
             returnKeyType="next"
@@ -206,6 +208,7 @@ export default function Auth() {
             value={password}
             secureTextEntry={true}
             placeholder={isSignUp ? "At least 6 characters" : "Enter password"}
+            placeholderTextColor="#6B7280"
             autoCapitalize="none"
             returnKeyType="done"
             autoComplete="password"

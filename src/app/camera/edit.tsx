@@ -5,7 +5,7 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useConversationsStore } from '../../stores/conversations';
@@ -22,9 +22,16 @@ export default function PhotoEditScreen() {
   const [isUploading, setIsUploading] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
   
-  const { friends } = useFriendsStore();
+  const { friends, isLoading: friendsLoading, fetchFriends } = useFriendsStore();
   const { conversations, startDirectConversation } = useConversationsStore();
   const { currentUser } = useUserStore();
+
+  // Load friends when component mounts
+  useEffect(() => {
+    if (currentUser?.id) {
+      fetchFriends(currentUser.id);
+    }
+  }, [currentUser?.id, fetchFriends]);
 
   /**
    * Handles sharing photo to a specific conversation
@@ -189,36 +196,41 @@ export default function PhotoEditScreen() {
             {/* Friends List */}
             <Text className="text-gray-300 text-sm mb-3">Send to Friends</Text>
             <ScrollView className="max-h-48" showsVerticalScrollIndicator={false}>
-              {friends.map((friend) => (
-                <TouchableOpacity
-                  key={friend.friendId}
-                  onPress={() => {
-                    const friendName = friend.friend.fullName || friend.friend.username;
-                    Alert.alert(
-                      'Send to Friend',
-                      `Send photo to ${friendName}?`,
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        { 
-                          text: 'Send', 
-                          onPress: () => handleShareToFriend(friend.friendId, friendName || 'Friend')
-                        }
-                      ]
-                    );
-                  }}
-                  disabled={isUploading}
-                  className="flex-row items-center bg-gray-800 rounded-lg p-3 mb-2"
-                >
-                  <View className="w-10 h-10 bg-gray-600 rounded-full items-center justify-center mr-3">
-                    <Ionicons name="person" size={16} color="#ffffff" />
-                  </View>
-                  <Text className="text-white font-medium">
-                    {friend.friend.fullName || friend.friend.username || 'Unknown Friend'}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-              
-              {friends.length === 0 && (
+              {friendsLoading ? (
+                <View className="py-4 items-center">
+                  <ActivityIndicator size="small" color="#9CA3AF" />
+                  <Text className="text-gray-400 text-sm mt-2">Loading friends...</Text>
+                </View>
+              ) : friends.length > 0 ? (
+                friends.map((friend) => (
+                  <TouchableOpacity
+                    key={friend.friendId}
+                    onPress={() => {
+                      const friendName = friend.friend.fullName || friend.friend.username;
+                      Alert.alert(
+                        'Send to Friend',
+                        `Send photo to ${friendName}?`,
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          { 
+                            text: 'Send', 
+                            onPress: () => handleShareToFriend(friend.friendId, friendName || 'Friend')
+                          }
+                        ]
+                      );
+                    }}
+                    disabled={isUploading}
+                    className="flex-row items-center bg-gray-800 rounded-lg p-3 mb-2"
+                  >
+                    <View className="w-10 h-10 bg-gray-600 rounded-full items-center justify-center mr-3">
+                      <Ionicons name="person" size={16} color="#ffffff" />
+                    </View>
+                    <Text className="text-white font-medium">
+                      {friend.friend.fullName || friend.friend.username || 'Unknown Friend'}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
                 <Text className="text-gray-400 text-center py-4">
                   No friends to share with. Add some friends first!
                 </Text>

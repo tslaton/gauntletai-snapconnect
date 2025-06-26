@@ -133,16 +133,9 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
 
       {/* Top overlay */}
       <View
-        className="absolute top-0 left-0 right-0 flex-row justify-between items-start px-6"
+        className="absolute top-0 left-0 right-0 flex-row justify-end items-start px-6"
         style={{ paddingTop: insets.top + 16 }}
       >
-        <TouchableOpacity
-          onPress={onGoBack}
-          className="bg-black/30 rounded-full p-3"
-        >
-          <Ionicons name="close" size={24} color="#ffffff" />
-        </TouchableOpacity>
-
         {/* Effect toggle */}
         <TouchableOpacity
           onPress={toggleEffect}
