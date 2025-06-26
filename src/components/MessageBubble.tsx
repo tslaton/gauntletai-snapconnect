@@ -110,11 +110,18 @@ export default function MessageBubble({
    */
   const renderMessageContent = () => {
     if (message.type === 'photo') {
-      // TODO: Handle photo display when photo messaging is implemented
+      // Display actual photo for photo messages
       return (
-        <View className="bg-gray-100 p-3 rounded-lg items-center">
-          <FontAwesome name="image" size={20} color="#6B7280" />
-          <Text className="text-gray-500 text-sm mt-1">Photo</Text>
+        <View>
+          <Image
+            source={{ uri: message.content }}
+            className="w-48 h-48 rounded-lg"
+            resizeMode="cover"
+            style={{
+              minHeight: 150,
+              minWidth: 150,
+            }}
+          />
         </View>
       );
     }

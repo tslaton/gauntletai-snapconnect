@@ -12,7 +12,10 @@
 - `src/utils/cameraApi.ts` - Camera utility functions and API wrapper
 - `src/utils/imageProcessing.ts` - Image processing utilities for Gaussian blur effects
 - `src/utils/permissions.ts` - Permission handling utilities
+- `src/utils/photoStorage.ts` - Photo storage utilities for Supabase Storage upload/download
+- `src/utils/cameraErrors.ts` - Camera error handling utilities
 - `src/types/camera.ts` - TypeScript types for camera functionality
+- `src/components/MessageBubble.tsx` - Updated to display photo messages
 - `__tests__/components/Camera/CameraView.test.tsx` - Unit tests for CameraView component
 - `__tests__/components/Camera/CameraControls.test.tsx` - Unit tests for CameraControls component
 - `__tests__/stores/camera.test.ts` - Unit tests for camera store
@@ -50,7 +53,7 @@
   - [ ] 3.6 Add loading states and performance monitoring for effect processing
   - [ ] 3.7 Implement effect intensity preview with live adjustment
 
-- [ ] 4.0 Photo Capture and Post-Processing Pipeline
+- [x] 4.0 Photo Capture and Post-Processing Pipeline
   - [x] 4.1 Implement photo capture functionality with full resolution support
   - [x] 4.2 Create post-capture editing screen at `src/app/camera/edit.tsx`
   - [ ] 4.3 Build `EffectSlider` component for blur intensity adjustment
@@ -61,9 +64,9 @@
   - [ ] 4.8 Add photo processing progress indicators and error handling
 
 - [ ] 5.0 Integration with Sharing and Stories Systems
-  - [ ] 5.1 Update existing messaging components to accept camera-captured photos
+  - [x] 5.1 Update existing messaging components to accept camera-captured photos
   - [ ] 5.2 Integrate camera photos with stories system for immediate sharing
   - [x] 5.3 Create sharing flow from post-capture edit screen
   - [x] 5.4 Update navigation to include camera access from chat and stories screens
-  - [ ] 5.5 Ensure captured photos work with existing Supabase storage integration
-  - [ ] 5.6 Add camera state management to Zustand store with proper cleanup 
+  - [x] 5.5 Ensure captured photos work with existing Supabase storage integration
+  - [x] 5.6 Add camera state management to Zustand store with proper cleanup 

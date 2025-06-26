@@ -114,70 +114,63 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
 
   return (
     <View className="flex-1 bg-black">
-      {/* Camera Preview */}
-      <View className="flex-1 relative">
-        <ExpoCameraView
-          ref={cameraRef}
-          style={{ flex: 1 }}
-          facing={cameraType}
-          onCameraReady={handleCameraReady}
-          onMountError={handleCameraMountError}
+      {/* Camera preview (no children) */}
+      <ExpoCameraView
+        ref={cameraRef}
+        style={{ flex: 1 }}
+        facing={cameraType}
+        onCameraReady={handleCameraReady}
+        onMountError={handleCameraMountError}
+      />
+
+      {/* Loading overlay */}
+      {!isCameraReady && (
+        <View className="absolute inset-0 bg-black items-center justify-center">
+          <Ionicons name="camera-outline" size={80} color="#ffffff" />
+          <Text className="text-white text-lg mt-4">Initializing camera...</Text>
+        </View>
+      )}
+
+      {/* Top overlay */}
+      <View
+        className="absolute top-0 left-0 right-0 flex-row justify-between items-start px-6"
+        style={{ paddingTop: insets.top + 16 }}
+      >
+        <TouchableOpacity
+          onPress={onGoBack}
+          className="bg-black/30 rounded-full p-3"
         >
-          {/* Loading overlay while camera initializes */}
-          {!isCameraReady && (
-            <View className="absolute inset-0 bg-black items-center justify-center">
-              <Ionicons name="camera-outline" size={80} color="#ffffff" />
-              <Text className="text-white text-lg mt-4">Initializing camera...</Text>
-            </View>
-          )}
-          {/* Back button overlay */}
-          <View 
-            className="absolute top-0 left-0 right-0 flex-row justify-between items-start px-6"
-            style={{ paddingTop: insets.top + 16 }}
-          >
-            <TouchableOpacity
-              onPress={onGoBack}
-              className="bg-black/30 rounded-full p-3"
-            >
-              <Ionicons name="close" size={24} color="#ffffff" />
-            </TouchableOpacity>
+          <Ionicons name="close" size={24} color="#ffffff" />
+        </TouchableOpacity>
 
-            {/* Effect toggle button */}
-            <TouchableOpacity
-              onPress={toggleEffect}
-              className={`rounded-full p-3 ${
-                effectEnabled ? 'bg-blue-500' : 'bg-black/30'
-              }`}
-            >
-              <Ionicons 
-                name="sparkles" 
-                size={24} 
-                color="#ffffff" 
-              />
-            </TouchableOpacity>
-          </View>
+        {/* Effect toggle */}
+        <TouchableOpacity
+          onPress={toggleEffect}
+          className={`rounded-full p-3 ${effectEnabled ? 'bg-blue-500' : 'bg-black/30'}`}
+        >
+          <Ionicons name="sparkles" size={24} color="#ffffff" />
+        </TouchableOpacity>
+      </View>
 
-          {/* Effect indicator */}
-          {effectEnabled && (
-            <View className="absolute top-20 right-6 bg-blue-500 px-3 py-1 rounded-full">
-              <Text className="text-white text-sm font-medium">Blur Effect</Text>
-            </View>
-          )}
+      {/* Effect indicator */}
+      {effectEnabled && (
+        <View className="absolute top-20 right-6 bg-blue-500 px-3 py-1 rounded-full">
+          <Text className="text-white text-sm font-medium">Blur Effect</Text>
+        </View>
+      )}
 
-          {/* Camera Controls */}
-          <View 
-            className="absolute bottom-0 left-0 right-0"
-            style={{ paddingBottom: insets.bottom + 16 }}
-          >
-            <CameraControls
-              onCapture={capturePhoto}
-              onToggleCamera={toggleCamera}
-              isCapturing={isCapturing}
-              cameraType={cameraType}
-              effectEnabled={effectEnabled}
-            />
-          </View>
-        </ExpoCameraView>
+      {/* Bottom controls */}
+      <View
+        className="absolute bottom-0 left-0 right-0"
+        style={{ paddingBottom: insets.bottom + 16 }}
+      >
+        <CameraControls
+          onCapture={capturePhoto}
+          onToggleCamera={toggleCamera}
+          isCapturing={isCapturing}
+          cameraType={cameraType}
+          effectEnabled={effectEnabled}
+        />
       </View>
     </View>
   );

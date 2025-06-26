@@ -10,6 +10,9 @@ import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, Vi
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useConversationsStore } from '../../stores/conversations';
 import { useFriendsStore } from '../../stores/friends';
+import { useUserStore } from '../../stores/user';
+import { sendMessage } from '../../utils/messagesApi';
+import { uploadPhoto, validatePhoto } from '../../utils/photoStorage';
 
 export default function PhotoEditScreen() {
   const router = useRouter();
@@ -20,26 +23,80 @@ export default function PhotoEditScreen() {
   const [showShareOptions, setShowShareOptions] = useState(false);
   
   const { friends } = useFriendsStore();
-  const { conversations } = useConversationsStore();
+  const { conversations, startDirectConversation } = useConversationsStore();
+  const { currentUser } = useUserStore();
 
   /**
    * Handles sharing photo to a specific conversation
    */
   const handleShareToConversation = async (conversationId: string) => {
-    if (!photoUri) return;
+    if (!photoUri || !currentUser?.id) return;
     
     try {
       setIsUploading(true);
       
-      // TODO: Implement photo upload to Supabase storage and send photo message
+      // Validate photo first
+      const validation = await validatePhoto(photoUri);
+      if (!validation.valid) {
+        Alert.alert('Invalid Photo', validation.error || 'Photo is not valid');
+        return;
+      }
+
+      // Upload photo to Supabase Storage
+      const uploadResult = await uploadPhoto(photoUri, currentUser.id, {
+        quality: 0.8,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        compress: true
+      });
+
+      if (!uploadResult.success || !uploadResult.publicUrl) {
+        Alert.alert('Upload Failed', uploadResult.error || 'Failed to upload photo');
+        return;
+      }
+
+      // Send photo message
+      const messageResult = await sendMessage({
+        conversationId,
+        content: uploadResult.publicUrl,
+        type: 'photo'
+      }, currentUser.id);
+
       Alert.alert(
-        'Photo Sharing',
-        'Photo sharing will be implemented next! For now, this is a placeholder.',
+        'Photo Sent!',
+        'Your photo has been shared successfully.',
         [{ text: 'OK', onPress: () => router.back() }]
       );
     } catch (error) {
       console.error('Error sharing photo:', error);
       Alert.alert('Error', 'Failed to share photo. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  /**
+   * Handles sharing photo to a friend (creates/finds conversation first)
+   */
+  const handleShareToFriend = async (friendId: string, friendName: string) => {
+    if (!currentUser?.id) return;
+    
+    try {
+      setIsUploading(true);
+      
+      // Create or get direct conversation with friend
+      const conversationResult = await startDirectConversation(currentUser.id, friendId);
+      
+      if (!conversationResult.success || !conversationResult.conversation) {
+        Alert.alert('Error', conversationResult.error || 'Failed to start conversation');
+        return;
+      }
+
+      // Share photo to the conversation
+      await handleShareToConversation(conversationResult.conversation.id);
+    } catch (error) {
+      console.error('Error sharing to friend:', error);
+      Alert.alert('Error', 'Failed to share photo to friend. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -136,17 +193,16 @@ export default function PhotoEditScreen() {
                 <TouchableOpacity
                   key={friend.friendId}
                   onPress={() => {
-                    // Find or create conversation with this friend
-                    // For now, show placeholder
+                    const friendName = friend.friend.fullName || friend.friend.username;
                     Alert.alert(
                       'Send to Friend',
-                      `Send photo to ${friend.friend.fullName || friend.friend.username}?`,
+                      `Send photo to ${friendName}?`,
                       [
                         { text: 'Cancel', style: 'cancel' },
-                        { text: 'Send', onPress: () => {
-                          // TODO: Implement friend messaging
-                          Alert.alert('Feature Coming Soon', 'Direct friend messaging will be implemented next!');
-                        }}
+                        { 
+                          text: 'Send', 
+                          onPress: () => handleShareToFriend(friend.friendId, friendName || 'Friend')
+                        }
                       ]
                     );
                   }}
@@ -175,7 +231,9 @@ export default function PhotoEditScreen() {
         {isUploading && (
           <View className="absolute inset-0 bg-black/70 items-center justify-center">
             <ActivityIndicator size="large" color="#ffffff" />
-            <Text className="text-white text-lg mt-4">Uploading...</Text>
+            <Text className="text-white text-lg mt-4">
+              {isUploading ? 'Uploading photo...' : 'Loading...'}
+            </Text>
           </View>
         )}
       </View>
