@@ -5,10 +5,11 @@
 
 import Account from '@/components/Account';
 import { supabase } from '@/utils/supabase';
+import { FontAwesome } from '@expo/vector-icons';
 import { Session } from '@supabase/supabase-js';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 /**
  * Account screen component
@@ -38,22 +39,23 @@ export default function AccountScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* Screen header configuration - clean style */}
+      {/* Hide the default header */}
       <Stack.Screen 
         options={{
-          title: 'Account',
-          headerStyle: {
-            backgroundColor: '#ffffff',
-          },
-          headerTintColor: '#4F46E5',
-          headerTitleStyle: {
-            fontWeight: '600',
-            fontSize: 18,
-          },
-          headerBackTitle: 'Back',
-          headerShadowVisible: false,
+          headerShown: false,
         }} 
       />
+      
+      {/* Custom Header */}
+      <View className="relative flex-row items-center justify-center p-4 border-b border-gray-200">
+        <Text className="text-lg font-semibold">Account</Text>
+        <TouchableOpacity 
+          onPress={() => router.dismiss()}
+          className="absolute right-4"
+        >
+          <FontAwesome name="close" size={24} color="#374151" />
+        </TouchableOpacity>
+      </View>
       
       {/* Main content with keyboard avoiding behavior */}
       <KeyboardAvoidingView 

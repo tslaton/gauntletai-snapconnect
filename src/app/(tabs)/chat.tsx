@@ -1,4 +1,5 @@
 import { Header } from '@/components/Header';
+import ModalWrapper from '@/components/ModalWrapper';
 import NewConversation from '@/components/NewConversation';
 import { useConversationsStore, type Conversation } from '@/stores/conversations';
 import { useUserStore } from '@/stores/user';
@@ -249,14 +250,13 @@ export default function ChatScreen() {
       </View>
 
       {/* New Conversation Modal */}
-      <Modal
-        animationType="slide"
-        presentationStyle="pageSheet"
+      <ModalWrapper
         visible={showNewConversationModal}
-        onRequestClose={() => setShowNewConversationModal(false)}
+        onClose={() => setShowNewConversationModal(false)}
+        title="New Conversation"
       >
         <NewConversation onClose={() => setShowNewConversationModal(false)} />
-      </Modal>
+      </ModalWrapper>
 
       {/* Dev Menu Modal */}
       {isDevMode && (
