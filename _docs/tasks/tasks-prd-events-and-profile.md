@@ -30,11 +30,11 @@
 
 ## Tasks
 
-- [ ] 1.0 Database Migrations & Seed Scripts
+- [x] 1.0 Database Migrations & Seed Scripts
   - [x] 1.1 Create migration `0002_create_events_and_interests.sql` defining `events` table and `user_interests` table; alter `profiles` with `personality_description` & `about` columns.
-  - [ ] 1.2 Write migration `0003_rls_policies.sql` enabling SELECT on `events` and INSERT/UPDATE/SELECT on `user_interests` for authenticated users.
-  - [ ] 1.3 Update `_scripts/seed-dev-data.sh` to insert 20 events with future start times, images, tags.
-  - [ ] 1.4 Run migrations and seed script locally; verify data and RLS via Supabase dashboard.
+  - [x] 1.2 Write migration `0003_rls_policies.sql` enabling SELECT on `events` and INSERT/UPDATE/SELECT on `user_interests` for authenticated users.
+  - [x] 1.3 Update `_scripts/seed-dev-data.sh` to insert 20 events with future start times, images, tags.
+  - [x] 1.4 Run migrations and seed script locally; verify data and RLS via Supabase dashboard.
 
 - [ ] 2.0 Events Feature Implementation
   - [ ] 2.1 Implement `src/api/events.ts` with `listEvents(search?: string)` sorted by `start_time`.
