@@ -9,11 +9,11 @@ import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import {
   ActivityIndicator,
-  Image,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import UserAvatar from './UserAvatar';
 
 /**
  * Interface for friend request data with user information
@@ -70,21 +70,7 @@ export default function FriendRequestCard({
    * Renders the user's avatar or placeholder
    */
   const renderAvatar = () => {
-    if (requester.avatarUrl) {
-      return (
-        <Image
-          source={{ uri: requester.avatarUrl }}
-          className="w-12 h-12 rounded-full"
-          resizeMode="cover"
-        />
-      );
-    }
-    
-    return (
-      <View className="w-12 h-12 bg-gray-300 rounded-full items-center justify-center">
-        <FontAwesome name="user" size={20} color="#6B7280" />
-      </View>
-    );
+    return <UserAvatar uri={requester.avatarUrl} size={48} />;
   };
 
   /**

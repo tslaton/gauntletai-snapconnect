@@ -4,9 +4,9 @@
  */
 
 import { type MessageWithSender } from '@/api/messages';
-import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import { Image, Text, View } from 'react-native';
+import UserAvatar from './UserAvatar';
 
 /**
  * Props for the MessageBubble component
@@ -71,21 +71,7 @@ export default function MessageBubble({
       return <View className="w-8 h-8" />; // Placeholder for alignment
     }
 
-    if (message.sender.avatarUrl) {
-      return (
-        <Image
-          source={{ uri: message.sender.avatarUrl }}
-          className="w-8 h-8 rounded-full mr-2"
-          resizeMode="cover"
-        />
-      );
-    }
-
-    return (
-      <View className="w-8 h-8 bg-gray-300 rounded-full items-center justify-center mr-2">
-        <FontAwesome name="user" size={12} color="#6B7280" />
-      </View>
-    );
+    return <UserAvatar uri={message.sender.avatarUrl} size={32} className="mr-2" />;
   };
 
   /**

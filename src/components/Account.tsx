@@ -12,12 +12,12 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import UserAvatar from './UserAvatar';
 
 export default function Account({ session }: { session: Session }) {
   // Profile store state
@@ -145,17 +145,7 @@ export default function Account({ session }: { session: Session }) {
       className="items-center"
     >
       <View className="relative">
-        {displayAvatarUrl ? (
-          <Image
-            source={{ uri: displayAvatarUrl }}
-            className="w-24 h-24 rounded-full"
-            resizeMode="cover"
-          />
-        ) : (
-          <View className="w-24 h-24 bg-gray-200 rounded-full items-center justify-center">
-            <FontAwesome name="user" size={40} color="#9CA3AF" />
-          </View>
-        )}
+        <UserAvatar uri={displayAvatarUrl} size={96} />
         
         {/* Upload indicator overlay */}
         <View className="absolute bottom-0 right-0 w-8 h-8 bg-indigo-600 rounded-full items-center justify-center border-2 border-white shadow-sm">

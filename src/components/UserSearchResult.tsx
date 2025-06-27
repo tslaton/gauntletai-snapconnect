@@ -9,11 +9,11 @@ import React from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import UserAvatar from './UserAvatar';
 
 /**
  * Props for the UserSearchResult component
@@ -52,21 +52,7 @@ export default function UserSearchResult({
    * Renders the user's avatar or placeholder
    */
   const renderAvatar = () => {
-    if (user.avatarUrl) {
-      return (
-        <Image
-          source={{ uri: user.avatarUrl }}
-          className="w-12 h-12 rounded-full"
-          resizeMode="cover"
-        />
-      );
-    }
-    
-    return (
-      <View className="w-12 h-12 bg-gray-300 rounded-full items-center justify-center">
-        <FontAwesome name="user" size={20} color="#6B7280" />
-      </View>
-    );
+    return <UserAvatar uri={user.avatarUrl} size={48} />;
   };
 
   /**

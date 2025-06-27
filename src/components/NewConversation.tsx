@@ -13,12 +13,12 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import UserAvatar from './UserAvatar';
 
 interface NewConversationProps {
   onClose: () => void;
@@ -145,10 +145,7 @@ export default function NewConversation({ onClose }: NewConversationProps) {
         className="bg-white mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center"
       >
         {/* Avatar */}
-        <Image
-          source={{ uri: item.friend.avatarUrl || 'https://www.gravatar.com/avatar/?d=mp' }}
-          className="w-12 h-12 rounded-full bg-gray-200"
-        />
+        <UserAvatar uri={item.friend.avatarUrl} size={48} />
 
         {/* Friend Info */}
         <View className="flex-1 ml-3">

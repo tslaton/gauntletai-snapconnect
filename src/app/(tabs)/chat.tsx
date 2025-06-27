@@ -1,6 +1,7 @@
 import { Header } from '@/components/Header';
 import ModalWrapper from '@/components/ModalWrapper';
 import NewConversation from '@/components/NewConversation';
+import UserAvatar from '@/components/UserAvatar';
 import { useConversationsStore, type Conversation } from '@/stores/conversations';
 import { useUserStore } from '@/stores/user';
 import { timeAgo } from '@/utils';
@@ -12,7 +13,6 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Image,
   Modal,
   Text,
   TouchableOpacity,
@@ -37,9 +37,10 @@ const ConversationItem = ({
       onPress={() => router.push(`/chat/${item.id}`)}
       className="flex-row items-center p-3 bg-white rounded-xl mb-3 shadow-sm"
     >
-      <Image
-        source={{ uri: otherParticipant?.user?.avatarUrl || 'https://www.gravatar.com/avatar/?d=mp' }}
-        className="w-14 h-14 rounded-full mr-4 bg-gray-200"
+      <UserAvatar 
+        uri={otherParticipant?.user?.avatarUrl} 
+        size={56} 
+        className="mr-4" 
       />
       <View className="flex-1">
         <Text className="font-bold text-base">{otherParticipant?.user?.fullName || otherParticipant?.user?.username || 'Unknown User'}</Text>
