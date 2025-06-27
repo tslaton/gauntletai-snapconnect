@@ -8,7 +8,7 @@ import { CameraErrorType, createCameraError, withCameraErrorHandling } from '@/u
 import { Ionicons } from '@expo/vector-icons';
 import { CameraType, CameraView as ExpoCameraView, useCameraPermissions } from 'expo-camera';
 import React, { useRef, useState } from 'react';
-import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface CameraViewProps {
@@ -131,27 +131,6 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
         </View>
       )}
 
-      {/* Top overlay */}
-      <View
-        className="absolute top-0 left-0 right-0 flex-row justify-end items-start px-6"
-        style={{ paddingTop: insets.top + 16 }}
-      >
-        {/* Effect toggle */}
-        <TouchableOpacity
-          onPress={toggleEffect}
-          className={`rounded-full p-3 ${effectEnabled ? 'bg-blue-500' : 'bg-black/30'}`}
-        >
-          <Ionicons name="sparkles" size={24} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Effect indicator */}
-      {effectEnabled && (
-        <View className="absolute top-20 right-6 bg-blue-500 px-3 py-1 rounded-full">
-          <Text className="text-white text-sm font-medium">Blur Effect</Text>
-        </View>
-      )}
-
       {/* Bottom controls */}
       <View
         className="absolute bottom-0 left-0 right-0"
@@ -163,6 +142,7 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
           isCapturing={isCapturing}
           cameraType={cameraType}
           effectEnabled={effectEnabled}
+          onToggleEffect={toggleEffect}
         />
       </View>
     </View>

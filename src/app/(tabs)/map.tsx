@@ -1,12 +1,17 @@
+import { Header } from '@/components/Header';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import { Text, View } from 'react-native';
-import { Header } from '@/components/Header';
 
 export default function MapScreen() {
+  const handleMoreOptions = () => {
+    // TODO: Implement popover menu for map options
+    console.log('More options pressed for Map tab');
+  };
+
   return (
     <View className="flex-1 bg-gray-50">
-      <Header title="Map" />
+      <Header title="Map" showAddFriend showMoreOptions onMoreOptionsPress={handleMoreOptions} />
       <View className="flex-1 items-center justify-center px-6">
         <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
           <View className="w-20 h-20 bg-indigo-100 rounded-full items-center justify-center mb-4">

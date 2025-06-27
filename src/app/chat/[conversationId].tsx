@@ -6,7 +6,7 @@
 import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { Alert } from 'react-native';
-import ChatScreen from '../../components/ChatScreen';
+import MessagesScreen from '../../components/MessagesScreen';
 
 /**
  * Dynamic route component for individual chat conversations
@@ -23,5 +23,5 @@ export default function ChatRoute() {
     return null;
   }
 
-  return <ChatScreen conversationId={conversationId} />;
+  return <MessagesScreen conversationId={conversationId} />;
 } 

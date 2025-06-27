@@ -4,10 +4,10 @@
  */
 
 import {
-    ConversationParticipant,
-    ConversationWithDetails,
-    fetchLatestMessage,
-    getUnreadMessageCount
+  ConversationParticipant,
+  ConversationWithDetails,
+  fetchLatestMessage,
+  getUnreadMessageCount
 } from './messagesApi';
 import { supabase } from './supabase';
 
@@ -309,16 +309,19 @@ export async function fetchUserConversations(
   currentUserId: string
 ): Promise<ConversationWithDetails[]> {
   try {
-    // Get all conversations where the user is an active participant
+    // We need to embed the conversation_participants table in the select clause in
+    // order to filter by its columns. Using `!inner` performs an inner join so we
+    // only get conversations where the current user is an active participant.
     const { data: conversationsData, error: conversationsError } = await supabase
       .from('conversations')
-      .select(`
-        id,
-        type,
-        title,
-        created_at,
-        updated_at
-      `)
+      .select(
+        `id,
+         type,
+         title,
+         created_at,
+         updated_at,
+         conversation_participants!inner ( user_id, is_active )` // required for filtering
+      )
       .eq('conversation_participants.user_id', currentUserId)
       .eq('conversation_participants.is_active', true)
       .order('updated_at', { ascending: false });

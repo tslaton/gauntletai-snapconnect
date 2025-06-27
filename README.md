@@ -76,12 +76,8 @@ Join our community of developers creating universal apps.
 
 ```bash
 # produce a full dump of the db for backup, reset, or inspection
-supabase db dump > schema.sql
+supabase db dump > schema.sql --local
 ```
-
-### Drizzle
-
-- [Getting started with Drizzle and Supabase](https://orm.drizzle.team/docs/get-started/supabase-new)
 
 ## Building
 

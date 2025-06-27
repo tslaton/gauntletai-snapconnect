@@ -23,6 +23,7 @@ export interface RelationshipStatus {
   isFriend: boolean;
   hasPendingRequest: boolean;
   sentByCurrentUser: boolean; // If there's a pending request, who sent it
+  friendshipCreatedAt?: string;
 }
 
 /**
@@ -65,6 +66,7 @@ export interface Friend {
  */
 export interface UserSearchResultWithStatus extends UserSearchResult {
   relationshipStatus: 'none' | 'sent' | 'received' | 'friends';
+  friendshipCreatedAt?: string;
 }
 
 /**
@@ -473,7 +475,7 @@ export async function checkRelationshipStatus(
     // Check if they are already friends
     const { data: friendshipData, error: friendshipError } = await supabase
       .from('friends')
-      .select('user_id')
+      .select('user_id, created_at')
       .eq('user_id', currentUserId)
       .eq('friend_id', otherUserId)
       .single();
@@ -490,6 +492,7 @@ export async function checkRelationshipStatus(
         isFriend: true,
         hasPendingRequest: false,
         sentByCurrentUser: false,
+        friendshipCreatedAt: friendshipData?.created_at,
       };
     }
 
@@ -731,6 +734,7 @@ export async function getRandomUsers(
           email: user.email,
           avatarUrl: user.avatar_url,
           relationshipStatus: status,
+          friendshipCreatedAt: relationshipStatus.friendshipCreatedAt,
         };
       })
     );
@@ -799,6 +803,7 @@ export async function searchUsersWithStatus(
           email: user.email,
           avatarUrl: user.avatar_url,
           relationshipStatus: status,
+          friendshipCreatedAt: relationshipStatus.friendshipCreatedAt,
         };
       })
     );

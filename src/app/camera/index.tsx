@@ -5,6 +5,7 @@
 
 import { CameraPermissions } from '@/components/Camera/CameraPermissions';
 import { CameraView } from '@/components/Camera/CameraView';
+import { Header } from '@/components/Header';
 import { Stack, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StatusBar, View } from 'react-native';
@@ -64,6 +65,16 @@ export default function CameraScreen() {
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
       
       <View className="flex-1 bg-black">
+        {/* Overlay Header with transparent background */}
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+          <Header
+            transparent
+            showAddFriend
+            showMoreOptions
+            onMoreOptionsPress={() => console.log('More options pressed in Camera')}
+          />
+        </View>
+
         <CameraPermissions
           onPermissionGranted={handlePermissionGranted}
           onPermissionDenied={handlePermissionDenied}

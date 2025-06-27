@@ -23,6 +23,11 @@ export default function CameraTab() {
     // For now, we'll just ignore it as tabs handle their own navigation
   };
 
+  const handleMoreOptions = () => {
+    // TODO: Implement popover menu for camera options
+    console.log('More options pressed for Camera tab');
+  }
+
   const handlePhotoTaken = (photoUri: string) => {
     router.push({
       pathname: '/camera/edit',
