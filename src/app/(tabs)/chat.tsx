@@ -1,13 +1,16 @@
 import { Header } from '@/components/Header';
 import { useConversationsStore, type Conversation } from '@/stores/conversations';
 import { useUserStore } from '@/stores/user';
+import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Image,
+  Modal,
   Text,
   TouchableOpacity,
   View,
@@ -73,8 +76,13 @@ const ConversationItem = ({
 
 export default function ChatScreen() {
   const [filter, setFilter] = useState<'All' | 'Unread'>('All');
+  const [showDevMenu, setShowDevMenu] = useState(false);
+  const [isDevLoading, setIsDevLoading] = useState(false);
   const { conversations, isLoading, error, fetchConversations } = useConversationsStore();
   const { currentUser } = useUserStore();
+
+  // Check if dev mode is enabled
+  const isDevMode = __DEV__ && currentUser?.email === 'dev@snapconnect.com';
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -83,7 +91,76 @@ export default function ChatScreen() {
   }, [currentUser?.id, fetchConversations]);
 
   const handleMoreOptions = () => {
-    console.log('More options pressed for Chat tab');
+    if (isDevMode) {
+      setShowDevMenu(true);
+    } else {
+      console.log('More options pressed for Chat tab');
+    }
+  };
+
+  const handleDevReceiveMessage = async () => {
+    setIsDevLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
+      const response = await fetch('/server/dev/receive-message', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error || 'Failed to send test message');
+      
+      Alert.alert(
+        'Test Message Sent',
+        `${data.from} sent you a message: "Hey!"`,
+        [{ text: 'OK', onPress: () => setShowDevMenu(false) }]
+      );
+      
+      // Refresh conversations to see the new message
+      if (currentUser?.id) {
+        fetchConversations(currentUser.id);
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to send test message');
+    } finally {
+      setIsDevLoading(false);
+    }
+  };
+
+  const handleDevReceiveFriendRequest = async () => {
+    setIsDevLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
+      const response = await fetch('/server/dev/receive-friend-request', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error || 'Failed to send test friend request');
+      
+      Alert.alert(
+        'Test Friend Request Sent',
+        `${data.from} sent you a friend request!`,
+        [{ text: 'OK', onPress: () => setShowDevMenu(false) }]
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to send test friend request');
+    } finally {
+      setIsDevLoading(false);
+    }
   };
 
   const filteredConversations = useMemo(() => {
@@ -179,6 +256,71 @@ export default function ChatScreen() {
           </View>
         )}
       </View>
+
+      {/* Dev Menu Modal */}
+      {isDevMode && (
+        <Modal
+          visible={showDevMenu}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowDevMenu(false)}
+        >
+          <TouchableOpacity 
+            className="flex-1 bg-black/50 justify-end" 
+            activeOpacity={1} 
+            onPress={() => setShowDevMenu(false)}
+          >
+            <TouchableOpacity 
+              className="bg-white rounded-t-3xl p-6" 
+              activeOpacity={1}
+            >
+              <View className="w-12 h-1 bg-gray-300 rounded-full self-center mb-6" />
+              <Text className="text-xl font-bold mb-6">Dev Tools</Text>
+              
+              <TouchableOpacity
+                className="bg-purple-600 rounded-xl p-4 mb-3 opacity-100 disabled:opacity-50"
+                onPress={handleDevReceiveMessage}
+                disabled={isDevLoading}
+              >
+                <View className="flex-row items-center">
+                  <FontAwesome name="comment" size={20} color="white" />
+                  <Text className="text-white font-semibold ml-3">Receive Test Message</Text>
+                </View>
+                <Text className="text-white/80 text-sm mt-1 ml-8">
+                  A random friend will send "Hey!"
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                className="bg-purple-600 rounded-xl p-4 mb-3 opacity-100 disabled:opacity-50"
+                onPress={handleDevReceiveFriendRequest}
+                disabled={isDevLoading}
+              >
+                <View className="flex-row items-center">
+                  <FontAwesome name="user-plus" size={20} color="white" />
+                  <Text className="text-white font-semibold ml-3">Receive Friend Request</Text>
+                </View>
+                <Text className="text-white/80 text-sm mt-1 ml-8">
+                  A random user will send a request
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                className="mt-3 py-3"
+                onPress={() => setShowDevMenu(false)}
+              >
+                <Text className="text-center text-gray-600">Cancel</Text>
+              </TouchableOpacity>
+              
+              {isDevLoading && (
+                <View className="absolute inset-0 bg-white/80 rounded-t-3xl items-center justify-center">
+                  <ActivityIndicator size="large" color="#9333EA" />
+                </View>
+              )}
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </Modal>
+      )}
     </View>
   );
 }

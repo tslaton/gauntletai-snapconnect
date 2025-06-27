@@ -3,10 +3,10 @@
  * Uses the ChatScreen component to display a specific conversation
  */
 
+import MessagesScreen from '@/components/MessagesScreen';
 import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { Alert } from 'react-native';
-import MessagesScreen from '../../components/MessagesScreen';
 
 /**
  * Dynamic route component for individual chat conversations

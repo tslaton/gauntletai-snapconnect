@@ -3,7 +3,7 @@
  * It provides functions for searching users, managing friendships, and handling friend requests.
  */
 
-import { supabase } from './supabase';
+import { supabase } from '@/utils/supabase';
 
 /**
  * Interface for user search results

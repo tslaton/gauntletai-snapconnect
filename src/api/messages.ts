@@ -3,7 +3,7 @@
  * It provides functions for sending messages, fetching messages, and managing message expiration.
  */
 
-import { supabase } from './supabase';
+import { supabase } from '@/utils/supabase';
 
 /**
  * Interface for message data

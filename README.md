@@ -83,3 +83,6 @@ supabase db dump > schema.sql --local
 
 - https://docs.expo.dev/build/setup/
 - https://expo.dev/accounts/tslaton/projects/snapconnect/builds
+
+# Server functions
+- https://docs.expo.dev/router/reference/api-routes/

@@ -3,22 +3,22 @@
  * It handles conversation data, participant management, and conversation-related state management.
  */
 
+import {
+  addParticipants as apiAddParticipants,
+  createConversation as apiCreateConversation,
+  fetchConversationById as apiFetchConversationById,
+  fetchUserConversations as apiFetchUserConversations,
+  getOrCreateDirectConversation as apiGetOrCreateDirectConversation,
+  leaveConversation as apiLeaveConversation,
+  type AddParticipantData,
+  type CreateConversationData,
+} from '@/api/conversations';
+import {
+  type ConversationWithDetails,
+} from '@/api/messages';
+import { supabase } from '@/utils/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { create } from 'zustand';
-import {
-    addParticipants as apiAddParticipants,
-    createConversation as apiCreateConversation,
-    fetchConversationById as apiFetchConversationById,
-    fetchUserConversations as apiFetchUserConversations,
-    getOrCreateDirectConversation as apiGetOrCreateDirectConversation,
-    leaveConversation as apiLeaveConversation,
-    type AddParticipantData,
-    type CreateConversationData,
-} from '../utils/conversationsApi';
-import {
-    type ConversationWithDetails,
-} from '../utils/messagesApi';
-import { supabase } from '../utils/supabase';
 
 /**
  * Interface for conversation data (from API)
@@ -75,6 +75,7 @@ interface ConversationsState {
   createConversation: (conversationData: CreateConversationData, currentUserId: string) => Promise<{ success: boolean; conversation?: Conversation; error?: string }>;
   startDirectConversation: (currentUserId: string, friendId: string) => Promise<{ success: boolean; conversation?: Conversation; error?: string }>;
   refreshConversation: (conversationId: string, currentUserId: string) => Promise<void>;
+  updateConversationUnreadCount: (conversationId: string, unreadCount: number) => void;
   addParticipants: (addParticipantData: AddParticipantData, currentUserId: string) => Promise<{ success: boolean; error?: string }>;
   leaveConversation: (conversationId: string, currentUserId: string) => Promise<{ success: boolean; error?: string }>;
   clearConversations: () => void;
@@ -296,6 +297,27 @@ export const useConversationsStore = create<ConversationsState>((set, get) => ({
       }
     } catch (error) {
       console.error('Error refreshing conversation:', error);
+    }
+  },
+
+  /**
+   * Updates the unread count for a specific conversation
+   * 
+   * @param conversationId - The conversation ID to update
+   * @param unreadCount - The new unread count
+   */
+  updateConversationUnreadCount: (conversationId, unreadCount) => {
+    const { conversations } = get();
+    const conversationIndex = conversations.findIndex(conv => conv.id === conversationId);
+    
+    if (conversationIndex >= 0) {
+      const updatedConversations = [...conversations];
+      updatedConversations[conversationIndex] = {
+        ...updatedConversations[conversationIndex],
+        unreadCount,
+      };
+      
+      set({ conversations: updatedConversations });
     }
   },
 

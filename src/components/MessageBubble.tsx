@@ -3,10 +3,10 @@
  * Handles different styling for sent vs received messages, timestamps, and sender avatars
  */
 
+import { type MessageWithSender } from '@/api/messages';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import { Image, Text, View } from 'react-native';
-import { type MessageWithSender } from '../utils/messagesApi';
 
 /**
  * Props for the MessageBubble component

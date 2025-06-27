@@ -3,18 +3,18 @@
  * Provides a text input field with send button, character limit, and error handling
  */
 
+import { type CreateMessageData } from '@/api/messages';
+import { useMessagesStore } from '@/stores/messages';
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useMessagesStore } from '../stores/messages';
-import { type CreateMessageData } from '../utils/messagesApi';
 
 /**
  * Props for the MessageInput component

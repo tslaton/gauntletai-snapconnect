@@ -3,12 +3,12 @@
  * Provides a dedicated screen for editing user profile information
  */
 
+import Account from '@/components/Account';
+import { supabase } from '@/utils/supabase';
 import { Session } from '@supabase/supabase-js';
-import { router, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView } from 'react-native';
-import Account from '../components/Account';
-import { supabase } from '../utils/supabase';
 
 /**
  * Account screen component
@@ -21,20 +21,11 @@ export default function AccountScreen() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      
-      // Navigate back immediately if no session on mount
-      if (!session) {
-        router.back();
-      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      
-      // Navigate back when user signs out (go back to previous screen)
-      if (!session) {
-        router.back();
-      }
+      // Don't navigate when signing out - the root layout will handle showing the auth screen
     });
 
     return () => subscription.unsubscribe();

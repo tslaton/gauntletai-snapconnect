@@ -3,9 +3,9 @@
  * It handles fetching and holding the state for the currently signed-in user.
  */
 
+import { supabase } from '@/utils/supabase';
 import { Session } from '@supabase/supabase-js';
 import { create } from 'zustand';
-import { supabase } from '../utils/supabase';
 
 /**
  * Interface for the current user data

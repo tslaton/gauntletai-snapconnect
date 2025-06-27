@@ -8,8 +8,8 @@ import {
   ConversationWithDetails,
   fetchLatestMessage,
   getUnreadMessageCount
-} from './messagesApi';
-import { supabase } from './supabase';
+} from '@/api/messages';
+import { supabase } from '@/utils/supabase';
 
 /**
  * Interface for creating a new conversation

@@ -3,6 +3,7 @@
  * Provides a reusable component for showing friend request details with accept/decline actions
  */
 
+import { type UserSearchResult } from '@/api/friends';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import {
@@ -12,7 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { type UserSearchResult } from '../utils/friendsApi';
 
 /**
  * Interface for friend request data with user information

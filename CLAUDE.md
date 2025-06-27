@@ -63,7 +63,7 @@ Zustand stores follow this detailed pattern from the React Native Expo rules:
  */
 
 import { create } from 'zustand';
-import { supabase } from '../utils/supabase';
+import { supabase } from '@/utils/supabase';
 
 interface StoreState {
   // State properties

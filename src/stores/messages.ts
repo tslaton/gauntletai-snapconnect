@@ -3,17 +3,18 @@
  * It handles message data, real-time subscriptions, and message-related state management.
  */
 
+import {
+  fetchMessages as apiFetchMessages,
+  getUnreadMessageCount as apiGetUnreadMessageCount,
+  markMessagesAsRead as apiMarkMessagesAsRead,
+  sendMessage as apiSendMessage,
+  type CreateMessageData,
+  type MessageWithSender,
+} from '@/api/messages';
+import { supabase } from '@/utils/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { create } from 'zustand';
-import {
-    fetchMessages as apiFetchMessages,
-    getUnreadMessageCount as apiGetUnreadMessageCount,
-    markMessagesAsRead as apiMarkMessagesAsRead,
-    sendMessage as apiSendMessage,
-    type CreateMessageData,
-    type MessageWithSender,
-} from '../utils/messagesApi';
-import { supabase } from '../utils/supabase';
+import { useConversationsStore } from './conversations';
 
 /**
  * Interface for message data (from API)
@@ -299,6 +300,10 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
           },
         },
       });
+      
+      // Update the conversations store with the new unread count
+      const conversationsStore = useConversationsStore.getState();
+      conversationsStore.updateConversationUnreadCount(conversationId, 0);
     } catch (error) {
       console.error('Error marking messages as read:', error);
       
@@ -410,6 +415,10 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
                         },
                       },
                     });
+                    
+                    // Update the conversations store with the new unread count
+                    const conversationsStore = useConversationsStore.getState();
+                    conversationsStore.updateConversationUnreadCount(conversationId, currentState.unreadCount + 1);
                   }
                 }
               }

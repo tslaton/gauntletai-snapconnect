@@ -3,17 +3,17 @@
  * Provides a reusable component for showing user information with friend request action
  */
 
+import { type UserSearchResultWithStatus } from '@/api/friends';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { type UserSearchResultWithStatus } from '../utils/friendsApi';
 
 /**
  * Props for the UserSearchResult component

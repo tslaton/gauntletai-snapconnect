@@ -3,20 +3,20 @@
  * Provides search functionality, alphabetical sorting, and friend removal with confirmation
  */
 
+import { useFriendsStore, type Friend } from '@/stores/friends';
+import { useUserStore } from '@/stores/user';
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Image,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useFriendsStore, type Friend } from '../stores/friends';
-import { useUserStore } from '../stores/user';
 
 /**
  * Props for the FriendsList component

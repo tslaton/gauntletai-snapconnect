@@ -3,15 +3,15 @@
  * It provides centralized state management for friend request statuses and actions.
  */
 
-import { create } from 'zustand';
 import {
-    acceptFriendRequest,
-    declineFriendRequest,
-    fetchReceivedFriendRequests,
-    fetchSentFriendRequests,
-    sendFriendRequest,
-    type FriendRequestWithUser,
-} from '../utils/friendsApi';
+  acceptFriendRequest,
+  declineFriendRequest,
+  fetchReceivedFriendRequests,
+  fetchSentFriendRequests,
+  sendFriendRequest,
+  type FriendRequestWithUser,
+} from '@/api/friends';
+import { create } from 'zustand';
 
 /**
  * Interface for friend request action states

@@ -3,6 +3,10 @@
  * Integrates message display, input, and conversation management with real-time updates
  */
 
+import { type ConversationWithDetails } from '@/api/messages';
+import { useConversationsStore } from '@/stores/conversations';
+import { useMessagesStore } from '@/stores/messages';
+import { useUserStore } from '@/stores/user';
 import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -17,10 +21,6 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { useConversationsStore } from '../stores/conversations';
-import { useMessagesStore } from '../stores/messages';
-import { useUserStore } from '../stores/user';
-import { type ConversationWithDetails } from '../utils/messagesApi';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 

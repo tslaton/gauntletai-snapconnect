@@ -3,16 +3,16 @@
  * Allows users to share photos to conversations or stories
  */
 
+import { sendMessage } from '@/api/messages';
+import { useConversationsStore } from '@/stores/conversations';
+import { useFriendsStore } from '@/stores/friends';
+import { useUserStore } from '@/stores/user';
+import { uploadPhoto, validatePhoto } from '@/utils/photoStorage';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useConversationsStore } from '../../stores/conversations';
-import { useFriendsStore } from '../../stores/friends';
-import { useUserStore } from '../../stores/user';
-import { sendMessage } from '../../utils/messagesApi';
-import { uploadPhoto, validatePhoto } from '../../utils/photoStorage';
 
 export default function PhotoEditScreen() {
   const router = useRouter();

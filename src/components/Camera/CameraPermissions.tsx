@@ -3,14 +3,14 @@
  * Provides UI feedback and handles permission requests for camera access
  */
 
+import {
+  checkCameraPermission,
+  handleCameraPermission,
+  PermissionStatus
+} from '@/utils/permissions';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
-import {
-    checkCameraPermission,
-    handleCameraPermission,
-    PermissionStatus
-} from '../../utils/permissions';
 
 interface CameraPermissionsProps {
   onPermissionGranted: () => void;

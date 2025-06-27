@@ -3,20 +3,20 @@
  * Provides a search interface with debounced input and real-time results display
  */
 
+import { type UserSearchResultWithStatus as UserResult } from '@/api/friends';
+import { useFriendRequestsStore } from '@/stores/friendRequests';
+import { useFriendsStore } from '@/stores/friends';
+import { useUserStore } from '@/stores/user';
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    SectionList,
-    Text,
-    TextInput,
-    View
+  ActivityIndicator,
+  Alert,
+  SectionList,
+  Text,
+  TextInput,
+  View
 } from 'react-native';
-import { useFriendRequestsStore } from '../stores/friendRequests';
-import { useFriendsStore } from '../stores/friends';
-import { useUserStore } from '../stores/user';
-import { type UserSearchResultWithStatus as UserResult } from '../utils/friendsApi';
 import FriendRequestCard, { type FriendRequestWithUser } from './FriendRequestCard';
 import UserSearchResult from './UserSearchResult';
 
