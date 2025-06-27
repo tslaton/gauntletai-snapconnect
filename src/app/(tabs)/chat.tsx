@@ -1,6 +1,8 @@
 import { Header } from '@/components/Header';
+import NewConversation from '@/components/NewConversation';
 import { useConversationsStore, type Conversation } from '@/stores/conversations';
 import { useUserStore } from '@/stores/user';
+import { timeAgo } from '@/utils';
 import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -15,27 +17,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-function timeAgo(dateString: string): string {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  let interval = seconds / 31536000;
-  if (interval > 1) return `${Math.floor(interval)}y`;
-  interval = seconds / 2592000;
-  if (interval > 1) return `${Math.floor(interval)}mo`;
-  interval = seconds / 604800;
-  if (interval > 1) return `${Math.floor(interval)}w`;
-  interval = seconds / 86400;
-  if (interval > 1) return `${Math.floor(interval)}d`;
-  interval = seconds / 3600;
-  if (interval > 1) return `${Math.floor(interval)}h`;
-  interval = seconds / 60;
-  if (interval > 1) return `${Math.floor(interval)}m`;
-  return `now`;
-}
 
 const ConversationItem = ({
   item,
@@ -78,6 +59,7 @@ export default function ChatScreen() {
   const [filter, setFilter] = useState<'All' | 'Unread'>('All');
   const [showDevMenu, setShowDevMenu] = useState(false);
   const [isDevLoading, setIsDevLoading] = useState(false);
+  const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const { conversations, isLoading, error, fetchConversations } = useConversationsStore();
   const { currentUser } = useUserStore();
 
@@ -179,35 +161,44 @@ export default function ChatScreen() {
       <Header title="Chats" showAddFriend showMoreOptions onMoreOptionsPress={handleMoreOptions} />
       <View className="flex-1 px-4 pt-4">
         {/* Filter buttons */}
-        <View className="flex-row mb-4 items-center">
-          <TouchableOpacity
-            onPress={() => setFilter('All')}
-            className={`px-4 py-2 rounded-full mr-2 ${
-              filter === 'All' ? 'bg-purple-100' : 'bg-white'
-            }`}
-          >
-            <Text className={`${filter === 'All' ? 'font-bold text-purple-700' : 'font-semibold text-gray-700'}`}>
-              All
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setFilter('Unread')}
-            className={`px-4 py-2 rounded-full mr-2 flex-row items-center ${
-              filter === 'Unread' ? 'bg-purple-100' : 'bg-white'
-            }`}
-          >
-            <Text
-              className={`${
-                filter === 'Unread' ? 'font-bold text-purple-700' : 'font-semibold text-gray-700'
+        <View className="flex-row mb-4 items-center justify-between">
+          <View className="flex-row items-center">
+            <TouchableOpacity
+              onPress={() => setFilter('All')}
+              className={`px-4 py-2 rounded-full mr-2 ${
+                filter === 'All' ? 'bg-purple-100' : 'bg-white'
               }`}
             >
-              Unread
-            </Text>
-            {unreadCount > 0 && (
-              <View className="bg-purple-600 rounded-full w-5 h-5 ml-2 items-center justify-center">
-                <Text className="text-white text-xs font-bold">{unreadCount}</Text>
-              </View>
-            )}
+              <Text className={`${filter === 'All' ? 'font-bold text-purple-700' : 'font-semibold text-gray-700'}`}>
+                All
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setFilter('Unread')}
+              className={`px-4 py-2 rounded-full mr-2 flex-row items-center ${
+                filter === 'Unread' ? 'bg-purple-100' : 'bg-white'
+              }`}
+            >
+              <Text
+                className={`${
+                  filter === 'Unread' ? 'font-bold text-purple-700' : 'font-semibold text-gray-700'
+                }`}
+              >
+                Unread
+              </Text>
+              {unreadCount > 0 && (
+                <View className="bg-purple-600 rounded-full w-5 h-5 ml-2 items-center justify-center">
+                  <Text className="text-white text-xs font-bold">{unreadCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            onPress={() => setShowNewConversationModal(true)}
+            className="bg-purple-600 px-4 py-2 rounded-full flex-row items-center"
+          >
+            <FontAwesome name="plus" size={14} color="white" />
+            <Text className="text-white font-semibold ml-2">New</Text>
           </TouchableOpacity>
         </View>
 
@@ -256,6 +247,16 @@ export default function ChatScreen() {
           </View>
         )}
       </View>
+
+      {/* New Conversation Modal */}
+      <Modal
+        animationType="slide"
+        presentationStyle="pageSheet"
+        visible={showNewConversationModal}
+        onRequestClose={() => setShowNewConversationModal(false)}
+      >
+        <NewConversation onClose={() => setShowNewConversationModal(false)} />
+      </Modal>
 
       {/* Dev Menu Modal */}
       {isDevMode && (

@@ -60,7 +60,9 @@ const CONVERSATION_LIMITS = {
  * Validates UUID format
  */
 function isValidUUID(uuid: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  // Relaxed UUID regex that accepts any hex string in UUID format
+  // This is needed because our seed data uses non-standard UUIDs like 77777777-7777-7777-7777-777777777777
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 }
 

@@ -139,12 +139,24 @@ export default function Friends() {
   useEffect(() => {
     const newSections = [];
 
-    if (searchResults.length > 0) {
-      newSections.push({
-        title: 'Users',
-        data: searchResults,
-        renderItem: renderUserResult,
-      });
+    // Get all user IDs from friend requests
+    const requestUserIds = new Set([
+      ...receivedRequests.map(r => r.requesterId),
+      ...sentRequests.map(r => r.addresseeId)
+    ]);
+
+    // Only show Users section if there's a search query
+    if (searchQuery.trim() && searchResults.length > 0) {
+      // Filter out users who already have pending requests
+      const filteredResults = searchResults.filter(user => !requestUserIds.has(user.id));
+      
+      if (filteredResults.length > 0) {
+        newSections.push({
+          title: 'Users',
+          data: filteredResults,
+          renderItem: renderUserResult,
+        });
+      }
     }
 
     const allRequests = [...receivedRequests, ...sentRequests];

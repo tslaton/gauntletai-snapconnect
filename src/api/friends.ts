@@ -187,7 +187,7 @@ export async function fetchReceivedFriendRequests(
         )
       `)
       .eq('addressee_id', currentUserId)
-      .in('status', ['pending', 'accepted', 'declined'])
+      .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -243,7 +243,7 @@ export async function fetchSentFriendRequests(
         )
       `)
       .eq('requester_id', currentUserId)
-      .in('status', ['pending', 'accepted', 'declined'])
+      .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
     if (error) {

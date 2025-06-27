@@ -4,6 +4,7 @@
  */
 
 import { type UserSearchResult } from '@/api/friends';
+import { timeAgo } from '@/utils';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import {
@@ -123,23 +124,12 @@ export default function FriendRequestCard({
    * Renders the request timestamp
    */
   const renderTimestamp = () => {
-    const requestDate = new Date(friendRequest.createdAt);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - requestDate.getTime()) / (1000 * 60 * 60));
-    
-    let timeAgo: string;
-    if (diffInHours < 1) {
-      timeAgo = 'Just now';
-    } else if (diffInHours < 24) {
-      timeAgo = `${diffInHours}h ago`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      timeAgo = `${diffInDays}d ago`;
-    }
+    const timeAgoText = timeAgo(friendRequest.createdAt);
+    const displayText = timeAgoText === 'now' ? 'Just now' : `${timeAgoText} ago`;
 
     return (
       <Text className={`text-xs ${disabled ? 'text-gray-300' : 'text-gray-400'}`}>
-        {timeAgo}
+        {displayText}
       </Text>
     );
   };
