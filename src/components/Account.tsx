@@ -46,7 +46,16 @@ export default function Account({ session }: { session: Session }) {
   }, [session, fetchProfile]);
 
   useEffect(() => {
-    if (avatarUrl) {
+    if (!avatarUrl) {
+      setDisplayAvatarUrl(null);
+      return;
+    }
+
+    // If avatarUrl is already a full URL, use it directly
+    if (/^https?:\/\//.test(avatarUrl)) {
+      setDisplayAvatarUrl(avatarUrl);
+    } else {
+      // Otherwise download from storage and convert to data URL (legacy support)
       downloadImage(avatarUrl);
     }
   }, [avatarUrl]);
@@ -110,7 +119,15 @@ export default function Account({ session }: { session: Session }) {
 
       if (uploadError) throw uploadError;
 
-      setAvatarUrl(data.path);
+      // After successful upload, obtain a public URL for the stored file
+      const { data: publicUrlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(storagePath);
+
+      // Fallback to storage path if public URL cannot be resolved
+      const finalUrl = publicUrlData.publicUrl ?? data.path;
+
+      setAvatarUrl(finalUrl);
       saveProfile(session);
     } catch (error) {
       if (error instanceof Error) {

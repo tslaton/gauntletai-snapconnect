@@ -3,8 +3,9 @@
  * Handles both regular images and SVG avatars (like DiceBear) with proper fallbacks
  */
 
+import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, View } from 'react-native';
 
 /**
@@ -36,6 +37,32 @@ export default function UserAvatar({
   fallbackIcon = 'user',
   fallbackIconSize
 }: UserAvatarProps) {
+  // NEW: resolve storage path to public URL if needed
+  const [resolvedUri, setResolvedUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!uri) {
+      setResolvedUri(null);
+      return;
+    }
+
+    // If uri already looks like a full URL, use it directly
+    if (/^https?:\/\//.test(uri)) {
+      setResolvedUri(uri);
+      return;
+    }
+
+    // Otherwise treat it as a Supabase storage path
+    try {
+      // We avoid async/await because getPublicUrl is synchronous
+      const { data } = supabase.storage.from('avatars').getPublicUrl(uri);
+      setResolvedUri(data?.publicUrl ?? null);
+    } catch (error) {
+      console.warn('Failed to resolve avatar URL:', error);
+      setResolvedUri(null);
+    }
+  }, [uri]);
+
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -59,7 +86,7 @@ export default function UserAvatar({
   }[size] || '';
 
   // Show fallback if no URI or if there was an error
-  if (!uri || hasError) {
+  if (!resolvedUri || hasError) {
     return (
       <View 
         className={`bg-gray-300 rounded-full items-center justify-center ${sizeClasses} ${className}`}
@@ -73,7 +100,7 @@ export default function UserAvatar({
   return (
     <View className={`rounded-full overflow-hidden ${sizeClasses} ${className}`} style={!sizeClasses ? sizeStyle : undefined}>
       <Image
-        source={{ uri }}
+        source={{ uri: resolvedUri }}
         className="w-full h-full bg-gray-200"
         resizeMode="cover"
         onError={() => setHasError(true)}
