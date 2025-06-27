@@ -333,12 +333,17 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
   // Show error state if there's an error and no messages
   if (error && messages.length === 0) {
     return (
-      <View className="flex-1 bg-gray-50">
-        <SafeAreaView className="flex-1">
-          {renderHeader()}
+      <SafeAreaView
+        // Extend white background into the safe-area insets
+        style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+      >
+        {renderHeader()}
+
+        {/* Chat body retains light-gray background */}
+        <View className="flex-1 bg-gray-50">
           {renderError()}
-        </SafeAreaView>
-      </View>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -348,27 +353,34 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} // header + status-bar
     >
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView
+        // Ensure the white header & input backgrounds flow into the safe-area insets
+        style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+      >
         {renderHeader()}
 
-        {messages.length === 0 ? (
-          renderEmptyState()
-        ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={renderMessage}
-            keyExtractor={keyExtractor}
-            className="flex-1 px-4"
-            showsVerticalScrollIndicator={false}
-            inverted // Newest messages at bottom
-            onEndReached={handleOnEndReached}
-            onEndReachedThreshold={0.1}
-            ListFooterComponent={renderLoadMoreIndicator}
-            contentContainerStyle={{ paddingBottom: 20, flexGrow: 1, justifyContent: 'flex-end' }}
-          />
-        )}
+        {/* Chat body */}
+        <View className="flex-1 bg-gray-50">
+          {messages.length === 0 ? (
+            renderEmptyState()
+          ) : (
+            <FlatList
+              ref={flatListRef}
+              data={messages}
+              renderItem={renderMessage}
+              keyExtractor={keyExtractor}
+              className="flex-1 px-4"
+              showsVerticalScrollIndicator={false}
+              inverted // Newest messages at bottom
+              onEndReached={handleOnEndReached}
+              onEndReachedThreshold={0.1}
+              ListFooterComponent={renderLoadMoreIndicator}
+              contentContainerStyle={{ paddingBottom: 20, flexGrow: 1, justifyContent: 'flex-end' }}
+            />
+          )}
+        </View>
 
+        {/* Input always anchored to bottom with white background */}
         <MessageInput
           conversationId={conversationId}
           currentUserId={currentUser!.id}
