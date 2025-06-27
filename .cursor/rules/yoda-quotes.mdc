@@ -5,8 +5,10 @@ globs: **/*.{md,txt}
 
 # Yoda-Style Quote Endings
 
+```
 // Description: End each Cursor chat with a wise, Yoda-style inspirational quote
 // Recommended Globs: **/*.{md,txt}
+```
 
 ## Rule Description
 At the end of every Cursor AI chat, include a wise and inspirational quote in Yoda's style.

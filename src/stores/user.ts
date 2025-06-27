@@ -3,9 +3,9 @@
  * It handles fetching and holding the state for the currently signed-in user.
  */
 
+import { supabase } from '@/utils/supabase';
 import { Session } from '@supabase/supabase-js';
 import { create } from 'zustand';
-import { supabase } from '../utils/supabase';
 
 /**
  * Interface for the current user data
@@ -112,7 +112,21 @@ export const useUserStore = create<UserState>((set, get) => ({
 
         if (createError) {
           console.error('Failed to create profile:', createError);
-          // Continue anyway, we'll use auth data
+          
+          // If it's a foreign key constraint error, the auth user doesn't exist
+          // This can happen after a database reset - sign out the user
+          if (createError.code === '23503') {
+            console.log('Auth user no longer exists, signing out...');
+            await supabase.auth.signOut();
+            set({ 
+              currentUser: null, 
+              isLoading: false, 
+              isInitialized: true,
+              error: 'Session expired. Please sign in again.'
+            });
+            return;
+          }
+          // Continue anyway for other errors, we'll use auth data
         }
 
         // Use auth user data since profile was just created or failed to create

@@ -55,3 +55,6 @@ app-example
 **/supabase/.branches
 **/supabase/.temp
 
+# symlinks for obsidian
+_docs/rules
+_docs/README.md

@@ -3,15 +3,15 @@
  * It handles friends list, search results, and related state management.
  */
 
-import { create } from 'zustand';
 import {
-    fetchFriends as apiFetchFriends,
-    removeFriend as apiRemoveFriend,
-    searchFriends as apiSearchFriends,
-    searchUsersWithStatus,
-    type Friend as ApiFriend,
-    type UserSearchResultWithStatus
-} from '../utils/friendsApi';
+  fetchFriends as apiFetchFriends,
+  removeFriend as apiRemoveFriend,
+  searchFriends as apiSearchFriends,
+  searchUsersWithStatus,
+  type Friend as ApiFriend,
+  type UserSearchResultWithStatus
+} from '@/api/friends';
+import { create } from 'zustand';
 
 /**
  * Interface for friend data (from API)

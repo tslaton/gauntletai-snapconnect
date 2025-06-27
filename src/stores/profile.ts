@@ -3,9 +3,9 @@
  * It handles fetching, updating, and holding the state for the user's public profile.
  */
 
+import { supabase } from '@/utils/supabase';
 import { Session } from '@supabase/supabase-js';
 import { create } from 'zustand';
-import { supabase } from '../utils/supabase';
 
 /**
  * Interface for the Profile store state and its actions.

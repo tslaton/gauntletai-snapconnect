@@ -3,12 +3,13 @@
  * Provides a dedicated screen for editing user profile information
  */
 
+import Account from '@/components/Account';
+import { supabase } from '@/utils/supabase';
+import { FontAwesome } from '@expo/vector-icons';
 import { Session } from '@supabase/supabase-js';
 import { router, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, View } from 'react-native';
-import Account from '../components/Account';
-import { supabase } from '../utils/supabase';
+import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 /**
  * Account screen component
@@ -21,20 +22,11 @@ export default function AccountScreen() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      
-      // Navigate back immediately if no session on mount
-      if (!session) {
-        router.back();
-      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      
-      // Navigate back when user signs out (go back to previous screen)
-      if (!session) {
-        router.back();
-      }
+      // Don't navigate when signing out - the root layout will handle showing the auth screen
     });
 
     return () => subscription.unsubscribe();
@@ -46,26 +38,40 @@ export default function AccountScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Screen header configuration - simple overlay style */}
+    <SafeAreaView className="flex-1 bg-white">
+      {/* Hide the default header */}
       <Stack.Screen 
         options={{
-          title: 'Account',
-          headerStyle: {
-            backgroundColor: '#ffffff',
-          },
-          headerTintColor: '#1f2937',
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
-          headerBackTitle: 'Back',
+          headerShown: false,
         }} 
       />
       
-      {/* Main content */}
-      <View className="flex-1">
-        <Account key={session.user.id} session={session} />
+      {/* Custom Header */}
+      <View className="relative flex-row items-center justify-center p-4 border-b border-gray-200">
+        <Text className="text-lg font-semibold">Account</Text>
+        <TouchableOpacity 
+          onPress={() => router.dismiss()}
+          className="absolute right-4"
+        >
+          <FontAwesome name="close" size={24} color="#374151" />
+        </TouchableOpacity>
       </View>
+      
+      {/* Main content with keyboard avoiding behavior */}
+      <KeyboardAvoidingView 
+        className="flex-1" 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView 
+          className="flex-1"
+          contentContainerClassName="flex-grow"
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Account key={session.user.id} session={session} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 } 

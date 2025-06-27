@@ -3,16 +3,17 @@
  * Provides a reusable component for showing user information with friend request action
  */
 
+import { type UserSearchResultWithStatus } from '@/api/friends';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import {
-    ActivityIndicator,
-    Image,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { type UserSearchResultWithStatus } from '../utils/friendsApi';
+import UserAvatar from './UserAvatar';
 
 /**
  * Props for the UserSearchResult component
@@ -22,8 +23,12 @@ interface UserSearchResultProps {
   user: UserSearchResultWithStatus;
   /** Callback when send friend request is pressed */
   onSendFriendRequest: (user: UserSearchResultWithStatus) => void;
+   /** Callback to remove a friend */
+  onRemoveFriend: (user: UserSearchResultWithStatus) => void;
   /** Whether the send request action is loading */
   isLoading?: boolean;
+    /** Whether the remove friend action is loading */
+  isRemoving?: boolean;
   /** Current request status with this user */
   requestStatus: 'none' | 'sent' | 'received' | 'friends';
 }
@@ -37,7 +42,9 @@ interface UserSearchResultProps {
 export default function UserSearchResult({ 
   user, 
   onSendFriendRequest,
+  onRemoveFriend,
   isLoading = false,
+  isRemoving = false,
   requestStatus
 }: UserSearchResultProps) {
   
@@ -45,21 +52,7 @@ export default function UserSearchResult({
    * Renders the user's avatar or placeholder
    */
   const renderAvatar = () => {
-    if (user.avatarUrl) {
-      return (
-        <Image
-          source={{ uri: user.avatarUrl }}
-          className="w-12 h-12 rounded-full"
-          resizeMode="cover"
-        />
-      );
-    }
-    
-    return (
-      <View className="w-12 h-12 bg-gray-300 rounded-full items-center justify-center">
-        <FontAwesome name="user" size={20} color="#6B7280" />
-      </View>
-    );
+    return <UserAvatar uri={user.avatarUrl} size={48} />;
   };
 
   /**
@@ -97,13 +90,54 @@ export default function UserSearchResult({
   };
 
   /**
+   * Renders the friend since date
+   */
+  const renderFriendSince = () => {
+    if (requestStatus !== 'friends' || !user.friendshipCreatedAt) {
+      return null;
+    }
+
+    const friendDate = new Date(user.friendshipCreatedAt);
+    const friendSince = friendDate.toLocaleDateString(undefined, { 
+      year: 'numeric', 
+      month: 'short' 
+    });
+
+    return (
+      <Text className="text-xs text-gray-400 mt-1">
+        Friends since {friendSince}
+      </Text>
+    );
+  };
+
+  const handleRemoveFriend = () => {
+    const displayName = user.fullName || user.username || 'this user';
+    
+    Alert.alert(
+      'Remove Friend',
+      `Are you sure you want to remove ${displayName} from your friends list?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => onRemoveFriend(user),
+        },
+      ]
+    );
+  };
+
+  /**
    * Renders the action button based on request status
    */
   const renderActionButton = () => {
-    if (isLoading) {
+    if (isLoading || isRemoving) {
       return (
-        <View className="w-20 h-8 bg-gray-100 rounded-lg items-center justify-center">
-          <ActivityIndicator size="small" color="#3B82F6" />
+        <View className="w-20 h-8 items-center justify-center">
+          <ActivityIndicator size="small" color="#9333EA" />
         </View>
       );
     }
@@ -112,10 +146,10 @@ export default function UserSearchResult({
       case 'none':
         return (
           <TouchableOpacity
-            className="bg-blue-600 px-4 py-2 rounded-lg active:bg-blue-700"
+            className="w-10 h-10 rounded-full border border-green-300 items-center justify-center active:bg-green-50"
             onPress={() => onSendFriendRequest(user)}
           >
-            <Text className="text-white font-medium text-sm">Add Friend</Text>
+            <FontAwesome name="plus" size={16} color="#16A34A" />
           </TouchableOpacity>
         );
 
@@ -135,10 +169,12 @@ export default function UserSearchResult({
 
       case 'friends':
         return (
-          <View className="bg-green-100 px-4 py-2 rounded-lg flex-row items-center">
-            <FontAwesome name="check" size={12} color="#16A34A" />
-            <Text className="text-green-800 font-medium text-sm ml-1">Friends</Text>
-          </View>
+          <TouchableOpacity
+            className="w-10 h-10 rounded-full border-2 border-red-300 items-center justify-center active:bg-red-50"
+            onPress={handleRemoveFriend}
+          >
+            <FontAwesome name="times" size={16} color="#FCA5A5" />
+          </TouchableOpacity>
         );
 
       default:
@@ -147,7 +183,7 @@ export default function UserSearchResult({
   };
 
   return (
-    <View className="bg-white p-4 border-b border-gray-200 flex-row items-center">
+    <View className="bg-white mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center">
       {/* Avatar */}
       {renderAvatar()}
       
@@ -155,6 +191,7 @@ export default function UserSearchResult({
       <View className="flex-1 ml-3">
         {renderDisplayName()}
         {renderUsername()}
+        {renderFriendSince()}
       </View>
       
       {/* Action Button */}

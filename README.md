@@ -74,11 +74,15 @@ Join our community of developers creating universal apps.
 - [Building User Auth with Expo and React Native](https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native?utm_source=expo&utm_medium=referral&utm_term=expo-react-native&queryGroups=database-method&database-method=sql)
 
 
-### Drizzle
-
-- [Getting started with Drizzle and Supabase](https://orm.drizzle.team/docs/get-started/supabase-new)
+```bash
+# produce a full dump of the db for backup, reset, or inspection
+supabase db dump > schema.sql --local
+```
 
 ## Building
 
 - https://docs.expo.dev/build/setup/
 - https://expo.dev/accounts/tslaton/projects/snapconnect/builds
+
+# Server functions
+- https://docs.expo.dev/router/reference/api-routes/

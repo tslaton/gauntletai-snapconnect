@@ -3,20 +3,20 @@
  * Provides search functionality, alphabetical sorting, and friend removal with confirmation
  */
 
+import { useFriendsStore, type Friend } from '@/stores/friends';
+import { useUserStore } from '@/stores/user';
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Image,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useFriendsStore, type Friend } from '../stores/friends';
-import { useUserStore } from '../stores/user';
+import UserAvatar from './UserAvatar';
 
 /**
  * Props for the FriendsList component
@@ -48,21 +48,7 @@ function FriendItem({ friend, onPress, onRemove, isRemoving }: FriendItemProps) 
    * Renders the friend's avatar or placeholder
    */
   const renderAvatar = () => {
-    if (friend.friend.avatarUrl) {
-      return (
-        <Image
-          source={{ uri: friend.friend.avatarUrl }}
-          className="w-12 h-12 rounded-full"
-          resizeMode="cover"
-        />
-      );
-    }
-    
-    return (
-      <View className="w-12 h-12 bg-gray-300 rounded-full items-center justify-center">
-        <FontAwesome name="user" size={20} color="#6B7280" />
-      </View>
-    );
+    return <UserAvatar uri={friend.friend.avatarUrl} size={48} />;
   };
 
   /**

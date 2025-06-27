@@ -5,8 +5,10 @@ globs: **/*.{js,jsx,ts,tsx}, **/*.sh
 
 # Terminal Path Verification
 
+```
 // Description: Best practices for verifying paths and locations before executing terminal commands
 // Recommended Globs: **/*.{js,jsx,ts,tsx}, **/*.sh
+```
 
 ## Overview
 Always verify current directory and path structure before executing path-related commands to prevent errors and unintended operations.

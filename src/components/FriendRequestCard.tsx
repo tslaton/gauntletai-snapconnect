@@ -3,16 +3,17 @@
  * Provides a reusable component for showing friend request details with accept/decline actions
  */
 
+import { type UserSearchResult } from '@/api/friends';
+import { timeAgo } from '@/utils';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import {
   ActivityIndicator,
-  Image,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { type UserSearchResult } from '../utils/friendsApi';
+import UserAvatar from './UserAvatar';
 
 /**
  * Interface for friend request data with user information
@@ -69,21 +70,7 @@ export default function FriendRequestCard({
    * Renders the user's avatar or placeholder
    */
   const renderAvatar = () => {
-    if (requester.avatarUrl) {
-      return (
-        <Image
-          source={{ uri: requester.avatarUrl }}
-          className="w-12 h-12 rounded-full"
-          resizeMode="cover"
-        />
-      );
-    }
-    
-    return (
-      <View className="w-12 h-12 bg-gray-300 rounded-full items-center justify-center">
-        <FontAwesome name="user" size={20} color="#6B7280" />
-      </View>
-    );
+    return <UserAvatar uri={requester.avatarUrl} size={48} />;
   };
 
   /**
@@ -123,23 +110,12 @@ export default function FriendRequestCard({
    * Renders the request timestamp
    */
   const renderTimestamp = () => {
-    const requestDate = new Date(friendRequest.createdAt);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - requestDate.getTime()) / (1000 * 60 * 60));
-    
-    let timeAgo: string;
-    if (diffInHours < 1) {
-      timeAgo = 'Just now';
-    } else if (diffInHours < 24) {
-      timeAgo = `${diffInHours}h ago`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      timeAgo = `${diffInDays}d ago`;
-    }
+    const timeAgoText = timeAgo(friendRequest.createdAt);
+    const displayText = timeAgoText === 'now' ? 'Just now' : `${timeAgoText} ago`;
 
     return (
       <Text className={`text-xs ${disabled ? 'text-gray-300' : 'text-gray-400'}`}>
-        {timeAgo}
+        {displayText}
       </Text>
     );
   };
@@ -193,34 +169,34 @@ export default function FriendRequestCard({
     const isLoading = isAcceptLoading || isDeclineLoading;
     
     return (
-      <View className="flex-row space-x-2">
+      <View className="flex-row items-center">
         {/* Decline Button */}
         <TouchableOpacity
-          className={`w-10 h-10 rounded-full border-2 border-gray-300 items-center justify-center ${
-            disabled || isLoading ? 'opacity-50' : 'active:bg-gray-50'
+          className={`w-10 h-10 rounded-full border-2 border-red-300 items-center justify-center mr-3 ${
+            disabled || isLoading ? 'opacity-50' : 'active:bg-red-50'
           }`}
           onPress={() => onDecline(friendRequest.id)}
           disabled={disabled || isLoading}
         >
           {isDeclineLoading ? (
-            <ActivityIndicator size="small" color="#6B7280" />
+            <ActivityIndicator size="small" color="#FCA5A5" />
           ) : (
-            <FontAwesome name="times" size={16} color="#6B7280" />
+            <FontAwesome name="ban" size={16} color="#FCA5A5" />
           )}
         </TouchableOpacity>
 
         {/* Accept Button */}
         <TouchableOpacity
-          className={`w-10 h-10 rounded-full bg-blue-600 items-center justify-center ${
-            disabled || isLoading ? 'opacity-50' : 'active:bg-blue-700'
+          className={`w-10 h-10 rounded-full border-2 border-green-500 items-center justify-center ${
+            disabled || isLoading ? 'opacity-50' : 'active:bg-green-50'
           }`}
           onPress={() => onAccept(friendRequest.id)}
           disabled={disabled || isLoading}
         >
           {isAcceptLoading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color="#10B981" />
           ) : (
-            <FontAwesome name="check" size={16} color="#FFFFFF" />
+            <FontAwesome name="check" size={16} color="#10B981" />
           )}
         </TouchableOpacity>
       </View>
@@ -229,7 +205,7 @@ export default function FriendRequestCard({
 
   return (
     <View
-      className={`bg-white p-4 border-b border-gray-200 flex-row items-center ${
+      className={`bg-white mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center ${
         disabled ? 'opacity-60' : ''
       }`}
     >
