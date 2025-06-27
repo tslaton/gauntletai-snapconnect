@@ -85,32 +85,32 @@ BEGIN
     username,
     full_name,
     email,
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=' || avatar_seed,
+    'https://api.dicebear.com/7.x/avataaars/png?seed=' || avatar_seed,
     now() - (random() * interval '365 days')
   FROM test_users
   ON CONFLICT (id) DO NOTHING;
   
   -- Update profiles with username, full_name, and avatar_url (trigger only sets minimal fields)
-  UPDATE public.profiles SET username = 'alexchen', full_name = 'Alex Chen', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex' WHERE id = '11111111-1111-1111-1111-111111111111'::uuid;
-  UPDATE public.profiles SET username = 'sarahjohnson', full_name = 'Sarah Johnson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah' WHERE id = '22222222-2222-2222-2222-222222222222'::uuid;
-  UPDATE public.profiles SET username = 'mikewilliams', full_name = 'Mike Williams', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=mike' WHERE id = '33333333-3333-3333-3333-333333333333'::uuid;
-  UPDATE public.profiles SET username = 'emilydavis', full_name = 'Emily Davis', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=emily' WHERE id = '44444444-4444-4444-4444-444444444444'::uuid;
-  UPDATE public.profiles SET username = 'chrisbrown', full_name = 'Chris Brown', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=chris' WHERE id = '55555555-5555-5555-5555-555555555555'::uuid;
-  UPDATE public.profiles SET username = 'jessicamiller', full_name = 'Jessica Miller', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=jessica' WHERE id = '66666666-6666-6666-6666-666666666666'::uuid;
-  UPDATE public.profiles SET username = 'davidwilson', full_name = 'David Wilson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=david' WHERE id = '77777777-7777-7777-7777-777777777777'::uuid;
-  UPDATE public.profiles SET username = 'lisaanderson', full_name = 'Lisa Anderson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=lisa' WHERE id = '88888888-8888-8888-8888-888888888888'::uuid;
-  UPDATE public.profiles SET username = 'jamestaylor', full_name = 'James Taylor', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=james' WHERE id = '99999999-9999-9999-9999-999999999999'::uuid;
-  UPDATE public.profiles SET username = 'mariagarcia', full_name = 'Maria Garcia', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=maria' WHERE id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid;
-  UPDATE public.profiles SET username = 'robertlee', full_name = 'Robert Lee', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=robert' WHERE id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid;
-  UPDATE public.profiles SET username = 'lindamartin', full_name = 'Linda Martin', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=linda' WHERE id = 'cccccccc-cccc-cccc-cccc-cccccccccccc'::uuid;
-  UPDATE public.profiles SET username = 'kevinwhite', full_name = 'Kevin White', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=kevin' WHERE id = 'dddddddd-dddd-dddd-dddd-dddddddddddd'::uuid;
-  UPDATE public.profiles SET username = 'amythomas', full_name = 'Amy Thomas', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=amy' WHERE id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'::uuid;
-  UPDATE public.profiles SET username = 'brianjackson', full_name = 'Brian Jackson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=brian' WHERE id = 'ffffffff-ffff-ffff-ffff-ffffffffffff'::uuid;
-  UPDATE public.profiles SET username = 'nancyharris', full_name = 'Nancy Harris', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=nancy' WHERE id = '11111111-2222-3333-4444-555555555555'::uuid;
-  UPDATE public.profiles SET username = 'steveclark', full_name = 'Steve Clark', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=steve' WHERE id = '22222222-3333-4444-5555-666666666666'::uuid;
-  UPDATE public.profiles SET username = 'karenlewis', full_name = 'Karen Lewis', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=karen' WHERE id = '33333333-4444-5555-6666-777777777777'::uuid;
-  UPDATE public.profiles SET username = 'jasonwalker', full_name = 'Jason Walker', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=jason' WHERE id = '44444444-5555-6666-7777-888888888888'::uuid;
-  UPDATE public.profiles SET username = 'michellehall', full_name = 'Michelle Hall', avatar_url = 'https://api.dicebear.com/7.x/avataaars/svg?seed=michelle' WHERE id = '55555555-6666-7777-8888-999999999999'::uuid;
+  UPDATE public.profiles SET username = 'alexchen', full_name = 'Alex Chen', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=alex' WHERE id = '11111111-1111-1111-1111-111111111111'::uuid;
+  UPDATE public.profiles SET username = 'sarahjohnson', full_name = 'Sarah Johnson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=sarah' WHERE id = '22222222-2222-2222-2222-222222222222'::uuid;
+  UPDATE public.profiles SET username = 'mikewilliams', full_name = 'Mike Williams', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=mike' WHERE id = '33333333-3333-3333-3333-333333333333'::uuid;
+  UPDATE public.profiles SET username = 'emilydavis', full_name = 'Emily Davis', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=emily' WHERE id = '44444444-4444-4444-4444-444444444444'::uuid;
+  UPDATE public.profiles SET username = 'chrisbrown', full_name = 'Chris Brown', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=chris' WHERE id = '55555555-5555-5555-5555-555555555555'::uuid;
+  UPDATE public.profiles SET username = 'jessicamiller', full_name = 'Jessica Miller', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=jessica' WHERE id = '66666666-6666-6666-6666-666666666666'::uuid;
+  UPDATE public.profiles SET username = 'davidwilson', full_name = 'David Wilson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=david' WHERE id = '77777777-7777-7777-7777-777777777777'::uuid;
+  UPDATE public.profiles SET username = 'lisaanderson', full_name = 'Lisa Anderson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=lisa' WHERE id = '88888888-8888-8888-8888-888888888888'::uuid;
+  UPDATE public.profiles SET username = 'jamestaylor', full_name = 'James Taylor', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=james' WHERE id = '99999999-9999-9999-9999-999999999999'::uuid;
+  UPDATE public.profiles SET username = 'mariagarcia', full_name = 'Maria Garcia', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=maria' WHERE id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid;
+  UPDATE public.profiles SET username = 'robertlee', full_name = 'Robert Lee', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=robert' WHERE id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid;
+  UPDATE public.profiles SET username = 'lindamartin', full_name = 'Linda Martin', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=linda' WHERE id = 'cccccccc-cccc-cccc-cccc-cccccccccccc'::uuid;
+  UPDATE public.profiles SET username = 'kevinwhite', full_name = 'Kevin White', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=kevin' WHERE id = 'dddddddd-dddd-dddd-dddd-dddddddddddd'::uuid;
+  UPDATE public.profiles SET username = 'amythomas', full_name = 'Amy Thomas', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=amy' WHERE id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'::uuid;
+  UPDATE public.profiles SET username = 'brianjackson', full_name = 'Brian Jackson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=brian' WHERE id = 'ffffffff-ffff-ffff-ffff-ffffffffffff'::uuid;
+  UPDATE public.profiles SET username = 'nancyharris', full_name = 'Nancy Harris', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=nancy' WHERE id = '11111111-2222-3333-4444-555555555555'::uuid;
+  UPDATE public.profiles SET username = 'steveclark', full_name = 'Steve Clark', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=steve' WHERE id = '22222222-3333-4444-5555-666666666666'::uuid;
+  UPDATE public.profiles SET username = 'karenlewis', full_name = 'Karen Lewis', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=karen' WHERE id = '33333333-4444-5555-6666-777777777777'::uuid;
+  UPDATE public.profiles SET username = 'jasonwalker', full_name = 'Jason Walker', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=jason' WHERE id = '44444444-5555-6666-7777-888888888888'::uuid;
+  UPDATE public.profiles SET username = 'michellehall', full_name = 'Michelle Hall', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=michelle' WHERE id = '55555555-6666-7777-8888-999999999999'::uuid;
   
   -- Make first 10 test users friends with auth user
   FOR test_user_id IN 
