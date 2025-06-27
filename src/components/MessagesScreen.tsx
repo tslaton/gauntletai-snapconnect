@@ -12,7 +12,6 @@ import { router } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -23,6 +22,7 @@ import {
 } from 'react-native';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
+import MoreOptionsMenu from './MoreOptionsMenu';
 
 /**
  * Props for the ChatScreen component
@@ -41,6 +41,7 @@ interface ChatScreenProps {
 export default function ChatScreen({ conversationId }: ChatScreenProps) {
   const flatListRef = useRef<FlatList>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
 
   // Get stores
   const { currentUser } = useUserStore();
@@ -220,15 +221,12 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
             )}
           </View>
           
-          {/* Options Button (for future features) */}
+          {/* Options Button */}
           <TouchableOpacity
-            onPress={() => {
-              // TODO: Navigate to conversation settings/info
-              Alert.alert('Info', 'Conversation settings coming soon!');
-            }}
+            onPress={() => setShowMoreOptions(true)}
             className="w-10 h-10 items-center justify-center"
           >
-            <FontAwesome name="info-circle" size={20} color="#6B7280" />
+            <FontAwesome name="ellipsis-v" size={20} color="#6B7280" />
           </TouchableOpacity>
         </View>
       </View>
@@ -386,6 +384,14 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
           currentUserId={currentUser!.id}
           placeholder={`Message ${getConversationTitle(conversation!)}…`}
           onMessageSent={handleMessageSent}
+        />
+        
+        {/* More Options Menu */}
+        <MoreOptionsMenu
+          visible={showMoreOptions}
+          onClose={() => setShowMoreOptions(false)}
+          context="conversation"
+          conversationId={conversationId}
         />
       </SafeAreaView>
     </KeyboardAvoidingView>
