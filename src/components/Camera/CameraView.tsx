@@ -8,7 +8,7 @@ import { CameraErrorType, createCameraError, withCameraErrorHandling } from '@/u
 import { Ionicons } from '@expo/vector-icons';
 import { CameraType, CameraView as ExpoCameraView, useCameraPermissions } from 'expo-camera';
 import React, { useRef, useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface CameraViewProps {
@@ -131,6 +131,22 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
         </View>
       )}
 
+      {/* Top right blur effect button */}
+      <View 
+        className="absolute top-0 right-0 p-4"
+        style={{ paddingTop: insets.top + 6 }}
+      >
+        <TouchableOpacity
+          onPress={toggleEffect}
+          disabled={isCapturing}
+          className={`w-12 h-12 rounded-xl items-center justify-center ${
+            effectEnabled ? 'bg-blue-500' : isCapturing ? 'bg-gray-500/20' : 'bg-white/20'
+          }`}
+        >
+          <Ionicons name="sparkles" size={24} color="#ffffff" />
+        </TouchableOpacity>
+      </View>
+
       {/* Bottom controls */}
       <View
         className="absolute bottom-0 left-0 right-0"
@@ -141,8 +157,6 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
           onToggleCamera={toggleCamera}
           isCapturing={isCapturing}
           cameraType={cameraType}
-          effectEnabled={effectEnabled}
-          onToggleEffect={toggleEffect}
         />
       </View>
     </View>

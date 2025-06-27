@@ -13,8 +13,6 @@ interface CameraControlsProps {
   onToggleCamera: () => void;
   isCapturing: boolean;
   cameraType: CameraType;
-  effectEnabled: boolean;
-  onToggleEffect: () => void;
 }
 
 /**
@@ -23,20 +21,16 @@ interface CameraControlsProps {
  * @param onToggleCamera - Callback for switching between front/back camera
  * @param isCapturing - Whether photo capture is in progress
  * @param cameraType - Current camera type (front/back)
- * @param effectEnabled - Whether blur effect is currently enabled
- * @param onToggleEffect - Callback for toggling the blur effect
  */
 export function CameraControls({ 
   onCapture, 
   onToggleCamera, 
   isCapturing, 
   cameraType,
-  effectEnabled,
-  onToggleEffect,
 }: CameraControlsProps) {
 
   return (
-    <View className="flex-row items-center justify-between px-6 py-4">
+    <View className="flex-row items-center justify-around px-6 py-4">
       {/* Gallery/Recent Photos Button (placeholder for future) */}
       <View className="w-12 h-12 rounded-xl bg-white/20 items-center justify-center">
         <Ionicons name="images-outline" size={24} color="#ffffff" />
@@ -70,17 +64,6 @@ export function CameraControls({
           {isCapturing ? 'Capturing...' : 'Tap to capture'}
         </Text>
       </View>
-
-      {/* Effect Toggle Button */}
-      <TouchableOpacity
-        onPress={onToggleEffect}
-        disabled={isCapturing}
-        className={`w-12 h-12 rounded-xl items-center justify-center ${
-          effectEnabled ? 'bg-blue-500' : isCapturing ? 'bg-gray-500/20' : 'bg-white/20'
-        }`}
-      >
-        <Ionicons name="sparkles" size={24} color="#ffffff" />
-      </TouchableOpacity>
 
       {/* Camera Switch Button */}
       <TouchableOpacity
