@@ -193,34 +193,34 @@ export default function FriendRequestCard({
     const isLoading = isAcceptLoading || isDeclineLoading;
     
     return (
-      <View className="flex-row space-x-2">
+      <View className="flex-row items-center">
         {/* Decline Button */}
         <TouchableOpacity
-          className={`w-10 h-10 rounded-full border-2 border-gray-300 items-center justify-center ${
-            disabled || isLoading ? 'opacity-50' : 'active:bg-gray-50'
+          className={`w-10 h-10 rounded-full border-2 border-red-300 items-center justify-center mr-3 ${
+            disabled || isLoading ? 'opacity-50' : 'active:bg-red-50'
           }`}
           onPress={() => onDecline(friendRequest.id)}
           disabled={disabled || isLoading}
         >
           {isDeclineLoading ? (
-            <ActivityIndicator size="small" color="#6B7280" />
+            <ActivityIndicator size="small" color="#FCA5A5" />
           ) : (
-            <FontAwesome name="times" size={16} color="#6B7280" />
+            <FontAwesome name="ban" size={16} color="#FCA5A5" />
           )}
         </TouchableOpacity>
 
         {/* Accept Button */}
         <TouchableOpacity
-          className={`w-10 h-10 rounded-full bg-blue-600 items-center justify-center ${
-            disabled || isLoading ? 'opacity-50' : 'active:bg-blue-700'
+          className={`w-10 h-10 rounded-full border-2 border-green-500 items-center justify-center ${
+            disabled || isLoading ? 'opacity-50' : 'active:bg-green-50'
           }`}
           onPress={() => onAccept(friendRequest.id)}
           disabled={disabled || isLoading}
         >
           {isAcceptLoading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color="#10B981" />
           ) : (
-            <FontAwesome name="check" size={16} color="#FFFFFF" />
+            <FontAwesome name="check" size={16} color="#10B981" />
           )}
         </TouchableOpacity>
       </View>
@@ -229,7 +229,7 @@ export default function FriendRequestCard({
 
   return (
     <View
-      className={`bg-white p-4 border-b border-gray-200 flex-row items-center ${
+      className={`bg-white mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center ${
         disabled ? 'opacity-60' : ''
       }`}
     >

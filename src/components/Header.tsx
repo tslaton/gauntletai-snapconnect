@@ -72,9 +72,12 @@ export function Header({
         onRequestClose={() => setFriendSearchModalVisible(false)}
       >
         <SafeAreaView className="flex-1 bg-white">
-          <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
+          <View className="relative flex-row items-center justify-center p-4 border-b border-gray-200">
             <Text className="text-lg font-semibold">Add Friends</Text>
-            <TouchableOpacity onPress={() => setFriendSearchModalVisible(false)}>
+            <TouchableOpacity 
+              onPress={() => setFriendSearchModalVisible(false)}
+              className="absolute right-4"
+            >
               <FontAwesome name="close" size={24} color="#374151" />
             </TouchableOpacity>
           </View>

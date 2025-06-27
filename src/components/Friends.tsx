@@ -15,6 +15,7 @@ import {
   SectionList,
   Text,
   TextInput,
+  TouchableOpacity,
   View
 } from 'react-native';
 import FriendRequestCard, { type FriendRequestWithUser } from './FriendRequestCard';
@@ -208,25 +209,37 @@ export default function Friends() {
    * Renders the search input field
    */
   const renderSearchInput = () => (
-    <View className="flex-row items-center bg-gray-100 rounded-lg px-3 py-2 mx-4 mb-4">
-      <FontAwesome name="search" size={16} color="#6B7280" />
-      <TextInput
-        className="flex-1 ml-3 text-base"
-        placeholder="Search by username or name..."
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="search"
-        onSubmitEditing={() => {
-          if (currentUser?.id && searchQuery.trim()) {
-            fetchSearchResults(searchQuery, currentUser.id);
-          }
-        }}
-      />
-             {isSearchLoading && (
-         <ActivityIndicator size="small" color="#6B7280" />
-       )}
+    <View className="px-4 pt-2 pb-4">
+      <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
+        <FontAwesome name="search" size={16} color="#6B7280" />
+        <TextInput
+          className="flex-1 ml-3 text-base text-gray-900"
+          placeholder="Search by username or name..."
+          placeholderTextColor="#9CA3AF"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="search"
+          onSubmitEditing={() => {
+            if (currentUser?.id && searchQuery.trim()) {
+              fetchSearchResults(searchQuery, currentUser.id);
+            }
+          }}
+        />
+        {searchQuery.length > 0 && !isSearchLoading && (
+          <TouchableOpacity
+            onPress={() => setSearchQuery('')}
+            className="ml-2 p-1"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <FontAwesome name="times-circle" size={16} color="#9CA3AF" />
+          </TouchableOpacity>
+        )}
+        {isSearchLoading && (
+          <ActivityIndicator size="small" color="#9333EA" />
+        )}
+      </View>
     </View>
   );
 
@@ -252,8 +265,8 @@ export default function Friends() {
   };
 
   const renderSectionHeader = ({ section: { title } }: { section: { title: string } }) => (
-    <View className="bg-gray-100 px-4 py-2">
-      <Text className="text-sm font-bold text-gray-600 uppercase">{title}</Text>
+    <View className="bg-gray-50 px-4 py-3 border-t border-gray-100">
+      <Text className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{title}</Text>
     </View>
   );
 
@@ -264,7 +277,7 @@ export default function Friends() {
     if (isSearchLoading) {
       return (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#3B82F6" />
+          <ActivityIndicator size="large" color="#9333EA" />
           <Text className="text-gray-500 mt-4">
             {searchQuery.trim() ? 'Searching users...' : 'Loading...'}
           </Text>
@@ -275,45 +288,57 @@ export default function Friends() {
     if (searchError) {
       return (
         <View className="flex-1 items-center justify-center px-6">
-          <FontAwesome name="exclamation-triangle" size={64} color="#EF4444" />
-          <Text className="text-xl font-semibold text-gray-900 mt-4 text-center">
-            {searchQuery.trim() ? 'Search Error' : 'Loading Error'}
-          </Text>
-          <Text className="text-gray-500 mt-2 text-center">
-            {searchError}
-          </Text>
+          <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
+            <View className="w-20 h-20 bg-red-100 rounded-full items-center justify-center mb-4">
+              <FontAwesome name="exclamation-circle" size={40} color="#DC2626" />
+            </View>
+            <Text className="text-xl font-semibold text-gray-900 mb-2">
+              {searchQuery.trim() ? 'Search Error' : 'Loading Error'}
+            </Text>
+            <Text className="text-gray-500 text-center">
+              {searchError}
+            </Text>
+          </View>
         </View>
       );
     }
 
     return (
       <View className="flex-1 items-center justify-center px-6">
-        <FontAwesome name="users" size={64} color="#D1D5DB" />
-        <Text className="text-xl font-semibold text-gray-900 mt-4 text-center">
-          Find Friends
-        </Text>
-        <Text className="text-gray-500 mt-2 text-center">
-          Search for friends by their username or name.
-        </Text>
+        <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
+          <View className="w-20 h-20 bg-purple-100 rounded-full items-center justify-center mb-4">
+            <FontAwesome name="users" size={40} color="#9333EA" />
+          </View>
+          <Text className="text-xl font-semibold text-gray-900 mb-2">
+            Find Friends
+          </Text>
+          <Text className="text-gray-500 text-center">
+            Search for friends by their username or name
+          </Text>
+        </View>
       </View>
     );
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-white">
       {renderSearchInput()}
       
       {sections.length === 0 ? (
-        renderEmptyState()
+        <View className="flex-1 bg-gray-50">
+          {renderEmptyState()}
+        </View>
       ) : (
-        <SectionList
-          sections={sections}
-          keyExtractor={(item, index) => item.id + index}
-          renderItem={({ item, section }: { item: any, section: any }) => section.renderItem({ item })}
-          renderSectionHeader={renderSectionHeader}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
+        <View className="flex-1 bg-gray-50">
+          <SectionList
+            sections={sections}
+            keyExtractor={(item, index) => item.id + index}
+            renderItem={({ item, section }: { item: any, section: any }) => section.renderItem({ item })}
+            renderSectionHeader={renderSectionHeader}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        </View>
       )}
     </View>
   );

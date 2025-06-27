@@ -151,7 +151,7 @@ export default function UserSearchResult({
     if (isLoading || isRemoving) {
       return (
         <View className="w-20 h-8 items-center justify-center">
-          <ActivityIndicator size="small" color="#3B82F6" />
+          <ActivityIndicator size="small" color="#9333EA" />
         </View>
       );
     }
@@ -184,10 +184,10 @@ export default function UserSearchResult({
       case 'friends':
         return (
           <TouchableOpacity
-            className="w-10 h-10 rounded-full border border-red-300 items-center justify-center active:bg-red-50"
+            className="w-10 h-10 rounded-full border-2 border-red-300 items-center justify-center active:bg-red-50"
             onPress={handleRemoveFriend}
           >
-            <FontAwesome name="times" size={16} color="#DC2626" />
+            <FontAwesome name="times" size={16} color="#FCA5A5" />
           </TouchableOpacity>
         );
 
@@ -197,7 +197,7 @@ export default function UserSearchResult({
   };
 
   return (
-    <View className="bg-white p-4 border-b border-gray-200 flex-row items-center">
+    <View className="bg-white mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center">
       {/* Avatar */}
       {renderAvatar()}
       
