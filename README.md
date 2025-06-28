@@ -84,5 +84,8 @@ supabase db dump > schema.sql --local
 - https://docs.expo.dev/build/setup/
 - https://expo.dev/accounts/tslaton/projects/snapconnect/builds
 
-# Server functions
+## Server functions
 - https://docs.expo.dev/router/reference/api-routes/
+
+## Env vars
+- check .env.example for the env vars you need to set. It is best if your local supabase url (`npx supabase start`) is your IPv4 address rather than localhost, so the phone will connect to it as if it's a remote. You can find it on Mac under TCP/IP "Details..." in the WiFi settings.
