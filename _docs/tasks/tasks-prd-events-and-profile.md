@@ -3,20 +3,20 @@
 - `supabase/migrations/0002_create_events_and_interests.sql` - Creates `events` and `user_interests` tables; adds new columns to `profiles`.
 - `supabase/migrations/0003_rls_policies.sql` - Row-Level Security policies for `events` and `user_interests`.
 - `_scripts/seed-dev-data.sh` - Inserts 20 sample events for local development.
-- `src/api/events.ts` - Client functions to fetch and search events from Supabase.
-- `src/stores/events.ts` - Zustand store managing events list and search state.
-- `src/app/(tabs)/events.tsx` - Events tab screen displaying list and search input.
-- `src/components/EventCard.tsx` - Reusable card component for event list items.
-- `src/app/events/[eventId].tsx` - Event detail screen.
+- `src/api/events.ts` - Client functions to fetch and search events from Supabase. ✅
+- `src/stores/events.ts` - Zustand store managing events list and search state. ✅
+- `src/app/(tabs)/events.tsx` - Events tab screen displaying list and search input. ✅
+- `src/components/EventCard.tsx` - Reusable card component for event list items. ✅
+- `src/app/events/[eventId].tsx` - Event detail screen. ✅
 - `src/app/onboarding/(stack)/Personality.tsx` - Onboarding screen collecting personality description.
 - `src/app/onboarding/(stack)/CurrentActivities.tsx` - Onboarding screen collecting current activities.
 - `src/app/onboarding/(stack)/DesiredActivities.tsx` - Onboarding screen collecting desired activities.
 - `src/api/userInterests.ts` - CRUD helpers for `user_interests` and profile fields.
 - `src/app/profile/edit.tsx` - Edit Profile screen allowing updates to personality and interests.
 - `src/app/server/dev/refine-user-inputs+api.ts` - Edge function calling OpenAI for suggestions.
-- `src/hooks/useDebounce.ts` - Debounce hook used for suggestion requests.
+- `src/hooks/useDebounce.ts` - Debounce hook used for suggestion requests. ✅
 - `src/components/UserCard.tsx` - Reusable user card displaying personality and interests.
-- `src/utils/relativeTime.ts` - Utility to format start times (e.g., "in 3 h").
+- `src/utils/relativeTime.ts` - Utility to format start times (e.g., "in 3 h"). ✅
 - `tests/events.test.ts` - Test API functions and store logic.
 - `src/components/__tests__/EventCard.test.tsx` - Unit tests for EventCard component.
 - `src/components/__tests__/UserCard.test.tsx` - Unit tests for UserCard component.
@@ -36,14 +36,14 @@
   - [x] 1.3 Update `_scripts/seed-dev-data.sh` to insert 20 events with future start times, images, tags.
   - [x] 1.4 Run migrations and seed script locally; verify data and RLS via Supabase dashboard.
 
-- [ ] 2.0 Events Feature Implementation
-  - [ ] 2.1 Implement `src/api/events.ts` with `listEvents(search?: string)` sorted by `start_time`.
-  - [ ] 2.2 Create Zustand store `src/stores/events.ts` exposing `events`, `fetchEvents`, `searchQuery`, `setSearchQuery`.
-  - [ ] 2.3 Build `EventCard.tsx` with image thumbnail, title, relative time, tag chips.
-  - [ ] 2.4 Create `events.tsx` tab screen: FlatList of `EventCard`; call `fetchEvents()` on mount.
-  - [ ] 2.5 Add search TextInput with 400 ms debounce; update `searchQuery` and refetch.
-  - [ ] 2.6 Implement `events/[eventId].tsx` detail screen displaying full event info.
-  - [ ] 2.7 Write unit tests for API, store, and EventCard component.
+- [x] 2.0 Events Feature Implementation
+  - [x] 2.1 Implement `src/api/events.ts` with `listEvents(search?: string)` sorted by `start_time`.
+  - [x] 2.2 Create Zustand store `src/stores/events.ts` exposing `events`, `fetchEvents`, `searchQuery`, `setSearchQuery`.
+  - [x] 2.3 Build `EventCard.tsx` with image thumbnail, title, relative time, tag chips.
+  - [x] 2.4 Create `events.tsx` tab screen: FlatList of `EventCard`; call `fetchEvents()` on mount.
+  - [x] 2.5 Add search TextInput with 400 ms debounce; update `searchQuery` and refetch.
+  - [x] 2.6 Implement `events/[eventId].tsx` detail screen displaying full event info.
+  - [x] 2.7 Write unit tests for API, store, and EventCard component.
 
 - [ ] 3.0 Onboarding Flow Implementation
   - [ ] 3.1 Set up stack navigator at `src/app/onboarding/(stack)` with three screens.
