@@ -48,11 +48,12 @@ export function ActivityCard({ activity, onPress }: ActivityCardProps) {
         {activity.image_url ? (
           <Image
             source={{ uri: activity.image_url }}
-            className="w-20 h-20"
+            className="w-20"
+            style={{ alignSelf: 'stretch' }}
             resizeMode="cover"
           />
         ) : (
-          <View className="w-20 h-20 bg-muted items-center justify-center">
+          <View className="w-20 bg-muted items-center justify-center" style={{ alignSelf: 'stretch' }}>
             <Ionicons name="image-outline" size={24} color={colors.mutedForeground} />
           </View>
         )}
@@ -97,14 +98,14 @@ export function ActivityCard({ activity, onPress }: ActivityCardProps) {
               {activity.tags.slice(0, 3).map((tag, index) => (
                 <View
                   key={index}
-                  className="bg-muted px-2 py-1 rounded-full mr-2 mb-1"
+                  className="bg-accent px-2 py-1 rounded-full mr-2 mb-1"
                 >
-                  <Text className="text-xs text-muted-foreground">{tag}</Text>
+                  <Text className="text-xs text-accent-foreground">{tag}</Text>
                 </View>
               ))}
               {activity.tags.length > 3 && (
-                <View className="bg-muted px-2 py-1 rounded-full mb-1">
-                  <Text className="text-xs text-muted-foreground">+{activity.tags.length - 3}</Text>
+                <View className="bg-accent px-2 py-1 rounded-full mb-1">
+                  <Text className="text-xs text-accent-foreground">+{activity.tags.length - 3}</Text>
                 </View>
               )}
             </View>

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useItinerariesStore } from '@/stores/itinerariesStore';
 import { useActivitiesStore } from '@/stores/activitiesStore';
@@ -17,6 +17,7 @@ export default function ItineraryDetailsScreen() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [filter, setFilter] = useState<'All' | 'Unscheduled'>('All');
 
   const { 
     getItineraryById, 
@@ -33,6 +34,14 @@ export default function ItineraryDetailsScreen() {
 
   const itinerary = getItineraryById(id);
   const activities = getActivitiesForItinerary(id);
+
+  // Filter activities based on the selected filter
+  const filteredActivities = useMemo(() => {
+    if (filter === 'Unscheduled') {
+      return activities.filter((activity) => !activity.start_time);
+    }
+    return activities;
+  }, [activities, filter]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -59,6 +68,10 @@ export default function ItineraryDetailsScreen() {
     setShowActivityModal(true);
   };
 
+  const handleMoreOptions = () => {
+    console.log('More options pressed for Itinerary details');
+  };
+
   const handleActivityPress = (activity: Activity) => {
     setEditingActivity(activity);
     setShowActivityModal(true);
@@ -78,7 +91,7 @@ export default function ItineraryDetailsScreen() {
 
   if (isInitialLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-card">
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -89,7 +102,7 @@ export default function ItineraryDetailsScreen() {
   const error = itineraryError || activitiesError;
   if (error) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-card">
         <View className="flex-1 justify-center items-center p-4">
           <Text className="text-destructive text-center mb-4">{error}</Text>
           <TouchableOpacity
@@ -105,7 +118,7 @@ export default function ItineraryDetailsScreen() {
 
   if (!itinerary) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-card">
         <View className="flex-1 justify-center items-center p-4">
           <Text className="text-muted-foreground text-center">Itinerary not found</Text>
           <TouchableOpacity
@@ -120,9 +133,9 @@ export default function ItineraryDetailsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-card">
       {/* Header */}
-      <View className="px-4 py-3 border-b border-border">
+      <View className="px-4 py-3 border-b border-border bg-card">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <TouchableOpacity
@@ -144,27 +157,65 @@ export default function ItineraryDetailsScreen() {
             </View>
           </View>
           <TouchableOpacity
-            onPress={handleNewActivity}
-            className="bg-primary px-3 py-2 rounded-lg flex-row items-center ml-2"
+            onPress={handleMoreOptions}
+            className="p-2 -mr-2"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="add" size={20} color={colors.primaryForeground} />
-            <Text className="text-primary-foreground ml-1">New</Text>
+            <Ionicons name="ellipsis-vertical" size={24} color={colors.foreground} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Activities List */}
-      {activitiesLoading && !isInitialLoading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color={colors.primary} />
+      {/* Main Content */}
+      <View className="flex-1 bg-background">
+        <View className="px-4 pt-4">
+          {/* Filter/Action Row */}
+          <View className="flex-row mb-4 items-center justify-between">
+            <View className="flex-row items-center">
+              <TouchableOpacity
+                onPress={() => setFilter('All')}
+                className={`px-4 py-2 rounded-full mr-2 ${
+                  filter === 'All' ? 'bg-accent' : 'bg-card'
+                }`}
+              >
+                <Text className={`${filter === 'All' ? 'font-bold text-accent-foreground' : 'font-semibold text-muted-foreground'}`}>
+                  All Days
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setFilter('Unscheduled')}
+                className={`px-4 py-2 rounded-full ${
+                  filter === 'Unscheduled' ? 'bg-accent' : 'bg-card'
+                }`}
+              >
+                <Text className={`${filter === 'Unscheduled' ? 'font-bold text-accent-foreground' : 'font-semibold text-muted-foreground'}`}>
+                  Unscheduled
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              onPress={handleNewActivity}
+              className="bg-primary px-4 py-2 rounded-full flex-row items-center"
+            >
+              <FontAwesome name="plus" size={14} color={colors.primaryForeground} />
+              <Text className="text-primary-foreground font-semibold ml-2">New</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      ) : (
-        <ActivityList
-          activities={activities}
-          onActivityPress={handleActivityPress}
-          itineraryStartDate={itinerary.start_time}
-        />
-      )}
+
+        {/* Activities List */}
+        {activitiesLoading && !isInitialLoading ? (
+          <View className="flex-1 justify-center items-center">
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        ) : (
+          <ActivityList
+            activities={filteredActivities}
+            onActivityPress={handleActivityPress}
+            itineraryStartDate={itinerary.start_time}
+          />
+        )}
+      </View>
 
       {/* Activity Modal */}
       {itinerary && (

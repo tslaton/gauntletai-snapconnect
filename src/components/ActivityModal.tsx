@@ -262,7 +262,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
         {/* Header */}
         <View className="px-4 py-3 border-b border-border flex-row items-center justify-between">
           <TouchableOpacity onPress={onClose} disabled={isLoading}>
-            <Text className="text-primary text-base">Cancel</Text>
+            <Text className="text-muted-foreground text-base">Cancel</Text>
           </TouchableOpacity>
           <Text className="text-lg font-semibold text-foreground">
             {isEditMode ? 'Edit Activity' : 'New Activity'}

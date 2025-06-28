@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useItinerariesStore } from '@/stores/itinerariesStore';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { ItineraryCard } from '@/components/ItineraryCard';
 import { ItineraryModal } from '@/components/ItineraryModal';
+import { Header } from '@/components/Header';
+import MoreOptionsMenu from '@/components/MoreOptionsMenu';
 import type { Itinerary } from '@/api/itineraries';
 
 export default function ItinerariesScreen() {
@@ -15,6 +16,7 @@ export default function ItinerariesScreen() {
   const router = useRouter();
   const [searchInput, setSearchInput] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
   const debouncedSearch = useDebounce(searchInput, 300);
   
   const {
@@ -51,13 +53,18 @@ export default function ItinerariesScreen() {
     router.push(`/itineraries/${itineraryId}`);
   };
 
+  const handleMoreOptions = () => {
+    setShowMoreOptions(true);
+  };
+
   const renderItinerary = ({ item }: { item: Itinerary }) => {
     return <ItineraryCard itinerary={item} onPress={handleItineraryPress} />;
   };
 
   if (error) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <View className="flex-1 bg-background">
+        <Header title="Itineraries" showAddFriend showMoreOptions onMoreOptionsPress={handleMoreOptions} />
         <View className="flex-1 justify-center items-center p-4">
           <Text className="text-destructive text-center mb-4">{error}</Text>
           <TouchableOpacity
@@ -70,28 +77,17 @@ export default function ItinerariesScreen() {
             <Text className="text-primary-foreground">Retry</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-1">
-        {/* Header */}
-        <View className="px-4 pt-4 pb-2">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-2xl font-bold text-foreground">Itineraries</Text>
-            <TouchableOpacity
-              onPress={handleNewItinerary}
-              className="bg-primary px-3 py-2 rounded-lg flex-row items-center"
-            >
-              <Ionicons name="add" size={20} color={colors.primaryForeground} />
-              <Text className="text-primary-foreground ml-1">New</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Search Bar */}
-          <View className="bg-muted rounded-lg px-3 py-2 flex-row items-center">
+    <View className="flex-1 bg-background">
+      <Header title="Itineraries" showAddFriend showMoreOptions onMoreOptionsPress={handleMoreOptions} />
+      <View className="flex-1 px-4 pt-4">
+        {/* Search Bar and New Button */}
+        <View className="flex-row mb-4 items-center">
+          <View className="bg-muted rounded-lg px-3 py-2 flex-row items-center flex-1 mr-2">
             <Ionicons name="search" size={20} color={colors.mutedForeground} />
             <TextInput
               value={searchInput}
@@ -106,6 +102,13 @@ export default function ItinerariesScreen() {
               </TouchableOpacity>
             )}
           </View>
+          <TouchableOpacity
+            onPress={handleNewItinerary}
+            className="bg-primary px-4 py-2 rounded-full flex-row items-center"
+          >
+            <FontAwesome name="plus" size={14} color={colors.primaryForeground} />
+            <Text className="text-primary-foreground font-semibold ml-2">New</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Itineraries List */}
@@ -140,6 +143,14 @@ export default function ItinerariesScreen() {
         onClose={() => setShowCreateModal(false)}
         onSave={handleItinerarySaved}
       />
-    </SafeAreaView>
+
+      {/* More Options Menu */}
+      <MoreOptionsMenu
+        visible={showMoreOptions}
+        onClose={() => setShowMoreOptions(false)}
+        context="itineraries"
+        onNewItinerary={handleNewItinerary}
+      />
+    </View>
   );
 }

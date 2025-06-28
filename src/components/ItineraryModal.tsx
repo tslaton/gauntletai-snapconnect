@@ -211,7 +211,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
         {/* Header */}
         <View className="px-4 py-3 border-b border-border flex-row items-center justify-between">
           <TouchableOpacity onPress={onClose} disabled={isLoading}>
-            <Text className="text-primary text-base">Cancel</Text>
+            <Text className="text-muted-foreground text-base">Cancel</Text>
           </TouchableOpacity>
           <Text className="text-lg font-semibold text-foreground">
             {isEditMode ? 'Edit Itinerary' : 'New Itinerary'}
@@ -260,7 +260,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
                   setTitle(text);
                   if (errors.title) setErrors({ ...errors, title: undefined });
                 }}
-                placeholder="Give your trip a name"
+                placeholder="Give your itinerary a name"
                 placeholderTextColor={colors.mutedForeground}
                 className="bg-muted px-3 py-3 rounded-lg text-foreground"
                 maxLength={100}
@@ -276,7 +276,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
               <TextInput
                 value={description}
                 onChangeText={setDescription}
-                placeholder="What's this trip about?"
+                placeholder="What's this itinerary about?"
                 placeholderTextColor={colors.mutedForeground}
                 className="bg-muted px-3 py-3 rounded-lg text-foreground"
                 multiline

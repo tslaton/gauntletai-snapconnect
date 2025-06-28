@@ -5,5 +5,5 @@ import { Redirect } from 'expo-router';
  * The authentication check is handled in the root layout
  */
 export default function Index() {
-  return <Redirect href="/(tabs)/map" />;
+  return <Redirect href="/(tabs)/itineraries" />;
 }

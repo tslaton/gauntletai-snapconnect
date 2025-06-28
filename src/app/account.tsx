@@ -50,7 +50,7 @@ export default function AccountScreen() {
       />
       
       {/* Custom Header */}
-      <View className="relative flex-row items-center justify-center p-4 border-b border-border">
+      <View className="relative flex-row items-center justify-center p-4 border-b border-border bg-card">
         <Text className="text-lg font-semibold text-foreground">Account</Text>
         <TouchableOpacity 
           onPress={() => router.dismiss()}
