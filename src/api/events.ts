@@ -66,14 +66,9 @@ export async function listEvents(search?: string): Promise<Event[]> {
     if (search && search.trim()) {
       const searchTerm = `%${search.trim()}%`;
       
-      // Search across title, description, location, and tags
-      // Using ilike for case-insensitive search and @> for array contains
-      query = query.or(`
-        title.ilike.${searchTerm},
-        description.ilike.${searchTerm},
-        location.ilike.${searchTerm},
-        tags.cs.{${search.trim()}}
-      `);
+      // Search across title, description, and location
+      // Note: Tag search temporarily disabled to fix syntax error
+      query = query.or(`title.ilike.${searchTerm},description.ilike.${searchTerm},location.ilike.${searchTerm}`);
     }
 
     const { data: eventsData, error: eventsError } = await query;
@@ -145,12 +140,9 @@ export async function listEventsWithCreators(search?: string): Promise<EventWith
     if (search && search.trim()) {
       const searchTerm = `%${search.trim()}%`;
       
-      query = query.or(`
-        title.ilike.${searchTerm},
-        description.ilike.${searchTerm},
-        location.ilike.${searchTerm},
-        tags.cs.{${search.trim()}}
-      `);
+      // Search across title, description, and location
+      // Note: Tag search temporarily disabled to fix syntax error
+      query = query.or(`title.ilike.${searchTerm},description.ilike.${searchTerm},location.ilike.${searchTerm}`);
     }
 
     const { data: eventsData, error: eventsError } = await query;
