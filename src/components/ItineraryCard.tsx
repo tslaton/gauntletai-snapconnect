@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { formatDateRange } from '@/utils/dateHelpers';
 import type { Itinerary } from '@/api/itineraries';
 
 interface ItineraryCardProps {
@@ -12,30 +13,7 @@ interface ItineraryCardProps {
 export function ItineraryCard({ itinerary, onPress }: ItineraryCardProps) {
   const colors = useThemeColors();
 
-  const formatDateRange = () => {
-    if (!itinerary.start_time && !itinerary.end_time) {
-      return null;
-    }
-
-    const formatDate = (dateString: string) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric',
-        year: 'numeric'
-      });
-    };
-
-    if (itinerary.start_time && itinerary.end_time) {
-      return `${formatDate(itinerary.start_time)} - ${formatDate(itinerary.end_time)}`;
-    } else if (itinerary.start_time) {
-      return `Starts ${formatDate(itinerary.start_time)}`;
-    } else if (itinerary.end_time) {
-      return `Ends ${formatDate(itinerary.end_time)}`;
-    }
-  };
-
-  const dateRange = formatDateRange();
+  const dateRange = formatDateRange(itinerary.start_time, itinerary.end_time);
 
   return (
     <TouchableOpacity

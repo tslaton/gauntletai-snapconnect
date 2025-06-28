@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { formatTimeRange } from '@/utils/dateHelpers';
 import type { Activity } from '@/api/activities';
 
 interface ActivityCardProps {
@@ -12,30 +13,7 @@ interface ActivityCardProps {
 export function ActivityCard({ activity, onPress }: ActivityCardProps) {
   const colors = useThemeColors();
 
-  const formatTimeRange = () => {
-    if (!activity.start_time && !activity.end_time) {
-      return null;
-    }
-
-    const formatTime = (dateString: string) => {
-      const date = new Date(dateString);
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
-    };
-
-    if (activity.start_time && activity.end_time) {
-      return `${formatTime(activity.start_time)} - ${formatTime(activity.end_time)}`;
-    } else if (activity.start_time) {
-      return `Starts at ${formatTime(activity.start_time)}`;
-    } else if (activity.end_time) {
-      return `Ends at ${formatTime(activity.end_time)}`;
-    }
-  };
-
-  const timeRange = formatTimeRange();
+  const timeRange = formatTimeRange(activity.start_time, activity.end_time);
 
   return (
     <TouchableOpacity

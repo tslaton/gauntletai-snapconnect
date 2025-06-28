@@ -3,6 +3,7 @@ import { View, Text, SectionList, SectionListData } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { ActivityCard } from './ActivityCard';
+import { groupActivitiesByDay, getDayLabel, calculateDayNumber } from '@/utils/dateHelpers';
 import type { Activity } from '@/api/activities';
 
 interface ActivityListProps {
@@ -19,65 +20,30 @@ interface GroupedActivity {
 export function ActivityList({ activities, onActivityPress, itineraryStartDate }: ActivityListProps) {
   const colors = useThemeColors();
 
-  const groupActivitiesByDay = (): GroupedActivity[] => {
+  const getGroupedActivities = (): GroupedActivity[] => {
     // Separate scheduled and unscheduled activities
     const scheduledActivities = activities.filter(a => a.start_time);
     const unscheduledActivities = activities.filter(a => !a.start_time);
 
-    // Group scheduled activities by day
-    const groupedByDay: { [key: string]: Activity[] } = {};
+    // Use the dateHelpers function to group activities
+    const grouped = groupActivitiesByDay(scheduledActivities);
     
-    scheduledActivities.forEach(activity => {
-      if (activity.start_time) {
-        const date = new Date(activity.start_time);
-        const dateKey = date.toDateString();
-        
-        if (!groupedByDay[dateKey]) {
-          groupedByDay[dateKey] = [];
-        }
-        groupedByDay[dateKey].push(activity);
-      }
-    });
-
-    // Sort activities within each day by start time
-    Object.keys(groupedByDay).forEach(dateKey => {
-      groupedByDay[dateKey].sort((a, b) => {
-        const timeA = a.start_time ? new Date(a.start_time).getTime() : 0;
-        const timeB = b.start_time ? new Date(b.start_time).getTime() : 0;
-        return timeA - timeB;
-      });
-    });
-
     // Create sections array
     const sections: GroupedActivity[] = [];
     
     // Sort days chronologically
-    const sortedDates = Object.keys(groupedByDay).sort((a, b) => {
-      return new Date(a).getTime() - new Date(b).getTime();
-    });
+    const sortedDates = Object.keys(grouped).sort();
 
-    // Calculate day numbers based on itinerary start date
-    let dayCounter = 1;
-    const startDate = itineraryStartDate ? new Date(itineraryStartDate) : null;
-
-    sortedDates.forEach((dateKey, index) => {
-      const date = new Date(dateKey);
-      const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-      const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    sortedDates.forEach((dateKey) => {
+      const dayNumber = itineraryStartDate 
+        ? calculateDayNumber(dateKey, itineraryStartDate)
+        : null;
       
-      let dayNumber = '';
-      if (startDate) {
-        const diffTime = date.getTime() - startDate.getTime();
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        dayNumber = `Day ${diffDays + 1} - `;
-      } else {
-        dayNumber = `Day ${dayCounter} - `;
-        dayCounter++;
-      }
-
+      const title = getDayLabel(dateKey, dayNumber);
+      
       sections.push({
-        title: `${dayNumber}${dayName}, ${monthDay}`,
-        data: groupedByDay[dateKey]
+        title,
+        data: grouped[dateKey]
       });
     });
 
@@ -118,7 +84,7 @@ export function ActivityList({ activities, onActivityPress, itineraryStartDate }
     </View>
   );
 
-  const sections = groupActivitiesByDay();
+  const sections = getGroupedActivities();
 
   if (activities.length === 0) {
     return renderEmptyState();

@@ -129,7 +129,7 @@ export default function ItinerariesScreen() {
                   {searchInput ? 'No itineraries found' : 'No itineraries yet'}
                 </Text>
                 <Text className="text-muted-foreground text-center mt-2">
-                  Tap "+ New" to create your first travel plan
+                  Tap &quot;+ New&quot; to create your first travel plan
                 </Text>
               </View>
             }
