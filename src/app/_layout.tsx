@@ -3,6 +3,7 @@ import { useUserStore } from "@/stores/user";
 import { supabase } from "@/utils/supabase";
 import { Session } from '@supabase/supabase-js';
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -42,6 +43,9 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+      {/* Set app to light mode by default for proper status bar display */}
+      <StatusBar style="dark" backgroundColor="#ffffff" />
+      
       {!session ? (
         // Show Auth screen when not authenticated
         <View className="flex-1 bg-gray-50">

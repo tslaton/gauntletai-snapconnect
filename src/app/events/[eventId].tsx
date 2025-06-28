@@ -244,7 +244,7 @@ export default function EventDetailRoute() {
    * Renders loading state
    */
   const renderLoading = () => (
-    <View className="flex-1 items-center justify-center">
+    <View className="flex-1 items-center justify-center bg-gray-50">
       <ActivityIndicator size="large" color="#4F46E5" />
       <Text className="text-gray-500 mt-4">Loading event details...</Text>
     </View>
@@ -254,7 +254,7 @@ export default function EventDetailRoute() {
    * Renders error state
    */
   const renderError = () => (
-    <View className="flex-1 items-center justify-center px-8">
+    <View className="flex-1 items-center justify-center px-8 bg-gray-50">
       <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
         <View className="w-20 h-20 bg-red-100 rounded-full items-center justify-center mb-4">
           <FontAwesome name="exclamation-circle" size={40} color="#DC2626" />
@@ -276,7 +276,7 @@ export default function EventDetailRoute() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-white">
       <Stack.Screen 
         options={{
           headerShown: false,
@@ -307,7 +307,7 @@ export default function EventDetailRoute() {
         renderError()
       ) : (
         <ScrollView 
-          className="flex-1"
+          className="flex-1 bg-gray-50"
           showsVerticalScrollIndicator={false}
         >
           {/* Event Image */}
