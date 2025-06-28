@@ -7,12 +7,14 @@ import { useItinerariesStore } from '@/stores/itinerariesStore';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { ItineraryCard } from '@/components/ItineraryCard';
+import { ItineraryModal } from '@/components/ItineraryModal';
 import type { Itinerary } from '@/api/itineraries';
 
 export default function ItinerariesScreen() {
   const colors = useThemeColors();
   const router = useRouter();
   const [searchInput, setSearchInput] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const debouncedSearch = useDebounce(searchInput, 300);
   
   const {
@@ -37,8 +39,12 @@ export default function ItinerariesScreen() {
   }, [debouncedSearch]);
 
   const handleNewItinerary = () => {
-    // TODO: Navigate to create itinerary modal
-    console.log('Create new itinerary');
+    setShowCreateModal(true);
+  };
+
+  const handleItinerarySaved = (itinerary: Itinerary) => {
+    // Navigate to the newly created itinerary
+    router.push(`/itineraries/${itinerary.id}`);
   };
 
   const handleItineraryPress = (itineraryId: string) => {
@@ -127,6 +133,13 @@ export default function ItinerariesScreen() {
           />
         )}
       </View>
+
+      {/* Create Itinerary Modal */}
+      <ItineraryModal
+        visible={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSave={handleItinerarySaved}
+      />
     </SafeAreaView>
   );
 }

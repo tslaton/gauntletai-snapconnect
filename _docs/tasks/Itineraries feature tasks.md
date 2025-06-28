@@ -111,16 +111,16 @@
 - [x] Add onPress handler to navigate to details
 
 ### 11. Create New/Edit Itinerary Modal
-- [ ] Create `/src/components/ItineraryModal.tsx` for create/edit functionality
-- [ ] Add form fields:
+- [x] Create `/src/components/ItineraryModal.tsx` for create/edit functionality
+- [x] Add form fields:
   - Title input (required, with validation)
   - Description textarea (optional)
   - Start date/time picker (optional)
   - End date/time picker (optional)
   - Cover image picker (reuse UserAvatar component logic)
-- [ ] Add "Save" and "Cancel" buttons
-- [ ] Connect to store actions for create/update
-- [ ] Handle loading and error states
+- [x] Add "Save" and "Cancel" buttons
+- [x] Connect to store actions for create/update
+- [x] Handle loading and error states
 
 ### 12. Create Itinerary Details Screen
 - [x] Create `/src/app/itineraries/[id].tsx` for detail view
