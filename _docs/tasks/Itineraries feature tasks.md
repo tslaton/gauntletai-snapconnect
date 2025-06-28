@@ -24,7 +24,7 @@
   - `start_time` (timestamp)
   - `end_time` (timestamp)
   - `cover_image_url` (text)
-  - `weather` (jsonb, default '[]')
+  - `weather` (json, default '[]')
   - `created_by` (uuid, foreign key to profiles)
   - `created_at` (timestamp)
   - `updated_at` (timestamp)
