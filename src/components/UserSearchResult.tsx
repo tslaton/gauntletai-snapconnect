@@ -4,6 +4,7 @@
  */
 
 import { type UserSearchResultWithStatus } from '@/api/friends';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import {
@@ -47,6 +48,7 @@ export default function UserSearchResult({
   isRemoving = false,
   requestStatus
 }: UserSearchResultProps) {
+  const themeColors = useThemeColors();
   
   /**
    * Renders the user's avatar or placeholder
@@ -62,7 +64,8 @@ export default function UserSearchResult({
     const displayName = user.fullName || user.username || 'Unknown User';
     return (
       <Text 
-        className="text-base font-semibold text-gray-900"
+        className="text-base font-semibold"
+        style={{ color: themeColors.foreground }}
         numberOfLines={1}
       >
         {displayName}
@@ -81,7 +84,8 @@ export default function UserSearchResult({
 
     return (
       <Text 
-        className="text-sm text-gray-500"
+        className="text-sm"
+        style={{ color: themeColors.mutedForeground }}
         numberOfLines={1}
       >
         @{user.username}
@@ -104,7 +108,7 @@ export default function UserSearchResult({
     });
 
     return (
-      <Text className="text-xs text-gray-400 mt-1">
+      <Text className="text-xs mt-1" style={{ color: themeColors.mutedForeground }}>
         Friends since {friendSince}
       </Text>
     );
@@ -137,7 +141,7 @@ export default function UserSearchResult({
     if (isLoading || isRemoving) {
       return (
         <View className="w-20 h-8 items-center justify-center">
-          <ActivityIndicator size="small" color="#9333EA" />
+          <ActivityIndicator size="small" color={themeColors.primary} />
         </View>
       );
     }
@@ -146,34 +150,36 @@ export default function UserSearchResult({
       case 'none':
         return (
           <TouchableOpacity
-            className="w-10 h-10 rounded-full border border-green-300 items-center justify-center active:bg-green-50"
+            className="w-10 h-10 rounded-full border items-center justify-center"
+            style={{ borderColor: themeColors.affirmative + '60' }}
             onPress={() => onSendFriendRequest(user)}
           >
-            <FontAwesome name="plus" size={16} color="#16A34A" />
+            <FontAwesome name="plus" size={16} color={themeColors.affirmative} />
           </TouchableOpacity>
         );
 
       case 'sent':
         return (
-          <View className="bg-yellow-100 px-4 py-2 rounded-lg">
-            <Text className="text-yellow-800 font-medium text-sm">Pending</Text>
+          <View className="px-4 py-2 rounded-lg" style={{ backgroundColor: '#FEF3C720' }}>
+            <Text className="font-medium text-sm" style={{ color: '#F59E0B' }}>Pending</Text>
           </View>
         );
 
       case 'received':
         return (
-          <View className="bg-green-100 px-4 py-2 rounded-lg">
-            <Text className="text-green-800 font-medium text-sm">Accept Request</Text>
+          <View className="px-4 py-2 rounded-lg" style={{ backgroundColor: themeColors.affirmative + '20' }}>
+            <Text className="font-medium text-sm" style={{ color: themeColors.affirmative }}>Accept Request</Text>
           </View>
         );
 
       case 'friends':
         return (
           <TouchableOpacity
-            className="w-10 h-10 rounded-full border-2 border-red-300 items-center justify-center active:bg-red-50"
+            className="w-10 h-10 rounded-full border-2 items-center justify-center"
+            style={{ borderColor: themeColors.destructive + '60' }}
             onPress={handleRemoveFriend}
           >
-            <FontAwesome name="times" size={16} color="#FCA5A5" />
+            <FontAwesome name="times" size={16} color={themeColors.destructive} />
           </TouchableOpacity>
         );
 
@@ -183,7 +189,7 @@ export default function UserSearchResult({
   };
 
   return (
-    <View className="bg-white mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center">
+    <View className="mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center" style={{ backgroundColor: themeColors.card }}>
       {/* Avatar */}
       {renderAvatar()}
       

@@ -4,6 +4,7 @@
  */
 
 import { fetchFriends, type Friend } from '@/api/friends';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useConversationsStore } from '@/stores/conversations';
 import { useUserStore } from '@/stores/user';
 import { timeAgo } from '@/utils';
@@ -39,6 +40,7 @@ export default function NewConversation({ onClose }: NewConversationProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState<string | null>(null);
+  const colors = useThemeColors();
 
   // Load friends and match with conversations
   useEffect(() => {
@@ -142,18 +144,19 @@ export default function NewConversation({ onClose }: NewConversationProps) {
       <TouchableOpacity
         onPress={() => handleFriendPress(item)}
         disabled={isCreatingConversation}
-        className="bg-white mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center"
+        className="mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center"
+        style={{ backgroundColor: colors.card }}
       >
         {/* Avatar */}
         <UserAvatar uri={item.friend.avatarUrl} size={48} />
 
         {/* Friend Info */}
         <View className="flex-1 ml-3">
-          <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+          <Text className="text-base font-semibold" style={{ color: colors.foreground }} numberOfLines={1}>
             {displayName}
           </Text>
           {item.friend.username && item.friend.username !== item.friend.fullName && (
-            <Text className="text-sm text-gray-500" numberOfLines={1}>
+            <Text className="text-sm" style={{ color: colors.mutedForeground }} numberOfLines={1}>
               @{item.friend.username}
             </Text>
           )}
@@ -161,10 +164,10 @@ export default function NewConversation({ onClose }: NewConversationProps) {
 
         {/* Activity Badge or Loading */}
         {isCreatingConversation ? (
-          <ActivityIndicator size="small" color="#9333EA" />
+          <ActivityIndicator size="small" color={colors.primary} />
         ) : item.lastActivity ? (
-          <View className="bg-gray-100 px-3 py-1 rounded-full">
-            <Text className="text-xs text-gray-600">
+          <View className="px-3 py-1 rounded-full" style={{ backgroundColor: colors.muted }}>
+            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
               {item.lastActivityType === 'sent' ? 'Sent' : 'Received'} {timeAgo(item.lastActivity)}
             </Text>
           </View>
@@ -177,15 +180,15 @@ export default function NewConversation({ onClose }: NewConversationProps) {
     if (searchQuery.trim()) {
       return (
         <View className="flex-1 items-center justify-center px-6">
-          <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
-            <View className="w-20 h-20 bg-gray-100 rounded-full items-center justify-center mb-4">
-              <FontAwesome name="search" size={40} color="#9CA3AF" />
+          <View className="rounded-2xl p-8 shadow-sm items-center" style={{ backgroundColor: colors.card }}>
+            <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: colors.muted }}>
+              <FontAwesome name="search" size={40} color={colors.mutedForeground} />
             </View>
-            <Text className="text-xl font-semibold text-gray-900 mb-2">
+            <Text className="text-xl font-semibold mb-2" style={{ color: colors.foreground }}>
               No friends found
             </Text>
-            <Text className="text-gray-500 text-center">
-              No friends match "{searchQuery}"
+            <Text className="text-center" style={{ color: colors.mutedForeground }}>
+              No friends match &quot;{searchQuery}&quot;
             </Text>
           </View>
         </View>
@@ -194,14 +197,14 @@ export default function NewConversation({ onClose }: NewConversationProps) {
 
     return (
       <View className="flex-1 items-center justify-center px-6">
-        <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
-          <View className="w-20 h-20 bg-purple-100 rounded-full items-center justify-center mb-4">
-            <FontAwesome name="users" size={40} color="#9333EA" />
+        <View className="rounded-2xl p-8 shadow-sm items-center" style={{ backgroundColor: colors.card }}>
+          <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: colors.accent }}>
+            <FontAwesome name="users" size={40} color={colors.primary} />
           </View>
-          <Text className="text-xl font-semibold text-gray-900 mb-2">
+          <Text className="text-xl font-semibold mb-2" style={{ color: colors.foreground }}>
             No friends yet
           </Text>
-          <Text className="text-gray-500 text-center">
+          <Text className="text-center" style={{ color: colors.mutedForeground }}>
             Add friends to start conversations
           </Text>
         </View>
@@ -210,16 +213,17 @@ export default function NewConversation({ onClose }: NewConversationProps) {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1" style={{ backgroundColor: colors.card }}>
 
       {/* Search Input */}
-      <View className="px-4 pt-2 pb-4">
-        <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
-          <FontAwesome name="search" size={16} color="#6B7280" />
+      <View className="px-4 pt-4 pb-4">
+        <View className="flex-row items-center rounded-xl px-4 py-3" style={{ backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }}>
+          <FontAwesome name="search" size={16} color={colors.mutedForeground} />
           <TextInput
-            className="flex-1 ml-3 text-base text-gray-900"
+            className="flex-1 ml-3 text-base"
+            style={{ color: colors.foreground, backgroundColor: 'transparent', paddingVertical: 0 }}
             placeholder="Search friends..."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.mutedForeground}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoCapitalize="none"
@@ -231,36 +235,37 @@ export default function NewConversation({ onClose }: NewConversationProps) {
               className="ml-2 p-1"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <FontAwesome name="times-circle" size={16} color="#9CA3AF" />
+              <FontAwesome name="times-circle" size={16} color={colors.mutedForeground} />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
       {/* Content */}
-      <View className="flex-1 bg-gray-50">
+      <View className="flex-1" style={{ backgroundColor: colors.background }}>
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#9333EA" />
-            <Text className="text-gray-500 mt-4">Loading friends...</Text>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text className="mt-4" style={{ color: colors.mutedForeground }}>Loading friends...</Text>
           </View>
         ) : error ? (
           <View className="flex-1 items-center justify-center px-6">
-            <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
-              <View className="w-20 h-20 bg-red-100 rounded-full items-center justify-center mb-4">
-                <FontAwesome name="exclamation-circle" size={40} color="#DC2626" />
+            <View className="rounded-2xl p-8 shadow-sm items-center" style={{ backgroundColor: colors.card }}>
+              <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: colors.destructive + '20' }}>
+                <FontAwesome name="exclamation-circle" size={40} color={colors.destructive} />
               </View>
-              <Text className="text-xl font-semibold text-gray-900 mb-2">
+              <Text className="text-xl font-semibold mb-2" style={{ color: colors.foreground }}>
                 Unable to load friends
               </Text>
-              <Text className="text-gray-500 text-center mb-6">
+              <Text className="text-center mb-6" style={{ color: colors.mutedForeground }}>
                 {error}
               </Text>
               <TouchableOpacity
                 onPress={loadFriends}
-                className="bg-purple-600 px-6 py-3 rounded-full"
+                className="px-6 py-3 rounded-full"
+                style={{ backgroundColor: colors.primary }}
               >
-                <Text className="text-white font-medium">Try Again</Text>
+                <Text className="font-medium" style={{ color: colors.primaryForeground }}>Try Again</Text>
               </TouchableOpacity>
             </View>
           </View>

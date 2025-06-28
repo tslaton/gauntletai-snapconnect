@@ -4,6 +4,7 @@
  */
 
 import { type UserSearchResultWithStatus as UserResult } from '@/api/friends';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useFriendRequestsStore } from '@/stores/friendRequests';
 import { useFriendsStore } from '@/stores/friends';
 import { useUserStore } from '@/stores/user';
@@ -28,6 +29,7 @@ import UserSearchResult from './UserSearchResult';
  */
 export default function Friends() {
   const { currentUser } = useUserStore();
+  const themeColors = useThemeColors();
   const {
     searchQuery,
     searchResults,
@@ -221,13 +223,14 @@ export default function Friends() {
    * Renders the search input field
    */
   const renderSearchInput = () => (
-    <View className="px-4 pt-2 pb-4">
-      <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
-        <FontAwesome name="search" size={16} color="#6B7280" />
+    <View className="px-4 pt-4 pb-4">
+      <View className="flex-row items-center rounded-xl px-4 py-3 border" style={{ backgroundColor: themeColors.background, borderColor: themeColors.border, borderWidth: 1 }}>
+        <FontAwesome name="search" size={16} color={themeColors.mutedForeground} />
         <TextInput
-          className="flex-1 ml-3 text-base text-gray-900"
+          className="flex-1 ml-3 text-base"
+          style={{ color: themeColors.foreground, backgroundColor: 'transparent', paddingVertical: 0 }}
           placeholder="Search by username or name..."
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={themeColors.mutedForeground}
           value={searchQuery}
           onChangeText={setSearchQuery}
           autoCapitalize="none"
@@ -245,11 +248,11 @@ export default function Friends() {
             className="ml-2 p-1"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <FontAwesome name="times-circle" size={16} color="#9CA3AF" />
+            <FontAwesome name="times-circle" size={16} color={themeColors.mutedForeground} />
           </TouchableOpacity>
         )}
         {isSearchLoading && (
-          <ActivityIndicator size="small" color="#9333EA" />
+          <ActivityIndicator size="small" color={themeColors.primary} />
         )}
       </View>
     </View>
@@ -277,8 +280,11 @@ export default function Friends() {
   };
 
   const renderSectionHeader = ({ section: { title } }: { section: { title: string } }) => (
-    <View className="bg-gray-50 px-4 py-3 border-t border-gray-100">
-      <Text className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{title}</Text>
+    <View>
+      <View className="px-4 py-3 border-t" style={{ backgroundColor: themeColors.secondary, borderColor: themeColors.border }}>
+        <Text className="text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.mutedForeground }}>{title}</Text>
+      </View>
+      <View style={{ height: 12 }} />
     </View>
   );
 
@@ -289,8 +295,8 @@ export default function Friends() {
     if (isSearchLoading) {
       return (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#9333EA" />
-          <Text className="text-gray-500 mt-4">
+          <ActivityIndicator size="large" color={themeColors.primary} />
+          <Text className="mt-4" style={{ color: themeColors.mutedForeground }}>
             {searchQuery.trim() ? 'Searching users...' : 'Loading...'}
           </Text>
         </View>
@@ -300,14 +306,14 @@ export default function Friends() {
     if (searchError) {
       return (
         <View className="flex-1 items-center justify-center px-6">
-          <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
-            <View className="w-20 h-20 bg-red-100 rounded-full items-center justify-center mb-4">
-              <FontAwesome name="exclamation-circle" size={40} color="#DC2626" />
+          <View className="rounded-2xl p-8 shadow-sm items-center" style={{ backgroundColor: themeColors.card }}>
+            <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: themeColors.destructive + '20' }}>
+              <FontAwesome name="exclamation-circle" size={40} color={themeColors.destructive} />
             </View>
-            <Text className="text-xl font-semibold text-gray-900 mb-2">
+            <Text className="text-xl font-semibold mb-2" style={{ color: themeColors.foreground }}>
               {searchQuery.trim() ? 'Search Error' : 'Loading Error'}
             </Text>
-            <Text className="text-gray-500 text-center">
+            <Text className="text-center" style={{ color: themeColors.mutedForeground }}>
               {searchError}
             </Text>
           </View>
@@ -317,14 +323,14 @@ export default function Friends() {
 
     return (
       <View className="flex-1 items-center justify-center px-6">
-        <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
-          <View className="w-20 h-20 bg-purple-100 rounded-full items-center justify-center mb-4">
-            <FontAwesome name="users" size={40} color="#9333EA" />
+        <View className="rounded-2xl p-8 shadow-sm items-center" style={{ backgroundColor: themeColors.card }}>
+          <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: themeColors.primary + '20' }}>
+            <FontAwesome name="users" size={40} color={themeColors.primary} />
           </View>
-          <Text className="text-xl font-semibold text-gray-900 mb-2">
+          <Text className="text-xl font-semibold mb-2" style={{ color: themeColors.foreground }}>
             Find Friends
           </Text>
-          <Text className="text-gray-500 text-center">
+          <Text className="text-center" style={{ color: themeColors.mutedForeground }}>
             Search for friends by their username or name
           </Text>
         </View>
@@ -333,20 +339,21 @@ export default function Friends() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1" style={{ backgroundColor: themeColors.card }}>
       {renderSearchInput()}
       
       {sections.length === 0 ? (
-        <View className="flex-1 bg-gray-50">
+        <View className="flex-1" style={{ backgroundColor: themeColors.background }}>
           {renderEmptyState()}
         </View>
       ) : (
-        <View className="flex-1 bg-gray-50">
+        <View className="flex-1" style={{ backgroundColor: themeColors.background }}>
           <SectionList
             sections={sections}
             keyExtractor={(item, index) => item.id + index}
             renderItem={({ item, section }: { item: any, section: any }) => section.renderItem({ item })}
             renderSectionHeader={renderSectionHeader}
+            renderSectionFooter={() => <View style={{ height: 4 }} />}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           />

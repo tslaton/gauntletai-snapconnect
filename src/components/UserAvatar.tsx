@@ -3,6 +3,7 @@
  * Handles both regular images and SVG avatars (like DiceBear) with proper fallbacks
  */
 
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
@@ -39,6 +40,7 @@ export default function UserAvatar({
 }: UserAvatarProps) {
   // NEW: resolve storage path to public URL if needed
   const [resolvedUri, setResolvedUri] = useState<string | null>(null);
+  const colors = useThemeColors();
 
   useEffect(() => {
     if (!uri) {
@@ -89,10 +91,13 @@ export default function UserAvatar({
   if (!resolvedUri || hasError) {
     return (
       <View 
-        className={`bg-gray-300 rounded-full items-center justify-center ${sizeClasses} ${className}`}
-        style={!sizeClasses ? sizeStyle : undefined}
+        className={`rounded-full items-center justify-center ${sizeClasses} ${className}`}
+        style={{
+          backgroundColor: colors.muted,
+          ...(!sizeClasses ? sizeStyle : {})
+        }}
       >
-        <FontAwesome name={fallbackIcon as any} size={iconSize} color="#6B7280" />
+        <FontAwesome name={fallbackIcon as any} size={iconSize} color={colors.mutedForeground} />
       </View>
     );
   }
@@ -101,14 +106,15 @@ export default function UserAvatar({
     <View className={`rounded-full overflow-hidden ${sizeClasses} ${className}`} style={!sizeClasses ? sizeStyle : undefined}>
       <Image
         source={{ uri: resolvedUri }}
-        className="w-full h-full bg-gray-200"
+        className="w-full h-full"
+        style={{ backgroundColor: colors.muted }}
         resizeMode="cover"
         onError={() => setHasError(true)}
         onLoad={() => setIsLoading(false)}
         defaultSource={{ uri: 'https://www.gravatar.com/avatar/?d=mp' }}
       />
       {isLoading && (
-        <View className="absolute inset-0 bg-gray-200" />
+        <View className="absolute inset-0" style={{ backgroundColor: colors.muted }} />
       )}
     </View>
   );

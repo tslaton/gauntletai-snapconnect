@@ -5,6 +5,7 @@
 
 import { useFriendsStore, type Friend } from '@/stores/friends';
 import { useUserStore } from '@/stores/user';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
@@ -44,6 +45,7 @@ interface FriendItemProps {
  * Component for displaying individual friend items
  */
 function FriendItem({ friend, onPress, onRemove, isRemoving }: FriendItemProps) {
+  const themeColors = useThemeColors();
   /**
    * Renders the friend's avatar or placeholder
    */
@@ -58,7 +60,8 @@ function FriendItem({ friend, onPress, onRemove, isRemoving }: FriendItemProps) 
     const displayName = friend.friend.fullName || friend.friend.username || 'Unknown User';
     return (
       <Text 
-        className="text-base font-semibold text-gray-900"
+        className="text-base font-semibold"
+        style={{ color: themeColors.foreground }}
         numberOfLines={1}
       >
         {displayName}
@@ -76,7 +79,8 @@ function FriendItem({ friend, onPress, onRemove, isRemoving }: FriendItemProps) 
 
     return (
       <Text 
-        className="text-sm text-gray-500"
+        className="text-sm"
+        style={{ color: themeColors.mutedForeground }}
         numberOfLines={1}
       >
         @{friend.friend.username}
@@ -95,7 +99,7 @@ function FriendItem({ friend, onPress, onRemove, isRemoving }: FriendItemProps) 
     });
 
     return (
-      <Text className="text-xs text-gray-400">
+      <Text className="text-xs" style={{ color: themeColors.mutedForeground }}>
         Friends since {friendSince}
       </Text>
     );
@@ -103,7 +107,8 @@ function FriendItem({ friend, onPress, onRemove, isRemoving }: FriendItemProps) 
 
   return (
     <TouchableOpacity
-      className="bg-white p-4 border-b border-gray-200 flex-row items-center"
+      className="p-4 border-b flex-row items-center"
+      style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}
       onPress={() => onPress?.(friend)}
       disabled={isRemoving}
     >
@@ -119,16 +124,17 @@ function FriendItem({ friend, onPress, onRemove, isRemoving }: FriendItemProps) 
       
       {/* Remove Button */}
       <TouchableOpacity
-        className={`w-10 h-10 rounded-full border border-red-300 items-center justify-center ${
-          isRemoving ? 'opacity-50' : 'active:bg-red-50'
+        className={`w-10 h-10 rounded-full border items-center justify-center ${
+          isRemoving ? 'opacity-50' : ''
         }`}
+        style={{ borderColor: themeColors.destructive + '60' }}
         onPress={() => onRemove(friend)}
         disabled={isRemoving}
       >
         {isRemoving ? (
-          <ActivityIndicator size="small" color="#DC2626" />
+          <ActivityIndicator size="small" color={themeColors.destructive} />
         ) : (
-          <FontAwesome name="trash" size={16} color="#DC2626" />
+          <FontAwesome name="trash" size={16} color={themeColors.destructive} />
         )}
       </TouchableOpacity>
     </TouchableOpacity>
@@ -149,6 +155,7 @@ export default function FriendsList({
 }: FriendsListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const themeColors = useThemeColors();
   
   // Get stores
   const { currentUser } = useUserStore();
@@ -231,13 +238,14 @@ export default function FriendsList({
     if (!showSearch) return null;
 
     return (
-      <View className="p-4 bg-gray-50 border-b border-gray-200">
-        <View className="flex-row items-center bg-white rounded-lg px-3 py-2 border border-gray-300">
-          <FontAwesome name="search" size={16} color="#6B7280" />
+      <View className="p-4 border-b" style={{ backgroundColor: themeColors.secondary, borderColor: themeColors.border }}>
+        <View className="flex-row items-center rounded-lg px-3 py-2 border" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+          <FontAwesome name="search" size={16} color={themeColors.mutedForeground} />
           <TextInput
-            className="flex-1 ml-2 text-base text-gray-900"
+            className="flex-1 ml-2 text-base"
+            style={{ color: themeColors.foreground }}
             placeholder="Search friends..."
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={themeColors.mutedForeground}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoCapitalize="none"
@@ -245,7 +253,7 @@ export default function FriendsList({
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <FontAwesome name="times" size={16} color="#6B7280" />
+              <FontAwesome name="times" size={16} color={themeColors.mutedForeground} />
             </TouchableOpacity>
           )}
         </View>
@@ -258,8 +266,8 @@ export default function FriendsList({
    */
   const renderLoading = () => (
     <View className="flex-1 items-center justify-center p-8">
-      <ActivityIndicator size="large" color="#3B82F6" />
-      <Text className="text-gray-500 mt-4">Loading friends...</Text>
+      <ActivityIndicator size="large" color={themeColors.primary} />
+      <Text className="mt-4" style={{ color: themeColors.mutedForeground }}>Loading friends...</Text>
     </View>
   );
 
@@ -268,13 +276,14 @@ export default function FriendsList({
    */
   const renderError = () => (
     <View className="flex-1 items-center justify-center p-8">
-      <FontAwesome name="exclamation-triangle" size={48} color="#EF4444" />
-      <Text className="text-red-600 font-semibold text-lg mt-4">Error</Text>
-      <Text className="text-gray-600 text-center mt-2 mb-4">
+      <FontAwesome name="exclamation-triangle" size={48} color={themeColors.destructive} />
+      <Text className="font-semibold text-lg mt-4" style={{ color: themeColors.destructive }}>Error</Text>
+      <Text className="text-center mt-2 mb-4" style={{ color: themeColors.mutedForeground }}>
         {friendsError}
       </Text>
       <TouchableOpacity
-        className="bg-blue-600 px-6 py-3 rounded-lg active:bg-blue-700"
+        className="px-6 py-3 rounded-lg"
+        style={{ backgroundColor: themeColors.primary }}
                  onPress={() => {
            clearFriendsError();
            if (currentUser?.id) {
@@ -282,7 +291,7 @@ export default function FriendsList({
            }
          }}
       >
-        <Text className="text-white font-semibold">Try Again</Text>
+        <Text className="font-semibold" style={{ color: themeColors.primaryForeground }}>Try Again</Text>
       </TouchableOpacity>
     </View>
   );
@@ -292,9 +301,9 @@ export default function FriendsList({
    */
   const renderEmpty = () => (
     <View className="flex-1 items-center justify-center p-8">
-      <FontAwesome name="users" size={48} color="#9CA3AF" />
-      <Text className="text-gray-500 font-semibold text-lg mt-4">No Friends</Text>
-      <Text className="text-gray-400 text-center mt-2">
+      <FontAwesome name="users" size={48} color={themeColors.mutedForeground} />
+      <Text className="font-semibold text-lg mt-4" style={{ color: themeColors.mutedForeground }}>No Friends</Text>
+      <Text className="text-center mt-2" style={{ color: themeColors.mutedForeground }}>
         {searchQuery.trim() 
           ? `No friends found matching "${searchQuery}"`
           : emptyMessage
@@ -318,7 +327,7 @@ export default function FriendsList({
   // Show loading state
   if (isFriendsLoading && friends.length === 0) {
     return (
-      <View className="flex-1 bg-gray-50">
+      <View className="flex-1" style={{ backgroundColor: themeColors.background }}>
         {renderSearchInput()}
         {renderLoading()}
       </View>
@@ -328,7 +337,7 @@ export default function FriendsList({
   // Show error state
   if (friendsError && friends.length === 0) {
     return (
-      <View className="flex-1 bg-gray-50">
+      <View className="flex-1" style={{ backgroundColor: themeColors.background }}>
         {renderSearchInput()}
         {renderError()}
       </View>
@@ -336,7 +345,7 @@ export default function FriendsList({
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1" style={{ backgroundColor: themeColors.background }}>
       {renderSearchInput()}
       
       {sortedFriends.length === 0 ? (
@@ -368,8 +377,8 @@ export default function FriendsList({
       
       {/* Friends count at bottom */}
       {sortedFriends.length > 0 && (
-        <View className="p-4 bg-white border-t border-gray-200">
-          <Text className="text-center text-gray-500 text-sm">
+        <View className="p-4 border-t" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+          <Text className="text-center text-sm" style={{ color: themeColors.mutedForeground }}>
             {sortedFriends.length} friend{sortedFriends.length !== 1 ? 's' : ''}
             {searchQuery.trim() && ` matching "${searchQuery}"`}
           </Text>

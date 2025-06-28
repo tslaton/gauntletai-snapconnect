@@ -62,23 +62,35 @@ export async function POST(request: Request) {
     }
 
     // Find or create a conversation with this friend
-    const { data: existingConversations } = await supabase
-      .from('conversations')
-      .select(`
-        id,
-        conversation_participants!inner(user_id)
-      `)
-      .eq('conversation_participants.user_id', user.id);
+    // First, get all conversations where the current user is a participant
+    const { data: userConversations } = await supabase
+      .from('conversation_participants')
+      .select('conversation_id')
+      .eq('user_id', user.id);
 
     let conversationId = null;
 
-    // Check if we already have a conversation with this friend
-    for (const conv of existingConversations || []) {
-      const participants = conv.conversation_participants;
-      if (participants.length === 2 && 
-          participants.some((p: any) => p.user_id === friendId)) {
-        conversationId = conv.id;
-        break;
+    if (userConversations && userConversations.length > 0) {
+      const conversationIds = userConversations.map(c => c.conversation_id);
+      
+      // Now get all participants for these conversations
+      const { data: conversationsWithParticipants } = await supabase
+        .from('conversations')
+        .select(`
+          id,
+          conversation_participants(user_id)
+        `)
+        .in('id', conversationIds);
+
+      // Check if we already have a direct conversation with this friend
+      for (const conv of conversationsWithParticipants || []) {
+        const participants = conv.conversation_participants;
+        if (participants.length === 2 && 
+            participants.some((p: any) => p.user_id === user.id) &&
+            participants.some((p: any) => p.user_id === friendId)) {
+          conversationId = conv.id;
+          break;
+        }
       }
     }
 

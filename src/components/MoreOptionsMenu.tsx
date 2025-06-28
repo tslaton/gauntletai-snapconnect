@@ -1,3 +1,4 @@
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useConversationsStore } from '@/stores/conversations';
 import { useUserStore } from '@/stores/user';
 import { supabase } from '@/utils/supabase';
@@ -40,6 +41,7 @@ export default function MoreOptionsMenu({
   const [loadingOptionId, setLoadingOptionId] = useState<string | null>(null);
   const { currentUser } = useUserStore();
   const { fetchConversations } = useConversationsStore();
+  const colors = useThemeColors();
 
   // Check if dev mode is enabled
   const isDevMode = __DEV__ && currentUser?.email === 'dev@snapconnect.com';
@@ -200,34 +202,37 @@ export default function MoreOptionsMenu({
       onRequestClose={onClose}
     >
       <TouchableOpacity 
-        className="flex-1 bg-black/50 justify-end" 
+        className="flex-1 justify-end" 
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
         activeOpacity={1} 
         onPress={onClose}
       >
         <TouchableOpacity 
-          className="bg-white rounded-t-3xl p-6" 
+          className="rounded-t-3xl p-6" 
+          style={{ backgroundColor: colors.card }}
           activeOpacity={1}
         >
-          <View className="w-12 h-1 bg-gray-300 rounded-full self-center mb-6" />
-          <Text className="text-xl font-bold mb-6">{title}</Text>
+          <View className="w-12 h-1 rounded-full self-center mb-6" style={{ backgroundColor: colors.muted }} />
+          <Text className="text-xl font-bold mb-6" style={{ color: colors.foreground }}>{title}</Text>
           
           {visibleOptions.map((option) => (
             <TouchableOpacity
               key={option.id}
-              className="bg-purple-600 rounded-xl p-4 mb-3 opacity-100 disabled:opacity-50"
+              className="rounded-xl p-4 mb-3 opacity-100 disabled:opacity-50"
+              style={{ backgroundColor: colors.primary }}
               onPress={() => handleOptionPress(option)}
               disabled={isLoading}
             >
               <View className="flex-row items-center">
-                <FontAwesome name={option.icon as any} size={20} color="white" />
-                <Text className="text-white font-semibold ml-3">{option.title}</Text>
+                <FontAwesome name={option.icon as any} size={20} color={colors.primaryForeground} />
+                <Text className="font-semibold ml-3" style={{ color: colors.primaryForeground }}>{option.title}</Text>
               </View>
-              <Text className="text-white/80 text-sm mt-1 ml-8">
+              <Text className="text-sm mt-1 ml-8" style={{ color: colors.primaryForeground, opacity: 0.8 }}>
                 {option.subtitle}
               </Text>
               {loadingOptionId === option.id && (
                 <View className="absolute inset-0 items-center justify-center">
-                  <ActivityIndicator size="small" color="white" />
+                  <ActivityIndicator size="small" color={colors.primaryForeground} />
                 </View>
               )}
             </TouchableOpacity>
@@ -237,12 +242,12 @@ export default function MoreOptionsMenu({
             className="mt-3 py-3"
             onPress={onClose}
           >
-            <Text className="text-center text-gray-600">Cancel</Text>
+            <Text className="text-center" style={{ color: colors.mutedForeground }}>Cancel</Text>
           </TouchableOpacity>
           
           {isLoading && (
-            <View className="absolute inset-0 bg-white/80 rounded-t-3xl items-center justify-center">
-              <ActivityIndicator size="large" color="#9333EA" />
+            <View className="absolute inset-0 rounded-t-3xl items-center justify-center" style={{ backgroundColor: `${colors.card}CC` }}>
+              <ActivityIndicator size="large" color={colors.primary} />
             </View>
           )}
         </TouchableOpacity>

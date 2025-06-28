@@ -3,6 +3,7 @@
  * Provides a reusable modal container with header, title, and dismiss button
  */
 
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import {
@@ -47,16 +48,17 @@ export default function ModalWrapper({
   presentationStyle = 'pageSheet',
   animationType = 'slide',
 }: ModalWrapperProps) {
+  const themeColors = useThemeColors();
   const content = (
     <>
       {/* Header */}
-      <View className="relative flex-row items-center justify-center p-4 border-b border-gray-200">
-        <Text className="text-lg font-semibold">{title}</Text>
+      <View className="relative flex-row items-center justify-center p-4 border-b" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+        <Text className="text-lg font-semibold" style={{ color: themeColors.foreground }}>{title}</Text>
         <TouchableOpacity 
           onPress={onClose}
           className="absolute right-4"
         >
-          <FontAwesome name="close" size={24} color="#374151" />
+          <FontAwesome name="close" size={24} color={themeColors.foreground} />
         </TouchableOpacity>
       </View>
 
@@ -72,7 +74,7 @@ export default function ModalWrapper({
       visible={visible}
       onRequestClose={onClose}
     >
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1" style={{ backgroundColor: themeColors.background }}>
         {avoidKeyboard ? (
           <KeyboardAvoidingView 
             className="flex-1" 
