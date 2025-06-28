@@ -46,7 +46,7 @@
   - [x] 2.7 Write unit tests for API, store, and EventCard component.
 
 - [ ] 3.0 Onboarding Flow Implementation
-  - [ ] 3.1 Set up stack navigator at `src/app/onboarding/(stack)` with three screens.
+  - [x] 3.1 Set up stack navigator at `src/app/onboarding/(stack)` with three screens.
   - [ ] 3.2 Implement `Personality.tsx` screen with progress bar, TextInput, save draft to local state.
   - [ ] 3.3 Persist personality to Supabase on "Next"; handle validation (≤ 250 chars).
   - [ ] 3.4 Implement `CurrentActivities.tsx` screen capturing up to 5 current activities.

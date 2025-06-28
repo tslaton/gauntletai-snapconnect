@@ -1,0 +1,9 @@
+- my rendition of Snapconnect aims to combine user interest and personality matching with events near in time and space to facilitate real-world connections
+- RAG-enabled features like:
+	- generate succinct descriptions and tags for events imported elsewhere, indicating what interests they serve
+	- provide the user with a simple natural language search over events matching their intent (no manual filters)
+	- suggested icebreakers to potential matches based on their profiles
+	- suggested events to create or attend together
+	- personalized highlight reel of an event you and some friends attended together (key snaps, moments)
+	- real-time event updates (weather, safety info, etc.) in the event group?
+	- suggest new interests based on similar users and activity
