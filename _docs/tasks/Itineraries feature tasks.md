@@ -146,8 +146,8 @@
 - [x] Add onPress handler to open edit modal
 
 ### 15. Create New/Edit Activity Modal
-- [ ] Create `/src/components/ActivityModal.tsx` for create/edit functionality
-- [ ] Add form fields:
+- [x] Create `/src/components/ActivityModal.tsx` for create/edit functionality
+- [x] Add form fields:
   - Title input (required, with validation)
   - Description textarea (optional)
   - Location input (optional)
@@ -155,9 +155,9 @@
   - End date/time picker (optional)
   - Image picker (reuse UserAvatar component logic)
   - Tags input (semicolon-separated text, optional)
-- [ ] Add "Save" and "Cancel" buttons
-- [ ] Connect to store actions for create/update
-- [ ] Handle loading and error states
+- [x] Add "Save" and "Cancel" buttons
+- [x] Connect to store actions for create/update
+- [x] Handle loading and error states
 
 ## Frontend - Utilities
 

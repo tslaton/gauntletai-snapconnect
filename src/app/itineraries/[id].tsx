@@ -7,6 +7,7 @@ import { useThemeColors } from '@/hooks/useThemeColors';
 import { useItinerariesStore } from '@/stores/itinerariesStore';
 import { useActivitiesStore } from '@/stores/activitiesStore';
 import { ActivityList } from '@/components/ActivityList';
+import { ActivityModal } from '@/components/ActivityModal';
 import type { Activity } from '@/api/activities';
 
 export default function ItineraryDetailsScreen() {
@@ -14,6 +15,8 @@ export default function ItineraryDetailsScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [showActivityModal, setShowActivityModal] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
 
   const { 
     getItineraryById, 
@@ -52,13 +55,18 @@ export default function ItineraryDetailsScreen() {
   };
 
   const handleNewActivity = () => {
-    // TODO: Navigate to create activity modal
-    console.log('Create new activity for itinerary:', id);
+    setEditingActivity(null);
+    setShowActivityModal(true);
   };
 
   const handleActivityPress = (activity: Activity) => {
-    // TODO: Navigate to edit activity modal
-    console.log('Edit activity:', activity.id);
+    setEditingActivity(activity);
+    setShowActivityModal(true);
+  };
+
+  const handleActivitySaved = () => {
+    // Refresh activities after save
+    fetchActivitiesForItinerary(id);
   };
 
   const handleRefresh = async () => {
@@ -155,6 +163,20 @@ export default function ItineraryDetailsScreen() {
           activities={activities}
           onActivityPress={handleActivityPress}
           itineraryStartDate={itinerary.start_time}
+        />
+      )}
+
+      {/* Activity Modal */}
+      {itinerary && (
+        <ActivityModal
+          visible={showActivityModal}
+          onClose={() => {
+            setShowActivityModal(false);
+            setEditingActivity(null);
+          }}
+          activity={editingActivity}
+          itineraryId={itinerary.id}
+          onSave={handleActivitySaved}
         />
       )}
     </SafeAreaView>
