@@ -7,7 +7,7 @@ import { type CreateMessageData } from '@/api/messages';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useMessagesStore } from '@/stores/messages';
 import { FontAwesome } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -15,6 +15,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  type TextInput as TextInputType
 } from 'react-native';
 
 /**
@@ -55,6 +56,8 @@ export default function MessageInput({
 }: MessageInputProps) {
   const [messageText, setMessageText] = useState('');
   const [showCharacterCount, setShowCharacterCount] = useState(false);
+  const [keepKeyboardUp, setKeepKeyboardUp] = useState(false);
+  const inputRef = useRef<TextInputType>(null);
   const colors = useThemeColors();
 
   // Get store state and actions
@@ -106,14 +109,22 @@ export default function MessageInput({
       type: 'text',
     };
 
+    // Set flag to keep keyboard up
+    setKeepKeyboardUp(true);
+
     try {
       const result = await sendMessage(messageData, currentUserId);
 
       if (result.success) {
-        // Clear input and notify parent
+        // Clear the text without losing focus
         setMessageText('');
         setShowCharacterCount(false);
+        
+        // Notify parent
         onMessageSent?.();
+        
+        // Keep focus on the input
+        inputRef.current?.focus();
       } else {
         // Show error to user
         Alert.alert('Send Failed', result.error || 'Failed to send message. Please try again.');
@@ -121,6 +132,11 @@ export default function MessageInput({
     } catch (error) {
       console.error('Unexpected error sending message:', error);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      // Reset flag after a delay
+      setTimeout(() => {
+        setKeepKeyboardUp(false);
+      }, 100);
     }
   };
 
@@ -202,6 +218,7 @@ export default function MessageInput({
         {/* Text input */}
         <View className="flex-1 mr-3">
           <TextInput
+            ref={inputRef}
             className="rounded-2xl px-4 py-3 text-base max-h-24"
             style={{
               borderColor: colors.border,
@@ -217,11 +234,21 @@ export default function MessageInput({
             onChangeText={handleTextChange}
             multiline
             scrollEnabled
-            editable={!disabled && !sendingState.isSending}
+            // Keep input editable while sending so that iOS keyboard does not dismiss
+            editable={!disabled}
             autoCapitalize="sentences"
             autoCorrect
             returnKeyType="default"
-            blurOnSubmit={false}
+            keyboardType="default"
+            textContentType="none"
+            autoFocus={false}
+            enablesReturnKeyAutomatically={false}
+            onBlur={() => {
+              // Prevent blur when sending message or when flag is set
+              if (sendingState.isSending || keepKeyboardUp) {
+                inputRef.current?.focus();
+              }
+            }}
             onSubmitEditing={({ nativeEvent }) => {
               // Send message on Enter key (single line) if not shift+enter
               if (!nativeEvent.text.includes('\n') && messageText.trim() && !isSendDisabled()) {
@@ -237,7 +264,9 @@ export default function MessageInput({
           style={{
             backgroundColor: isSendDisabled() ? colors.muted : colors.primary
           }}
-          onPress={handleSendMessage}
+          onPress={() => {
+            handleSendMessage();
+          }}
           disabled={isSendDisabled()}
           activeOpacity={0.7}
         >

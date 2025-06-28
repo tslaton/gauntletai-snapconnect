@@ -131,7 +131,11 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
    * Handles when a message is sent - scroll to bottom and mark as read
    */
   const handleMessageSent = useCallback(() => {
-    scrollToBottom(true);
+    // Use requestAnimationFrame to ensure scroll happens after render
+    requestAnimationFrame(() => {
+      scrollToBottom(true);
+    });
+    
     if (currentUser?.id) {
       markAsRead(conversationId, currentUser.id);
     }
@@ -348,15 +352,14 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
     );
   }
 
+
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}                          // it must stretch
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} // header + status-bar
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.card }}
     >
-      <SafeAreaView
-        // Ensure the card header & input backgrounds flow into the safe-area insets
-        style={{ flex: 1, backgroundColor: colors.card }}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {renderHeader()}
 
@@ -376,7 +379,13 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
               onEndReached={handleOnEndReached}
               onEndReachedThreshold={0.1}
               ListFooterComponent={renderLoadMoreIndicator}
-              contentContainerStyle={{ paddingBottom: 20, flexGrow: 1, justifyContent: 'flex-end' }}
+              contentContainerStyle={{ paddingBottom: 10, flexGrow: 1, justifyContent: 'flex-end' }}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              maintainVisibleContentPosition={{
+                minIndexForVisible: 0,
+                autoscrollToTopThreshold: 10,
+              }}
             />
           )}
         </View>
@@ -388,15 +397,15 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
           placeholder={`Message ${conversation ? getConversationTitle(conversation) : ''}…`}
           onMessageSent={handleMessageSent}
         />
-        
-        {/* More Options Menu */}
-        <MoreOptionsMenu
-          visible={showMoreOptions}
-          onClose={() => setShowMoreOptions(false)}
-          context="conversation"
-          conversationId={conversationId}
-        />
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+      
+      {/* More Options Menu */}
+      <MoreOptionsMenu
+        visible={showMoreOptions}
+        onClose={() => setShowMoreOptions(false)}
+        context="conversation"
+        conversationId={conversationId}
+      />
+    </SafeAreaView>
   );
 } 
