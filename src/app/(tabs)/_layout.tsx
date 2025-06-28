@@ -1,7 +1,7 @@
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { FontAwesome } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { useThemeColors } from '@/hooks/useThemeColors';
 
 export default function TabLayout() {
   const colors = useThemeColors();
@@ -22,15 +22,6 @@ export default function TabLayout() {
         headerShown: false, // Hide the default header
       }}
     >
-      <Tabs.Screen
-        name="events"
-        options={{
-          title: 'Events',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome name="calendar" size={size} color={color} />
-          ),
-        }}
-      />
       <Tabs.Screen
         name="map"
         options={{

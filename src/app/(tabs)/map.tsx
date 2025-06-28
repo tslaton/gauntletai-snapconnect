@@ -1,7 +1,7 @@
 import { Header } from '@/components/Header';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
-import { useThemeColors } from '@/hooks/useThemeColors';
 import { Text, View } from 'react-native';
 
 export default function MapScreen() {
@@ -22,7 +22,7 @@ export default function MapScreen() {
           </View>
           <Text className="text-2xl font-bold text-foreground mb-2">Map View</Text>
           <Text className="text-muted-foreground text-center">
-            Discover events and stories happening around you
+            See your itineraries on mapped out around you
           </Text>
           <View className="bg-accent px-4 py-2 rounded-full mt-4">
             <Text className="text-accent-foreground text-sm font-medium">Coming Soon</Text>
