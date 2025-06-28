@@ -11,6 +11,7 @@ import { useUserStore } from '@/stores/user';
 import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import {
   ActivityIndicator,
   FlatList,
@@ -27,6 +28,7 @@ import {
  * @returns JSX element for events screen
  */
 export default function EventsScreen() {
+  const colors = useThemeColors();
   const { 
     events, 
     isLoading, 
@@ -93,13 +95,13 @@ export default function EventsScreen() {
    * Renders the search input
    */
   const renderSearchInput = () => (
-    <View className="px-4 pb-3">
-      <View className="bg-white rounded-xl px-4 py-3 flex-row items-center shadow-sm">
-        <FontAwesome name="search" size={16} color="#6B7280" />
+    <View className="px-4 pt-3 pb-3">
+      <View className="bg-card rounded-xl px-4 py-3 flex-row items-center shadow-sm">
+        <FontAwesome name="search" size={16} color={colors.mutedForeground} />
         <TextInput
-          className="flex-1 ml-3 text-base text-gray-900"
+          className="flex-1 ml-3 text-base text-foreground"
           placeholder="Search events..."
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.mutedForeground}
           value={searchInput}
           onChangeText={setSearchInput}
           autoCapitalize="none"
@@ -110,7 +112,7 @@ export default function EventsScreen() {
             onPress={handleClearSearch}
             className="ml-2 p-1"
           >
-            <FontAwesome name="times-circle" size={16} color="#9CA3AF" />
+            <FontAwesome name="times-circle" size={16} color={colors.mutedForeground} />
           </TouchableOpacity>
         )}
       </View>
@@ -132,8 +134,8 @@ export default function EventsScreen() {
    */
   const renderLoading = () => (
     <View className="flex-1 items-center justify-center">
-      <ActivityIndicator size="large" color="#4F46E5" />
-      <Text className="text-gray-500 mt-4">Loading events...</Text>
+      <ActivityIndicator size="large" color={colors.primary} />
+      <Text className="text-muted-foreground mt-4">Loading events...</Text>
     </View>
   );
 
@@ -142,21 +144,21 @@ export default function EventsScreen() {
    */
   const renderError = () => (
     <View className="flex-1 items-center justify-center px-8">
-      <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
-        <View className="w-20 h-20 bg-red-100 rounded-full items-center justify-center mb-4">
-          <FontAwesome name="exclamation-circle" size={40} color="#DC2626" />
+      <View className="bg-card rounded-2xl p-8 shadow-sm items-center">
+        <View className="w-20 h-20 bg-destructive/10 rounded-full items-center justify-center mb-4">
+          <FontAwesome name="exclamation-circle" size={40} color={colors.destructive} />
         </View>
-        <Text className="text-xl font-semibold text-gray-900 mb-2">
+        <Text className="text-xl font-semibold text-foreground mb-2">
           Unable to load events
         </Text>
-        <Text className="text-gray-500 text-center mb-6">
+        <Text className="text-muted-foreground text-center mb-6">
           {error}
         </Text>
         <TouchableOpacity
           onPress={() => fetchEvents()}
-          className="bg-indigo-600 px-6 py-3 rounded-full"
+          className="bg-primary px-6 py-3 rounded-full"
         >
-          <Text className="text-white font-medium">Try Again</Text>
+          <Text className="text-primary-foreground font-medium">Try Again</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -170,18 +172,18 @@ export default function EventsScreen() {
     
     return (
       <View className="flex-1 items-center justify-center px-8">
-        <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
-          <View className="w-20 h-20 bg-indigo-100 rounded-full items-center justify-center mb-4">
+        <View className="bg-card rounded-2xl p-8 shadow-sm items-center">
+          <View className="w-20 h-20 bg-primary/10 rounded-full items-center justify-center mb-4">
             <FontAwesome 
               name={isSearching ? "search" : "calendar"} 
               size={40} 
-              color="#4F46E5" 
+              color={colors.primary} 
             />
           </View>
-          <Text className="text-xl font-semibold text-gray-900 mb-2">
+          <Text className="text-xl font-semibold text-foreground mb-2">
             {isSearching ? 'No events found' : 'No events available'}
           </Text>
-          <Text className="text-gray-500 text-center mb-6">
+          <Text className="text-muted-foreground text-center mb-6">
             {isSearching 
               ? `No events match "${searchQuery}". Try adjusting your search terms.`
               : 'There are no events available at the moment. Check back later for exciting events near you!'
@@ -190,16 +192,16 @@ export default function EventsScreen() {
           {isSearching ? (
             <TouchableOpacity
               onPress={handleClearSearch}
-              className="bg-indigo-600 px-6 py-3 rounded-full"
+              className="bg-primary px-6 py-3 rounded-full"
             >
-              <Text className="text-white font-medium">Clear Search</Text>
+              <Text className="text-primary-foreground font-medium">Clear Search</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               onPress={() => fetchEvents()}
-              className="bg-indigo-600 px-6 py-3 rounded-full"
+              className="bg-primary px-6 py-3 rounded-full"
             >
-              <Text className="text-white font-medium">Refresh</Text>
+              <Text className="text-primary-foreground font-medium">Refresh</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -219,7 +221,7 @@ export default function EventsScreen() {
 
     return (
       <View className="px-4 pb-3">
-        <Text className="text-sm text-gray-600">
+        <Text className="text-sm text-muted-foreground">
           {isSearching && `Found ${totalEvents} events • `}
           {totalEvents} events • {upcomingEvents.length} upcoming
         </Text>
@@ -228,7 +230,7 @@ export default function EventsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-background">
       <Header 
         title="Events" 
         showAddFriend={false} 
@@ -259,8 +261,8 @@ export default function EventsScreen() {
               <RefreshControl
                 refreshing={isLoading && events.length > 0}
                 onRefresh={handleRefresh}
-                colors={['#4F46E5']}
-                tintColor="#4F46E5"
+                colors={[colors.primary]}
+                tintColor={colors.primary}
               />
             }
           />

@@ -1,6 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { AvatarButton } from './AvatarButton';
 import Friends from './Friends';
 import ModalWrapper from './ModalWrapper';
@@ -23,8 +24,9 @@ export function Header({
   onMoreOptionsPress,
 }: HeaderProps) {
   const [friendSearchModalVisible, setFriendSearchModalVisible] = useState(false);
-  const backgroundColor = transparent ? 'transparent' : 'white';
-  const iconColor = transparent ? '#ffffff' : '#374151';
+  const themeColors = useThemeColors();
+  const backgroundColor = transparent ? 'transparent' : themeColors.card;
+  const iconColor = transparent ? '#ffffff' : themeColors.foreground;
 
   const RightComponent = () => (
     <View className="flex-row items-center justify-end">
@@ -58,7 +60,7 @@ export function Header({
 
         {/* Center - Title */}
         <View className="flex-1 items-center">
-          {title && <Text className="text-lg font-semibold text-gray-900">{title}</Text>}
+          {title && <Text className="text-lg font-semibold" style={{ color: transparent ? '#ffffff' : themeColors.foreground }}>{title}</Text>}
         </View>
 
         {/* Right side - Action buttons */}

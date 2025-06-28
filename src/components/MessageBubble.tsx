@@ -4,6 +4,7 @@
  */
 
 import { type MessageWithSender } from '@/api/messages';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import React from 'react';
 import { Image, Text, View } from 'react-native';
 import UserAvatar from './UserAvatar';
@@ -35,6 +36,7 @@ export default function MessageBubble({
   showSenderName = false,
 }: MessageBubbleProps) {
   const isSentByCurrentUser = message.senderId === currentUserId;
+  const colors = useThemeColors();
 
   /**
    * Formats the message timestamp for display
@@ -85,7 +87,7 @@ export default function MessageBubble({
     const displayName = message.sender.fullName || message.sender.username || 'Unknown User';
     
     return (
-      <Text className="text-xs text-gray-500 mb-1 ml-1">
+      <Text className="text-xs mb-1 ml-1" style={{ color: colors.mutedForeground }}>
         {displayName}
       </Text>
     );
@@ -114,9 +116,8 @@ export default function MessageBubble({
 
     return (
       <Text 
-        className={`text-base ${
-          isSentByCurrentUser ? 'text-white' : 'text-gray-900'
-        }`}
+        className="text-base"
+        style={{ color: isSentByCurrentUser ? colors.primaryForeground : colors.foreground }}
         selectable
       >
         {message.content}
@@ -134,9 +135,10 @@ export default function MessageBubble({
       <Text 
         className={`text-xs mt-1 ${
           isSentByCurrentUser 
-            ? 'text-right text-gray-400' 
-            : 'text-left text-gray-500'
+            ? 'text-right' 
+            : 'text-left'
         }`}
+        style={{ color: colors.mutedForeground }}
       >
         {timestamp}
       </Text>
@@ -165,9 +167,12 @@ export default function MessageBubble({
         <View
           className={`px-4 py-3 rounded-2xl ${
             isSentByCurrentUser
-              ? 'bg-blue-600 rounded-br-md'
-              : 'bg-gray-200 rounded-bl-md'
+              ? 'rounded-br-md'
+              : 'rounded-bl-md'
           }`}
+          style={{ 
+            backgroundColor: isSentByCurrentUser ? colors.primary : colors.secondary 
+          }}
         >
           {renderMessageContent()}
         </View>

@@ -4,6 +4,7 @@
  */
 
 import { type UserSearchResult } from '@/api/friends';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { timeAgo } from '@/utils';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
@@ -65,6 +66,7 @@ export default function FriendRequestCard({
 }: FriendRequestCardProps) {
   
   const { requester } = friendRequest;
+  const themeColors = useThemeColors();
   
   /**
    * Renders the user's avatar or placeholder
@@ -80,7 +82,8 @@ export default function FriendRequestCard({
     const displayName = requester.fullName || requester.username || 'Unknown User';
     return (
       <Text 
-        className={`text-base font-semibold ${disabled ? 'text-gray-400' : 'text-gray-900'}`}
+        className="text-base font-semibold"
+        style={{ color: disabled ? themeColors.mutedForeground : themeColors.foreground }}
         numberOfLines={1}
       >
         {displayName}
@@ -98,7 +101,8 @@ export default function FriendRequestCard({
 
     return (
       <Text 
-        className={`text-sm ${disabled ? 'text-gray-300' : 'text-gray-500'}`}
+        className="text-sm"
+        style={{ color: disabled ? themeColors.muted : themeColors.mutedForeground }}
         numberOfLines={1}
       >
         @{requester.username}
@@ -114,7 +118,7 @@ export default function FriendRequestCard({
     const displayText = timeAgoText === 'now' ? 'Just now' : `${timeAgoText} ago`;
 
     return (
-      <Text className={`text-xs ${disabled ? 'text-gray-300' : 'text-gray-400'}`}>
+      <Text className="text-xs" style={{ color: disabled ? themeColors.muted : themeColors.mutedForeground }}>
         {displayText}
       </Text>
     );
@@ -130,9 +134,9 @@ export default function FriendRequestCard({
     if (status === 'accepted') {
       return (
         <View className="items-center">
-          <View className="bg-green-100 px-3 py-1 rounded-full flex-row items-center">
-            <FontAwesome name="check" size={12} color="#16A34A" />
-            <Text className="text-green-800 text-xs font-medium ml-1">
+          <View className="px-3 py-1 rounded-full flex-row items-center" style={{ backgroundColor: themeColors.affirmative + '20' }}>
+            <FontAwesome name="check" size={12} color={themeColors.affirmative} />
+            <Text className="text-xs font-medium ml-1" style={{ color: themeColors.affirmative }}>
               {type === 'sent' ? 'Accepted' : 'Friends'}
             </Text>
           </View>
@@ -144,9 +148,9 @@ export default function FriendRequestCard({
     if (status === 'declined') {
       return (
         <View className="items-center">
-          <View className="bg-red-100 px-3 py-1 rounded-full flex-row items-center">
-            <FontAwesome name="times" size={12} color="#DC2626" />
-            <Text className="text-red-800 text-xs font-medium ml-1">
+          <View className="px-3 py-1 rounded-full flex-row items-center" style={{ backgroundColor: themeColors.destructive + '20' }}>
+            <FontAwesome name="times" size={12} color={themeColors.destructive} />
+            <Text className="text-xs font-medium ml-1" style={{ color: themeColors.destructive }}>
               {type === 'sent' ? 'Declined' : 'Rejected'}
             </Text>
           </View>
@@ -155,11 +159,11 @@ export default function FriendRequestCard({
     }
 
     if (type === 'sent') {
-      // For sent pending requests, show pending status
+      // For sent pending requests, show sent status
       return (
         <View className="items-center">
-          <View className="bg-yellow-100 px-3 py-1 rounded-full">
-            <Text className="text-yellow-800 text-xs font-medium">Pending</Text>
+          <View className="px-3 py-1 rounded-full" style={{ backgroundColor: themeColors.muted }}>
+            <Text className="text-xs font-medium" style={{ color: themeColors.mutedForeground }}>Sent</Text>
           </View>
         </View>
       );
@@ -172,31 +176,33 @@ export default function FriendRequestCard({
       <View className="flex-row items-center">
         {/* Decline Button */}
         <TouchableOpacity
-          className={`w-10 h-10 rounded-full border-2 border-red-300 items-center justify-center mr-3 ${
-            disabled || isLoading ? 'opacity-50' : 'active:bg-red-50'
+          className={`w-10 h-10 rounded-full border-2 items-center justify-center mr-3 ${
+            disabled || isLoading ? 'opacity-50' : ''
           }`}
+          style={{ borderColor: themeColors.destructive + '60' }}
           onPress={() => onDecline(friendRequest.id)}
           disabled={disabled || isLoading}
         >
           {isDeclineLoading ? (
-            <ActivityIndicator size="small" color="#FCA5A5" />
+            <ActivityIndicator size="small" color={themeColors.destructive} />
           ) : (
-            <FontAwesome name="ban" size={16} color="#FCA5A5" />
+            <FontAwesome name="ban" size={16} color={themeColors.destructive} />
           )}
         </TouchableOpacity>
 
         {/* Accept Button */}
         <TouchableOpacity
-          className={`w-10 h-10 rounded-full border-2 border-green-500 items-center justify-center ${
-            disabled || isLoading ? 'opacity-50' : 'active:bg-green-50'
+          className={`w-10 h-10 rounded-full border-2 items-center justify-center ${
+            disabled || isLoading ? 'opacity-50' : ''
           }`}
+          style={{ borderColor: themeColors.affirmative }}
           onPress={() => onAccept(friendRequest.id)}
           disabled={disabled || isLoading}
         >
           {isAcceptLoading ? (
-            <ActivityIndicator size="small" color="#10B981" />
+            <ActivityIndicator size="small" color={themeColors.affirmative} />
           ) : (
-            <FontAwesome name="check" size={16} color="#10B981" />
+            <FontAwesome name="check" size={16} color={themeColors.affirmative} />
           )}
         </TouchableOpacity>
       </View>
@@ -205,9 +211,10 @@ export default function FriendRequestCard({
 
   return (
     <View
-      className={`bg-white mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center ${
+      className={`mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row items-center ${
         disabled ? 'opacity-60' : ''
       }`}
+      style={{ backgroundColor: themeColors.card }}
     >
       {/* Avatar */}
       {renderAvatar()}

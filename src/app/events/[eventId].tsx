@@ -9,6 +9,7 @@ import { formatEventTime, relativeTime } from '@/utils/relativeTime';
 import { FontAwesome } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import {
   ActivityIndicator,
   Alert,
@@ -27,6 +28,7 @@ import {
  * @returns JSX element for the event detail screen
  */
 export default function EventDetailRoute() {
+  const colors = useThemeColors();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const { 
     selectedEvent, 
@@ -65,14 +67,14 @@ export default function EventDetailRoute() {
   const renderEventImage = () => {
     if (!selectedEvent?.imageUrl || imageError) {
       return (
-        <View className="h-64 bg-gray-300 items-center justify-center">
-          <FontAwesome name="calendar" size={48} color="#6B7280" />
+        <View className="h-64 bg-muted items-center justify-center">
+          <FontAwesome name="calendar" size={48} color={colors.mutedForeground} />
         </View>
       );
     }
 
     return (
-      <View className="h-64 bg-gray-200">
+      <View className="h-64 bg-muted">
         <Image
           source={{ uri: selectedEvent.imageUrl }}
           className="w-full h-full"
@@ -81,8 +83,8 @@ export default function EventDetailRoute() {
           onLoad={() => setImageLoading(false)}
         />
         {imageLoading && (
-          <View className="absolute inset-0 bg-gray-200 items-center justify-center">
-            <ActivityIndicator size="large" color="#4F46E5" />
+          <View className="absolute inset-0 bg-muted items-center justify-center">
+            <ActivityIndicator size="large" color={colors.primary} />
           </View>
         )}
       </View>
@@ -100,18 +102,18 @@ export default function EventDetailRoute() {
     const endTimeText = selectedEvent.endTime ? formatEventTime(selectedEvent.endTime) : null;
 
     return (
-      <View className="bg-white p-4 border-b border-gray-100">
+      <View className="bg-card p-4 border-b border-border">
         <View className="flex-row items-center mb-2">
-          <FontAwesome name="clock-o" size={16} color="#4F46E5" />
-          <Text className="text-base font-semibold text-indigo-600 ml-2">
+          <FontAwesome name="clock-o" size={16} color={colors.primary} />
+          <Text className="text-base font-semibold text-primary ml-2">
             {relativeTimeText}
           </Text>
         </View>
-        <Text className="text-gray-700 mb-1">
+        <Text className="text-muted-foreground mb-1">
           <Text className="font-medium">Starts:</Text> {fullTimeText}
         </Text>
         {endTimeText && (
-          <Text className="text-gray-700">
+          <Text className="text-muted-foreground">
             <Text className="font-medium">Ends:</Text> {endTimeText}
           </Text>
         )}
@@ -126,12 +128,12 @@ export default function EventDetailRoute() {
     if (!selectedEvent?.location) return null;
 
     return (
-      <View className="bg-white p-4 border-b border-gray-100">
+      <View className="bg-card p-4 border-b border-border">
         <View className="flex-row items-center mb-2">
-          <FontAwesome name="map-marker" size={16} color="#4F46E5" />
-          <Text className="text-base font-semibold text-gray-900 ml-2">Location</Text>
+          <FontAwesome name="map-marker" size={16} color={colors.primary} />
+          <Text className="text-base font-semibold text-foreground ml-2">Location</Text>
         </View>
-        <Text className="text-gray-700 leading-5">
+        <Text className="text-muted-foreground leading-5">
           {selectedEvent.location}
         </Text>
       </View>
@@ -145,12 +147,12 @@ export default function EventDetailRoute() {
     if (!selectedEvent?.description) return null;
 
     return (
-      <View className="bg-white p-4 border-b border-gray-100">
+      <View className="bg-card p-4 border-b border-border">
         <View className="flex-row items-center mb-2">
-          <FontAwesome name="align-left" size={16} color="#4F46E5" />
-          <Text className="text-base font-semibold text-gray-900 ml-2">About this event</Text>
+          <FontAwesome name="align-left" size={16} color={colors.primary} />
+          <Text className="text-base font-semibold text-foreground ml-2">About this event</Text>
         </View>
-        <Text className="text-gray-700 leading-6">
+        <Text className="text-muted-foreground leading-6">
           {selectedEvent.description}
         </Text>
       </View>
@@ -164,18 +166,18 @@ export default function EventDetailRoute() {
     if (!selectedEvent?.tags || selectedEvent.tags.length === 0) return null;
 
     return (
-      <View className="bg-white p-4 border-b border-gray-100">
+      <View className="bg-card p-4 border-b border-border">
         <View className="flex-row items-center mb-3">
-          <FontAwesome name="tags" size={16} color="#4F46E5" />
-          <Text className="text-base font-semibold text-gray-900 ml-2">Tags</Text>
+          <FontAwesome name="tags" size={16} color={colors.primary} />
+          <Text className="text-base font-semibold text-foreground ml-2">Tags</Text>
         </View>
         <View className="flex-row flex-wrap">
           {selectedEvent.tags.map((tag, index) => (
             <View
               key={`${tag}-${index}`}
-              className="bg-blue-100 px-3 py-2 rounded-full mr-2 mb-2"
+              className="bg-primary/10 px-3 py-2 rounded-full mr-2 mb-2"
             >
-              <Text className="text-blue-700 text-sm font-medium">
+              <Text className="text-primary text-sm font-medium">
                 {tag}
               </Text>
             </View>
@@ -195,10 +197,10 @@ export default function EventDetailRoute() {
     const displayName = creator.fullName || creator.username || 'Unknown Creator';
 
     return (
-      <View className="bg-white p-4 border-b border-gray-100">
+      <View className="bg-card p-4 border-b border-border">
         <View className="flex-row items-center mb-3">
-          <FontAwesome name="user" size={16} color="#4F46E5" />
-          <Text className="text-base font-semibold text-gray-900 ml-2">Organized by</Text>
+          <FontAwesome name="user" size={16} color={colors.primary} />
+          <Text className="text-base font-semibold text-foreground ml-2">Organized by</Text>
         </View>
         <View className="flex-row items-center">
           <UserAvatar 
@@ -207,11 +209,11 @@ export default function EventDetailRoute() {
             className="mr-3" 
           />
           <View className="flex-1">
-            <Text className="text-base font-semibold text-gray-900">
+            <Text className="text-base font-semibold text-foreground">
               {displayName}
             </Text>
             {creator.username && creator.username !== creator.fullName && (
-              <Text className="text-sm text-gray-500">
+              <Text className="text-sm text-muted-foreground">
                 @{creator.username}
               </Text>
             )}
@@ -228,12 +230,12 @@ export default function EventDetailRoute() {
     if (!selectedEvent?.maxAttendees) return null;
 
     return (
-      <View className="bg-white p-4 border-b border-gray-100">
+      <View className="bg-card p-4 border-b border-border">
         <View className="flex-row items-center mb-2">
-          <FontAwesome name="users" size={16} color="#4F46E5" />
-          <Text className="text-base font-semibold text-gray-900 ml-2">Capacity</Text>
+          <FontAwesome name="users" size={16} color={colors.primary} />
+          <Text className="text-base font-semibold text-foreground ml-2">Capacity</Text>
         </View>
-        <Text className="text-gray-700">
+        <Text className="text-muted-foreground">
           Maximum {selectedEvent.maxAttendees} attendees
         </Text>
       </View>
@@ -244,9 +246,9 @@ export default function EventDetailRoute() {
    * Renders loading state
    */
   const renderLoading = () => (
-    <View className="flex-1 items-center justify-center bg-gray-50">
-      <ActivityIndicator size="large" color="#4F46E5" />
-      <Text className="text-gray-500 mt-4">Loading event details...</Text>
+    <View className="flex-1 items-center justify-center bg-background">
+      <ActivityIndicator size="large" color={colors.primary} />
+      <Text className="text-muted-foreground mt-4">Loading event details...</Text>
     </View>
   );
 
@@ -254,29 +256,29 @@ export default function EventDetailRoute() {
    * Renders error state
    */
   const renderError = () => (
-    <View className="flex-1 items-center justify-center px-8 bg-gray-50">
-      <View className="bg-white rounded-2xl p-8 shadow-sm items-center">
-        <View className="w-20 h-20 bg-red-100 rounded-full items-center justify-center mb-4">
-          <FontAwesome name="exclamation-circle" size={40} color="#DC2626" />
+    <View className="flex-1 items-center justify-center px-8 bg-background">
+      <View className="bg-card rounded-2xl p-8 shadow-sm items-center">
+        <View className="w-20 h-20 bg-destructive/10 rounded-full items-center justify-center mb-4">
+          <FontAwesome name="exclamation-circle" size={40} color={colors.destructive} />
         </View>
-        <Text className="text-xl font-semibold text-gray-900 mb-2">
+        <Text className="text-xl font-semibold text-foreground mb-2">
           Event not found
         </Text>
-        <Text className="text-gray-500 text-center mb-6">
+        <Text className="text-muted-foreground text-center mb-6">
           {eventError || 'This event could not be loaded.'}
         </Text>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="bg-indigo-600 px-6 py-3 rounded-full"
+          className="bg-primary px-6 py-3 rounded-full"
         >
-          <Text className="text-white font-medium">Go Back</Text>
+          <Text className="text-primary-foreground font-medium">Go Back</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-card">
       <Stack.Screen 
         options={{
           headerShown: false,
@@ -284,19 +286,19 @@ export default function EventDetailRoute() {
       />
       
       {/* Custom Header */}
-      <View className="relative flex-row items-center justify-between p-4 bg-white border-b border-gray-200">
+      <View className="relative flex-row items-center justify-between p-4 bg-card border-b border-border">
         <TouchableOpacity 
           onPress={() => router.back()}
           className="flex-row items-center"
         >
-          <FontAwesome name="chevron-left" size={16} color="#374151" />
-          <Text className="text-base text-gray-700 ml-2">Back</Text>
+          <FontAwesome name="chevron-left" size={16} color={colors.foreground} />
+          <Text className="text-base text-foreground ml-2">Back</Text>
         </TouchableOpacity>
         
-        <Text className="text-lg font-semibold">Event Details</Text>
+        <Text className="text-lg font-semibold text-foreground">Event Details</Text>
         
         <TouchableOpacity>
-          <FontAwesome name="share" size={20} color="#374151" />
+          <FontAwesome name="share" size={20} color={colors.foreground} />
         </TouchableOpacity>
       </View>
       
@@ -307,15 +309,15 @@ export default function EventDetailRoute() {
         renderError()
       ) : (
         <ScrollView 
-          className="flex-1 bg-gray-50"
+          className="flex-1 bg-background"
           showsVerticalScrollIndicator={false}
         >
           {/* Event Image */}
           {renderEventImage()}
           
           {/* Event Title */}
-          <View className="bg-white p-4 border-b border-gray-100">
-            <Text className="text-2xl font-bold text-gray-900 leading-8">
+          <View className="bg-card p-4 border-b border-border">
+            <Text className="text-2xl font-bold text-foreground leading-8">
               {selectedEvent.title}
             </Text>
           </View>

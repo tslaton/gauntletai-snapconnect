@@ -4,6 +4,7 @@
  */
 
 import { type ConversationWithDetails } from '@/api/messages';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useConversationsStore } from '@/stores/conversations';
 import { useMessagesStore } from '@/stores/messages';
 import { useUserStore } from '@/stores/user';
@@ -42,6 +43,7 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
   const flatListRef = useRef<FlatList>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const colors = useThemeColors();
 
   // Get stores
   const { currentUser } = useUserStore();
@@ -199,23 +201,23 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
     const subtitle = conversation ? getConversationSubtitle(conversation) : null;
 
     return (
-      <View className="bg-white border-b border-gray-200 px-4 py-4">
+      <View className="px-4 py-4" style={{ backgroundColor: colors.card, borderBottomColor: colors.border, borderBottomWidth: 1 }}>
         <View className="flex-row items-center">
           {/* Back Button */}
           <TouchableOpacity
             onPress={() => router.back()}
             className="mr-4 w-10 h-10 items-center justify-center"
           >
-            <FontAwesome name="arrow-left" size={20} color="#374151" />
+            <FontAwesome name="arrow-left" size={20} color={colors.foreground} />
           </TouchableOpacity>
           
           {/* Conversation Info */}
           <View className="flex-1">
-            <Text className="text-lg font-bold text-gray-900" numberOfLines={1}>
+            <Text className="text-lg font-bold" style={{ color: colors.foreground }} numberOfLines={1}>
               {title}
             </Text>
             {subtitle && (
-              <Text className="text-sm text-gray-500" numberOfLines={1}>
+              <Text className="text-sm" style={{ color: colors.mutedForeground }} numberOfLines={1}>
                 {subtitle}
               </Text>
             )}
@@ -226,7 +228,7 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
             onPress={() => setShowMoreOptions(true)}
             className="w-10 h-10 items-center justify-center"
           >
-            <FontAwesome name="ellipsis-v" size={20} color="#6B7280" />
+            <FontAwesome name="ellipsis-v" size={20} color={colors.mutedForeground} />
           </TouchableOpacity>
         </View>
       </View>
@@ -257,8 +259,8 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
 
     return (
       <View className="py-4 items-center">
-        <ActivityIndicator size="small" color="#6B7280" />
-        <Text className="text-gray-500 text-sm mt-2">Loading more messages...</Text>
+        <ActivityIndicator size="small" color={colors.mutedForeground} />
+        <Text className="text-sm mt-2" style={{ color: colors.mutedForeground }}>Loading more messages...</Text>
       </View>
     );
   };
@@ -270,19 +272,19 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
     if (isLoading) {
       return (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#3B82F6" />
-          <Text className="text-gray-500 mt-4">Loading messages...</Text>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text className="mt-4" style={{ color: colors.mutedForeground }}>Loading messages...</Text>
         </View>
       );
     }
 
     return (
       <View className="flex-1 items-center justify-center px-6">
-        <FontAwesome name="comments" size={64} color="#D1D5DB" />
-        <Text className="text-xl font-semibold text-gray-900 mt-4 text-center">
+        <FontAwesome name="comments" size={64} color={colors.muted} />
+        <Text className="text-xl font-semibold mt-4 text-center" style={{ color: colors.foreground }}>
           Start the conversation
         </Text>
-        <Text className="text-gray-500 mt-2 text-center">
+        <Text className="mt-2 text-center" style={{ color: colors.mutedForeground }}>
           Send the first message to begin chatting
         </Text>
       </View>
@@ -294,22 +296,23 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
    */
   const renderError = () => (
     <View className="flex-1 items-center justify-center px-6">
-      <FontAwesome name="exclamation-triangle" size={64} color="#EF4444" />
-      <Text className="text-red-600 font-semibold text-lg mt-4 text-center">
+      <FontAwesome name="exclamation-triangle" size={64} color={colors.destructive} />
+      <Text className="font-semibold text-lg mt-4 text-center" style={{ color: colors.destructive }}>
         Unable to load chat
       </Text>
-      <Text className="text-gray-600 text-center mt-2 mb-4">
+      <Text className="text-center mt-2 mb-4" style={{ color: colors.mutedForeground }}>
         {error}
       </Text>
       <TouchableOpacity
-        className="bg-blue-600 px-6 py-3 rounded-lg active:bg-blue-700"
+        className="px-6 py-3 rounded-lg"
+        style={{ backgroundColor: colors.primary }}
         onPress={() => {
           if (currentUser?.id) {
             fetchMessages(conversationId, currentUser.id);
           }
         }}
       >
-        <Text className="text-white font-semibold">Try Again</Text>
+        <Text className="font-semibold" style={{ color: colors.primaryForeground }}>Try Again</Text>
       </TouchableOpacity>
     </View>
   );
@@ -332,13 +335,13 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
   if (error && messages.length === 0) {
     return (
       <SafeAreaView
-        // Extend white background into the safe-area insets
-        style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+        // Extend card background into the safe-area insets
+        style={{ flex: 1, backgroundColor: colors.card }}
       >
         {renderHeader()}
 
-        {/* Chat body retains light-gray background */}
-        <View className="flex-1 bg-gray-50">
+        {/* Chat body retains background color */}
+        <View className="flex-1" style={{ backgroundColor: colors.background }}>
           {renderError()}
         </View>
       </SafeAreaView>
@@ -352,13 +355,13 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} // header + status-bar
     >
       <SafeAreaView
-        // Ensure the white header & input backgrounds flow into the safe-area insets
-        style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+        // Ensure the card header & input backgrounds flow into the safe-area insets
+        style={{ flex: 1, backgroundColor: colors.card }}
       >
         {renderHeader()}
 
         {/* Chat body */}
-        <View className="flex-1 bg-gray-50">
+        <View className="flex-1" style={{ backgroundColor: colors.background }}>
           {messages.length === 0 ? (
             renderEmptyState()
           ) : (
@@ -382,7 +385,7 @@ export default function ChatScreen({ conversationId }: ChatScreenProps) {
         <MessageInput
           conversationId={conversationId}
           currentUserId={currentUser!.id}
-          placeholder={`Message ${getConversationTitle(conversation!)}…`}
+          placeholder={`Message ${conversation ? getConversationTitle(conversation) : ''}…`}
           onMessageSent={handleMessageSent}
         />
         

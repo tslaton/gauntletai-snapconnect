@@ -7,6 +7,7 @@ import { type Event } from '@/stores/events';
 import { formatEventTime, relativeTime } from '@/utils/relativeTime';
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useState } from 'react';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import {
   Image,
   ScrollView,
@@ -41,6 +42,7 @@ export default function EventCard({
   disabled = false,
   className = ''
 }: EventCardProps) {
+  const colors = useThemeColors();
   
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
@@ -54,17 +56,17 @@ export default function EventCard({
     if (!event.imageUrl || imageError) {
       return (
         <View 
-          className="bg-gray-300 rounded-lg items-center justify-center"
+          className="bg-muted rounded-lg items-center justify-center"
           style={{ width: imageSize, height: imageSize }}
         >
-          <FontAwesome name="calendar" size={24} color="#6B7280" />
+          <FontAwesome name="calendar" size={24} color={colors.mutedForeground} />
         </View>
       );
     }
 
     return (
       <View 
-        className="rounded-lg overflow-hidden bg-gray-200"
+        className="rounded-lg overflow-hidden bg-muted"
         style={{ width: imageSize, height: imageSize }}
       >
         <Image
@@ -75,7 +77,7 @@ export default function EventCard({
           onLoad={() => setImageLoading(false)}
         />
         {imageLoading && (
-          <View className="absolute inset-0 bg-gray-200" />
+          <View className="absolute inset-0 bg-muted" />
         )}
       </View>
     );
@@ -87,7 +89,7 @@ export default function EventCard({
   const renderTitle = () => {
     return (
       <Text 
-        className={`text-base font-semibold ${disabled ? 'text-gray-400' : 'text-gray-900'}`}
+        className={`text-base font-semibold ${disabled ? 'text-muted-foreground/50' : 'text-foreground'}`}
         numberOfLines={2}
       >
         {event.title}
@@ -104,10 +106,10 @@ export default function EventCard({
 
     return (
       <View className="mt-1">
-        <Text className={`text-sm font-medium ${disabled ? 'text-gray-300' : 'text-blue-600'}`}>
+        <Text className={`text-sm font-medium ${disabled ? 'text-muted-foreground/30' : 'text-primary'}`}>
           {relativeTimeText}
         </Text>
-        <Text className={`text-xs ${disabled ? 'text-gray-300' : 'text-gray-500'}`}>
+        <Text className={`text-xs ${disabled ? 'text-muted-foreground/30' : 'text-muted-foreground'}`}>
           {fullTimeText}
         </Text>
       </View>
@@ -125,10 +127,10 @@ export default function EventCard({
         <FontAwesome 
           name="map-marker" 
           size={12} 
-          color={disabled ? '#D1D5DB' : '#6B7280'} 
+          color={disabled ? colors.border : colors.mutedForeground} 
         />
         <Text 
-          className={`text-xs ml-1 flex-1 ${disabled ? 'text-gray-300' : 'text-gray-500'}`}
+          className={`text-xs ml-1 flex-1 ${disabled ? 'text-muted-foreground/30' : 'text-muted-foreground'}`}
           numberOfLines={1}
         >
           {event.location}
@@ -159,12 +161,12 @@ export default function EventCard({
               <View
                 key={`${tag}-${index}`}
                 className={`px-2 py-1 rounded-full mr-2 ${
-                  disabled ? 'bg-gray-200' : 'bg-blue-100'
+                  disabled ? 'bg-muted' : 'bg-primary/10'
                 }`}
               >
                 <Text 
                   className={`text-xs font-medium ${
-                    disabled ? 'text-gray-400' : 'text-blue-700'
+                    disabled ? 'text-muted-foreground/50' : 'text-primary'
                   }`}
                 >
                   {tag}
@@ -174,12 +176,12 @@ export default function EventCard({
             {hasMoreTags && (
               <View
                 className={`px-2 py-1 rounded-full ${
-                  disabled ? 'bg-gray-200' : 'bg-gray-100'
+                  disabled ? 'bg-muted' : 'bg-secondary'
                 }`}
               >
                 <Text 
                   className={`text-xs font-medium ${
-                    disabled ? 'text-gray-400' : 'text-gray-600'
+                    disabled ? 'text-muted-foreground/50' : 'text-secondary-foreground'
                   }`}
                 >
                   +{event.tags.length - 3}
@@ -203,10 +205,10 @@ export default function EventCard({
         <FontAwesome 
           name="users" 
           size={12} 
-          color={disabled ? '#D1D5DB' : '#6B7280'} 
+          color={disabled ? colors.border : colors.mutedForeground} 
         />
         <Text 
-          className={`text-xs ml-1 ${disabled ? 'text-gray-300' : 'text-gray-500'}`}
+          className={`text-xs ml-1 ${disabled ? 'text-muted-foreground/30' : 'text-muted-foreground'}`}
         >
           Max {event.maxAttendees} attendees
         </Text>
@@ -216,7 +218,7 @@ export default function EventCard({
 
   const cardContent = (
     <View
-      className={`bg-white mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row ${
+      className={`bg-card mx-4 mb-3 p-4 rounded-xl shadow-sm flex-row ${
         disabled ? 'opacity-60' : ''
       } ${className}`}
     >

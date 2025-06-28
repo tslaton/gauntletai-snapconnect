@@ -1,3 +1,4 @@
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useUserStore } from '@/stores/user';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -7,6 +8,7 @@ import UserAvatar from './UserAvatar';
 export function AvatarButton() {
   const router = useRouter();
   const { currentUser } = useUserStore();
+  const themeColors = useThemeColors();
   const handlePress = () => router.push('/account');
 
   const hasAvatar = !!currentUser?.avatarUrl && currentUser.avatarUrl.trim() !== '';
@@ -23,10 +25,10 @@ export function AvatarButton() {
     <TouchableOpacity
       onPress={handlePress}
       className="w-10 h-10 rounded-full items-center justify-center overflow-hidden"
-      style={{ backgroundColor: '#4F46E5' }}
+      style={{ backgroundColor: themeColors.primary }}
       activeOpacity={0.7}
     >
-      <Text className="text-white font-bold">
+      <Text className="font-bold" style={{ color: themeColors.primaryForeground }}>
         {currentUser?.fullName?.[0]?.toUpperCase() ?? 'U'}
       </Text>
     </TouchableOpacity>

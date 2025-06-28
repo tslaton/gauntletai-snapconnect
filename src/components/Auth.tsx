@@ -1,3 +1,4 @@
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useState } from 'react';
@@ -31,6 +32,7 @@ export default function Auth() {
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const themeColors = useThemeColors();
 
   /**
    * Validates the form inputs
@@ -156,12 +158,12 @@ export default function Auth() {
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="p-4">
+        <View className="p-4 max-w-md mx-auto w-full">
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-center text-gray-900">
+            <Text className="text-2xl font-bold text-center" style={{ color: themeColors.foreground }}>
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </Text>
-            <Text className="text-center text-gray-600 mt-2">
+            <Text className="text-center mt-2" style={{ color: themeColors.mutedForeground }}>
               {isSignUp ? 'Sign up to get started' : 'Sign in to your account'}
             </Text>
           </View>
@@ -169,17 +171,18 @@ export default function Auth() {
           {/* Full Name Field - Only shown during sign up */}
           {isSignUp && (
             <View className="py-2">
-              <Text className="text-gray-700 mb-1 ml-1">Full Name *</Text>
-              <View className="flex-row items-center border border-gray-300 rounded-md p-3 bg-white">
+              <Text className="mb-1 ml-1" style={{ color: themeColors.foreground }}>Full Name *</Text>
+              <View className="flex-row items-center border rounded-md p-3" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
                 <View className="w-8 items-center">
-                  <FontAwesome name="user" size={20} color="gray" />
+                  <FontAwesome name="user" size={20} color={themeColors.mutedForeground} />
                 </View>
                 <TextInput
                   className="flex-1 text-base ml-2"
+                  style={{ color: themeColors.foreground }}
                   onChangeText={(text) => setFullName(text)}
                   value={fullName}
                   placeholder="Enter your full name"
-                  placeholderTextColor="#6B7280"
+                  placeholderTextColor={themeColors.mutedForeground}
                   autoCapitalize="words"
                   returnKeyType="next"
                 />
@@ -189,17 +192,18 @@ export default function Auth() {
 
           {/* Email Field */}
           <View className="py-2">
-            <Text className="text-gray-700 mb-1 ml-1">Email *</Text>
-            <View className="flex-row items-center border border-gray-300 rounded-md p-3 bg-white">
+            <Text className="mb-1 ml-1" style={{ color: themeColors.foreground }}>Email *</Text>
+            <View className="flex-row items-center border rounded-md p-3" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
               <View className="w-8 items-center">
-                <FontAwesome name="envelope" size={20} color="gray" />
+                <FontAwesome name="envelope" size={20} color={themeColors.mutedForeground} />
               </View>
               <TextInput
                 className="flex-1 text-base ml-2"
+                style={{ color: themeColors.foreground }}
                 onChangeText={(text) => setEmail(text)}
                 value={email}
                 placeholder="email@example.com"
-                placeholderTextColor="#6B7280"
+                placeholderTextColor={themeColors.mutedForeground}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 returnKeyType="next"
@@ -210,18 +214,19 @@ export default function Auth() {
 
           {/* Password Field */}
           <View className="py-2">
-            <Text className="text-gray-700 mb-1 ml-1">Password *</Text>
-            <View className="flex-row items-center border border-gray-300 rounded-md p-3 bg-white">
+            <Text className="mb-1 ml-1" style={{ color: themeColors.foreground }}>Password *</Text>
+            <View className="flex-row items-center border rounded-md p-3" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
               <View className="w-8 items-center">
-                <FontAwesome name="lock" size={24} color="gray" />
+                <FontAwesome name="lock" size={24} color={themeColors.mutedForeground} />
               </View>
               <TextInput
                 className="flex-1 text-base ml-2"
+                style={{ color: themeColors.foreground }}
                 onChangeText={(text) => setPassword(text)}
                 value={password}
                 secureTextEntry={true}
                 placeholder={isSignUp ? "At least 6 characters" : "Enter password"}
-                placeholderTextColor="#6B7280"
+                placeholderTextColor={themeColors.mutedForeground}
                 autoCapitalize="none"
                 returnKeyType="done"
                 autoComplete="password"
@@ -234,9 +239,13 @@ export default function Auth() {
             <TouchableOpacity
               disabled={isLoading}
               onPress={isSignUp ? signUpWithEmail : signInWithEmail}
-              className="bg-blue-600 rounded-md py-3 items-center justify-center active:bg-blue-700 disabled:bg-gray-400"
+              className="rounded-md py-3 items-center justify-center"
+              style={{ 
+                backgroundColor: isLoading ? themeColors.muted : themeColors.primary,
+                opacity: isLoading ? 0.6 : 1
+              }}
             >
-              <Text className="text-white text-base font-bold">
+              <Text className="text-base font-bold" style={{ color: themeColors.primaryForeground }}>
                 {isLoading ? 'Loading...' : (isSignUp ? 'Sign up' : 'Sign in')}
               </Text>
             </TouchableOpacity>
@@ -249,9 +258,9 @@ export default function Auth() {
               onPress={toggleMode}
               className="py-3 items-center justify-center"
             >
-              <Text className="text-gray-600 text-base">
+              <Text className="text-base" style={{ color: themeColors.mutedForeground }}>
                 {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-                <Text className="text-blue-600 font-semibold">
+                <Text className="font-semibold" style={{ color: themeColors.primary }}>
                   {isSignUp ? 'Sign in' : 'Sign up'}
                 </Text>
               </Text>
@@ -260,7 +269,7 @@ export default function Auth() {
 
           {/* Required Fields Note */}
           <View className="mt-4">
-            <Text className="text-xs text-gray-500 text-center">
+            <Text className="text-xs text-center" style={{ color: themeColors.mutedForeground }}>
               * Required fields
             </Text>
           </View>

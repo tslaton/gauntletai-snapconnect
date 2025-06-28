@@ -3,6 +3,7 @@
  * Compact design that avoids keyboard overlap issues
  */
 
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useProfileStore } from '@/stores/profile';
 import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
@@ -17,9 +18,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Spacer from './Spacer';
 import UserAvatar from './UserAvatar';
 
 export default function Account({ session }: { session: Session }) {
+  const colors = useThemeColors();
+  
   // Profile store state
   const isLoading = useProfileStore((state) => state.isLoading);
   const username = useProfileStore((state) => state.username);
@@ -165,16 +169,16 @@ export default function Account({ session }: { session: Session }) {
         <UserAvatar uri={displayAvatarUrl} size={96} />
         
         {/* Upload indicator overlay */}
-        <View className="absolute bottom-0 right-0 w-8 h-8 bg-indigo-600 rounded-full items-center justify-center border-2 border-white shadow-sm">
+        <View className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full items-center justify-center border-2 border-card shadow-sm">
           {isUploading ? (
-            <ActivityIndicator size="small" color="white" />
+            <ActivityIndicator size="small" color={colors.primaryForeground} />
           ) : (
-            <FontAwesome name="camera" size={14} color="white" />
+            <FontAwesome name="camera" size={14} color={colors.primaryForeground} />
           )}
         </View>
       </View>
       
-      <Text className="text-sm text-gray-500 mt-3 text-center">
+      <Text className="text-sm text-muted-foreground mt-3 text-center">
         {isUploading ? 'Uploading...' : 'Tap to change photo'}
       </Text>
     </TouchableOpacity>
@@ -193,38 +197,38 @@ export default function Account({ session }: { session: Session }) {
         <View className="space-y-5">
           {/* Email Field */}
           <View>
-            <Text className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Email</Text>
+            <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Email</Text>
             <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-gray-600 text-base"
+              className="border border-border rounded-xl px-4 py-3 bg-muted text-muted-foreground text-base"
               value={session?.user?.email}
               editable={false}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.mutedForeground}
             />
           </View>
 
           {/* Username Field */}
           <View>
-            <Text className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Username</Text>
+            <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Username</Text>
             <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3 bg-white text-gray-900 text-base"
+              className="border border-border rounded-xl px-4 py-3 bg-card text-foreground text-base"
               value={username || ''}
               onChangeText={setUsername}
               autoCapitalize="none"
               placeholder="Enter username"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.mutedForeground}
             />
           </View>
 
           {/* Website Field */}
           <View>
-            <Text className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Website</Text>
+            <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Website</Text>
             <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3 bg-white text-gray-900 text-base"
+              className="border border-border rounded-xl px-4 py-3 bg-card text-foreground text-base"
               value={website || ''}
               onChangeText={setWebsite}
               autoCapitalize="none"
               placeholder="Enter website URL"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.mutedForeground}
             />
           </View>
         </View>
@@ -234,18 +238,18 @@ export default function Account({ session }: { session: Session }) {
           <TouchableOpacity
             disabled={isLoading}
             onPress={() => saveProfile(session)}
-            className="bg-indigo-600 rounded-xl py-4 items-center justify-center active:bg-indigo-700 disabled:bg-gray-400 shadow-sm"
+            className="bg-primary rounded-xl py-4 items-center justify-center active:opacity-90 disabled:bg-muted shadow-sm"
           >
-            <Text className="text-white text-base font-semibold">
+            <Text className="text-primary-foreground text-base font-semibold">
               {isLoading ? 'Updating...' : 'Update Profile'}
             </Text>
           </TouchableOpacity>
-
+          <Spacer size={8} />
           <TouchableOpacity
             onPress={handleSignOut}
-            className="bg-white border border-gray-200 rounded-xl py-4 items-center justify-center active:bg-gray-50"
+            className="bg-card border border-border rounded-xl py-4 items-center justify-center active:opacity-90"
           >
-            <Text className="text-gray-700 text-base font-semibold">Sign Out</Text>
+            <Text className="text-foreground text-base font-semibold">Sign Out</Text>
           </TouchableOpacity>
         </View>
       </View>

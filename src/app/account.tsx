@@ -4,6 +4,8 @@
  */
 
 import Account from '@/components/Account';
+import { ThemeSettings } from '@/components/ThemeSettings';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
 import { Session } from '@supabase/supabase-js';
@@ -18,6 +20,7 @@ import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, Touchab
  */
 export default function AccountScreen() {
   const [session, setSession] = useState<Session | null>(null);
+  const colors = useThemeColors();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -38,7 +41,7 @@ export default function AccountScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-background">
       {/* Hide the default header */}
       <Stack.Screen 
         options={{
@@ -47,13 +50,13 @@ export default function AccountScreen() {
       />
       
       {/* Custom Header */}
-      <View className="relative flex-row items-center justify-center p-4 border-b border-gray-200">
-        <Text className="text-lg font-semibold">Account</Text>
+      <View className="relative flex-row items-center justify-center p-4 border-b border-border">
+        <Text className="text-lg font-semibold text-foreground">Account</Text>
         <TouchableOpacity 
           onPress={() => router.dismiss()}
           className="absolute right-4"
         >
-          <FontAwesome name="close" size={24} color="#374151" />
+          <FontAwesome name="close" size={24} color={colors.foreground} />
         </TouchableOpacity>
       </View>
       
@@ -70,6 +73,7 @@ export default function AccountScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <Account key={session.user.id} session={session} />
+          <ThemeSettings />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

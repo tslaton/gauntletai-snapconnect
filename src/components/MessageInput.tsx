@@ -4,6 +4,7 @@
  */
 
 import { type CreateMessageData } from '@/api/messages';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useMessagesStore } from '@/stores/messages';
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
@@ -54,6 +55,7 @@ export default function MessageInput({
 }: MessageInputProps) {
   const [messageText, setMessageText] = useState('');
   const [showCharacterCount, setShowCharacterCount] = useState(false);
+  const colors = useThemeColors();
 
   // Get store state and actions
   const {
@@ -161,9 +163,9 @@ export default function MessageInput({
     const length = messageText.length;
     const limit = MESSAGE_LIMITS.MAX_CONTENT_LENGTH;
     
-    if (length > limit) return '#EF4444'; // Red for over limit
-    if (length > limit * 0.9) return '#F59E0B'; // Amber for warning
-    return '#6B7280'; // Gray for normal
+    if (length > limit) return colors.destructive; // Red for over limit
+    if (length > limit * 0.9) return colors.destructive; // Use destructive for warning too
+    return colors.mutedForeground; // Gray for normal
   };
 
   /**
@@ -191,7 +193,7 @@ export default function MessageInput({
   };
 
   return (
-    <View className="bg-white border-t border-gray-200">
+    <View style={{ backgroundColor: colors.card, borderTopColor: colors.border, borderTopWidth: 1 }}>
       {/* Character count display */}
       {renderCharacterCount()}
       
@@ -200,11 +202,17 @@ export default function MessageInput({
         {/* Text input */}
         <View className="flex-1 mr-3">
           <TextInput
-            className={`border border-gray-300 rounded-2xl px-4 py-3 text-base max-h-24 ${
-              disabled ? 'bg-gray-100 text-gray-500' : 'bg-white text-gray-900'
-            }`}
+            className="rounded-2xl px-4 py-3 text-base max-h-24"
+            style={{
+              borderColor: colors.border,
+              borderWidth: 1,
+              backgroundColor: disabled ? colors.muted : colors.background,
+              color: disabled ? colors.mutedForeground : colors.foreground,
+              minHeight: 44, // Ensure minimum touch target size
+              textAlignVertical: 'center',
+            }}
             placeholder={placeholder}
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.mutedForeground}
             value={messageText}
             onChangeText={handleTextChange}
             multiline
@@ -220,20 +228,15 @@ export default function MessageInput({
                 handleSendMessage();
               }
             }}
-            style={{
-              minHeight: 44, // Ensure minimum touch target size
-              textAlignVertical: 'center',
-            }}
           />
         </View>
 
         {/* Send button */}
         <TouchableOpacity
-          className={`w-11 h-11 rounded-full items-center justify-center ${
-            isSendDisabled()
-              ? 'bg-gray-300'
-              : 'bg-blue-600 active:bg-blue-700'
-          }`}
+          className="w-11 h-11 rounded-full items-center justify-center"
+          style={{
+            backgroundColor: isSendDisabled() ? colors.muted : colors.primary
+          }}
           onPress={handleSendMessage}
           disabled={isSendDisabled()}
           activeOpacity={0.7}
@@ -244,7 +247,7 @@ export default function MessageInput({
             <FontAwesome 
               name="send" 
               size={16} 
-              color={isSendDisabled() ? '#9CA3AF' : 'white'} 
+              color={isSendDisabled() ? colors.mutedForeground : colors.primaryForeground} 
             />
           )}
         </TouchableOpacity>
