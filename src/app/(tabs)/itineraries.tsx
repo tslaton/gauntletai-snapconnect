@@ -1,0 +1,132 @@
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useItinerariesStore } from '@/stores/itinerariesStore';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useThemeColors } from '@/hooks/useThemeColors';
+import { ItineraryCard } from '@/components/ItineraryCard';
+import type { Itinerary } from '@/api/itineraries';
+
+export default function ItinerariesScreen() {
+  const colors = useThemeColors();
+  const router = useRouter();
+  const [searchInput, setSearchInput] = useState('');
+  const debouncedSearch = useDebounce(searchInput, 300);
+  
+  const {
+    itineraries,
+    isLoading,
+    error,
+    fetchItineraries,
+    searchItineraries,
+    clearError
+  } = useItinerariesStore();
+
+  useEffect(() => {
+    fetchItineraries();
+  }, []);
+
+  useEffect(() => {
+    if (debouncedSearch) {
+      searchItineraries(debouncedSearch);
+    } else {
+      fetchItineraries();
+    }
+  }, [debouncedSearch]);
+
+  const handleNewItinerary = () => {
+    // TODO: Navigate to create itinerary modal
+    console.log('Create new itinerary');
+  };
+
+  const handleItineraryPress = (itineraryId: string) => {
+    router.push(`/itineraries/${itineraryId}`);
+  };
+
+  const renderItinerary = ({ item }: { item: Itinerary }) => {
+    return <ItineraryCard itinerary={item} onPress={handleItineraryPress} />;
+  };
+
+  if (error) {
+    return (
+      <SafeAreaView className="flex-1 bg-background">
+        <View className="flex-1 justify-center items-center p-4">
+          <Text className="text-destructive text-center mb-4">{error}</Text>
+          <TouchableOpacity
+            onPress={() => {
+              clearError();
+              fetchItineraries();
+            }}
+            className="bg-primary px-4 py-2 rounded-lg"
+          >
+            <Text className="text-primary-foreground">Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="flex-1">
+        {/* Header */}
+        <View className="px-4 pt-4 pb-2">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-2xl font-bold text-foreground">Itineraries</Text>
+            <TouchableOpacity
+              onPress={handleNewItinerary}
+              className="bg-primary px-3 py-2 rounded-lg flex-row items-center"
+            >
+              <Ionicons name="add" size={20} color={colors.primaryForeground} />
+              <Text className="text-primary-foreground ml-1">New</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Search Bar */}
+          <View className="bg-muted rounded-lg px-3 py-2 flex-row items-center">
+            <Ionicons name="search" size={20} color={colors.mutedForeground} />
+            <TextInput
+              value={searchInput}
+              onChangeText={setSearchInput}
+              placeholder="Search itineraries..."
+              placeholderTextColor={colors.mutedForeground}
+              className="flex-1 ml-2 text-foreground"
+            />
+            {searchInput.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchInput('')}>
+                <Ionicons name="close-circle" size={20} color={colors.mutedForeground} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Itineraries List */}
+        {isLoading ? (
+          <View className="flex-1 justify-center items-center">
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        ) : (
+          <FlatList
+            data={itineraries}
+            renderItem={renderItinerary}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
+            ListEmptyComponent={
+              <View className="flex-1 justify-center items-center py-20">
+                <Ionicons name="calendar-outline" size={64} color={colors.mutedForeground} />
+                <Text className="text-muted-foreground text-center mt-4">
+                  {searchInput ? 'No itineraries found' : 'No itineraries yet'}
+                </Text>
+                <Text className="text-muted-foreground text-center mt-2">
+                  Tap "+ New" to create your first travel plan
+                </Text>
+              </View>
+            }
+          />
+        )}
+      </View>
+    </SafeAreaView>
+  );
+}
