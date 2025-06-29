@@ -30,6 +30,7 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
   const [isCapturing, setIsCapturing] = useState(false);
   const [effectEnabled, setEffectEnabled] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
+  const [zoom, setZoom] = useState(0); // 0 = no zoom (1x), 0.25 = 2x, 0.5 = 5x
 
   /**
    * Handles camera ready state
@@ -119,6 +120,7 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
         ref={cameraRef}
         style={{ flex: 1 }}
         facing={cameraType}
+        zoom={zoom}
         onCameraReady={handleCameraReady}
         onMountError={handleCameraMountError}
       />
@@ -157,6 +159,8 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
           onToggleCamera={toggleCamera}
           isCapturing={isCapturing}
           cameraType={cameraType}
+          zoom={zoom}
+          onZoomChange={setZoom}
         />
       </View>
     </View>
