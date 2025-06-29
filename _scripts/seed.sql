@@ -336,7 +336,7 @@ BEGIN
   END IF;
     -- Create Japan Trip Itinerary
     japan_trip_id := gen_random_uuid();
-    INSERT INTO public.itineraries (id, title, description, start_time, end_time, cover_image_url, weather, created_by, created_at, updated_at)
+    INSERT INTO public.itineraries (id, title, description, start_time, end_time, cover_image_url, created_by, created_at, updated_at)
     VALUES (
       japan_trip_id,
       'Japan Adventure 2024',
@@ -344,48 +344,47 @@ BEGIN
       '2024-04-01 09:00:00+00',
       '2024-04-10 23:00:00+00',
       'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800',
-      '[{"day": 1, "temp": 18, "condition": "sunny"}, {"day": 2, "temp": 20, "condition": "cloudy"}]'::json,
       auth_user_id,
       now() - interval '30 days',
       now() - interval '5 days'
     );
     
     -- Japan Trip Activities
-    INSERT INTO public.activities (title, description, location, start_time, end_time, image_url, tags, created_by, itinerary_id)
+    INSERT INTO public.activities (title, description, location, start_time, end_time, image_url, tags, weather, temperature, precipitation_chance, gps_coords, timezone, created_by, itinerary_id)
     VALUES 
       ('Arrive at Narita Airport', 'Land in Tokyo and take the Narita Express to the city', 'Narita International Airport', 
        '2024-04-01 14:00:00+00', '2024-04-01 16:00:00+00', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600', 
-       ARRAY['transportation', 'arrival'], auth_user_id, japan_trip_id),
+       ARRAY['transportation', 'arrival'], 'weather-partly-cloudy', '64', '20', ARRAY[35.7647, 140.3862], 'Asia/Tokyo', auth_user_id, japan_trip_id),
       
       ('Check-in at Shinjuku Hotel', 'Get settled at the hotel and explore the neighborhood', 'Shinjuku, Tokyo',
        '2024-04-01 17:00:00+00', '2024-04-01 18:30:00+00', 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600',
-       ARRAY['accommodation', 'shinjuku'], auth_user_id, japan_trip_id),
+       ARRAY['accommodation', 'shinjuku'], 'weather-partly-cloudy', '62', '15', ARRAY[35.6938, 139.7034], 'Asia/Tokyo', auth_user_id, japan_trip_id),
        
       ('Dinner at Ichiran Ramen', 'Experience authentic tonkotsu ramen at this famous chain', 'Shibuya, Tokyo',
        '2024-04-01 19:00:00+00', '2024-04-01 20:30:00+00', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600',
-       ARRAY['food', 'ramen', 'dinner'], auth_user_id, japan_trip_id),
+       ARRAY['food', 'ramen', 'dinner'], 'weather-night-partly-cloudy', '58', '10', ARRAY[35.6595, 139.7006], 'Asia/Tokyo', auth_user_id, japan_trip_id),
        
       ('Visit Sensoji Temple', 'Explore Tokyo''s oldest temple and browse Nakamise shopping street', 'Asakusa, Tokyo',
        '2024-04-02 09:00:00+00', '2024-04-02 12:00:00+00', 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=600',
-       ARRAY['temple', 'culture', 'shopping'], auth_user_id, japan_trip_id),
+       ARRAY['temple', 'culture', 'shopping'], 'weather-sunny', '68', '5', ARRAY[35.7148, 139.7967], 'Asia/Tokyo', auth_user_id, japan_trip_id),
        
       ('Tokyo Skytree', 'Panoramic views of Tokyo from the observation deck', 'Sumida, Tokyo',
        '2024-04-02 14:00:00+00', '2024-04-02 16:00:00+00', 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=600',
-       ARRAY['sightseeing', 'views'], auth_user_id, japan_trip_id),
+       ARRAY['sightseeing', 'views'], 'weather-sunny', '72', '0', ARRAY[35.7101, 139.8107], 'Asia/Tokyo', auth_user_id, japan_trip_id),
        
       ('TeamLab Borderless', 'Immersive digital art museum experience', 'Odaiba, Tokyo',
        '2024-04-03 10:00:00+00', '2024-04-03 13:00:00+00', 'https://images.unsplash.com/photo-1634912314704-c646c586b131?w=600',
-       ARRAY['art', 'museum', 'technology'], auth_user_id, japan_trip_id),
+       ARRAY['art', 'museum', 'technology'], 'weather-cloudy', '66', '30', ARRAY[35.6197, 139.7768], 'Asia/Tokyo', auth_user_id, japan_trip_id),
        
       ('Buy JR Pass', 'Purchase Japan Rail Pass for intercity travel', 'Tokyo Station',
-       NULL, NULL, NULL, ARRAY['transportation', 'planning'], auth_user_id, japan_trip_id),
+       NULL, NULL, NULL, ARRAY['transportation', 'planning'], NULL, NULL, NULL, ARRAY[35.6812, 139.7671], 'Asia/Tokyo', auth_user_id, japan_trip_id),
        
       ('Pack rain jacket', 'Remember to pack rain gear for potential April showers', NULL,
-       NULL, NULL, NULL, ARRAY['packing', 'preparation'], auth_user_id, japan_trip_id);
+       NULL, NULL, NULL, ARRAY['packing', 'preparation'], NULL, NULL, NULL, NULL, NULL, auth_user_id, japan_trip_id);
     
     -- Create Italy Vacation Itinerary
     italy_trip_id := gen_random_uuid();
-    INSERT INTO public.itineraries (id, title, description, start_time, end_time, cover_image_url, weather, created_by, created_at)
+    INSERT INTO public.itineraries (id, title, description, start_time, end_time, cover_image_url, created_by, created_at)
     VALUES (
       italy_trip_id,
       'Italian Renaissance Tour',
@@ -393,36 +392,35 @@ BEGIN
       '2024-06-15 10:00:00+00',
       '2024-06-25 22:00:00+00',
       'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=800',
-      '[]'::json,
       auth_user_id,
       now() - interval '20 days'
     );
     
     -- Italy Trip Activities
-    INSERT INTO public.activities (title, description, location, start_time, end_time, image_url, tags, created_by, itinerary_id)
+    INSERT INTO public.activities (title, description, location, start_time, end_time, image_url, tags, weather, temperature, precipitation_chance, gps_coords, timezone, created_by, itinerary_id)
     VALUES 
       ('Colosseum Tour', 'Skip-the-line guided tour of the Colosseum and Roman Forum', 'Rome',
        '2024-06-16 09:00:00+00', '2024-06-16 13:00:00+00', 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600',
-       ARRAY['history', 'ancient rome', 'tour'], auth_user_id, italy_trip_id),
+       ARRAY['history', 'ancient rome', 'tour'], 'weather-sunny', '82', '10', ARRAY[41.8902, 12.4922], 'Europe/Rome', auth_user_id, italy_trip_id),
        
       ('Vatican Museums', 'Visit Sistine Chapel and St. Peter''s Basilica', 'Vatican City',
        '2024-06-17 08:30:00+00', '2024-06-17 14:00:00+00', 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
-       ARRAY['art', 'religion', 'museum'], auth_user_id, italy_trip_id),
+       ARRAY['art', 'religion', 'museum'], 'weather-partly-cloudy', '79', '15', ARRAY[41.9022, 12.4539], 'Europe/Rome', auth_user_id, italy_trip_id),
        
       ('Trevi Fountain at Sunset', 'Throw a coin and make a wish at the iconic fountain', 'Rome',
        '2024-06-17 19:00:00+00', '2024-06-17 20:00:00+00', 'https://images.unsplash.com/photo-1555992828-ca4dbe41d294?w=600',
-       ARRAY['landmark', 'evening'], auth_user_id, italy_trip_id),
+       ARRAY['landmark', 'evening'], 'weather-sunny', '75', '5', ARRAY[41.9009, 12.4833], 'Europe/Rome', auth_user_id, italy_trip_id),
        
       ('Uffizi Gallery', 'Renaissance masterpieces including Botticelli''s Birth of Venus', 'Florence',
        '2024-06-19 10:00:00+00', '2024-06-19 14:00:00+00', 'https://images.unsplash.com/photo-1547948577-967e101e81b5?w=600',
-       ARRAY['art', 'renaissance', 'museum'], auth_user_id, italy_trip_id),
+       ARRAY['art', 'renaissance', 'museum'], 'weather-sunny', '85', '0', ARRAY[43.7678, 11.2553], 'Europe/Rome', auth_user_id, italy_trip_id),
        
       ('Cooking Class in Tuscany', 'Learn to make authentic pasta and tiramisu', 'Chianti, Tuscany',
        '2024-06-20 10:00:00+00', '2024-06-20 15:00:00+00', 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600',
-       ARRAY['cooking', 'food', 'experience'], auth_user_id, italy_trip_id),
+       ARRAY['cooking', 'food', 'experience'], 'weather-sunny', '88', '0', ARRAY[43.4663, 11.2201], 'Europe/Rome', auth_user_id, italy_trip_id),
        
       ('Research Venice restaurants', 'Find authentic local restaurants away from tourist traps', NULL,
-       NULL, NULL, NULL, ARRAY['planning', 'food'], auth_user_id, italy_trip_id);
+       NULL, NULL, NULL, ARRAY['planning', 'food'], NULL, NULL, NULL, NULL, NULL, auth_user_id, italy_trip_id);
     
     -- Create Thailand Adventure Itinerary
     thailand_trip_id := gen_random_uuid();
@@ -439,27 +437,27 @@ BEGIN
     );
     
     -- Thailand Activities
-    INSERT INTO public.activities (title, description, location, start_time, end_time, image_url, tags, created_by, itinerary_id)
+    INSERT INTO public.activities (title, description, location, start_time, end_time, image_url, tags, weather, temperature, precipitation_chance, gps_coords, timezone, created_by, itinerary_id)
     VALUES 
       ('Grand Palace & Wat Phra Kaew', 'Marvel at the golden temples and intricate Thai architecture', 'Bangkok',
        '2024-11-02 08:00:00+00', '2024-11-02 12:00:00+00', 'https://images.unsplash.com/photo-1563492065599-3520f775eeed?w=600',
-       ARRAY['temple', 'culture', 'bangkok'], auth_user_id, thailand_trip_id),
+       ARRAY['temple', 'culture', 'bangkok'], 'weather-partly-cloudy', '86', '40', ARRAY[13.7500, 100.4913], 'Asia/Bangkok', auth_user_id, thailand_trip_id),
        
       ('Floating Market Tour', 'Shop for souvenirs and try local food from boat vendors', 'Damnoen Saduak',
        '2024-11-03 06:00:00+00', '2024-11-03 13:00:00+00', 'https://images.unsplash.com/photo-1574482620811-1aa16ffe3c82?w=600',
-       ARRAY['market', 'shopping', 'local'], auth_user_id, thailand_trip_id),
+       ARRAY['market', 'shopping', 'local'], 'weather-cloudy', '82', '60', ARRAY[13.5181, 99.9595], 'Asia/Bangkok', auth_user_id, thailand_trip_id),
        
       ('Elephant Nature Park', 'Ethical elephant sanctuary visit - feed and bathe rescued elephants', 'Chiang Mai',
        '2024-11-05 08:00:00+00', '2024-11-05 17:00:00+00', 'https://images.unsplash.com/photo-1566438480900-0609be27a4be?w=600',
-       ARRAY['animals', 'nature', 'ethical'], auth_user_id, thailand_trip_id),
+       ARRAY['animals', 'nature', 'ethical'], 'weather-rainy', '78', '70', ARRAY[18.7883, 98.9853], 'Asia/Bangkok', auth_user_id, thailand_trip_id),
        
       ('Island Hopping Tour', 'Speedboat tour to Maya Bay, Pileh Lagoon, and Monkey Beach', 'Koh Phi Phi',
        '2024-11-09 08:30:00+00', '2024-11-09 16:30:00+00', 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=600',
-       ARRAY['beach', 'boat', 'snorkeling'], auth_user_id, thailand_trip_id),
+       ARRAY['beach', 'boat', 'snorkeling'], 'weather-sunny', '88', '20', ARRAY[7.7407, 98.7784], 'Asia/Bangkok', auth_user_id, thailand_trip_id),
        
       ('Thai Massage Course', 'Half-day traditional Thai massage workshop', 'Phuket',
-       '2024-11-11 09:00:00+00', '2024-11-11 13:00:00+00', NULL,
-       ARRAY['wellness', 'learning', 'spa'], auth_user_id, thailand_trip_id);
+       '2024-11-11 09:00:00+00', '2024-11-11 13:00:00+00', 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=600',
+       ARRAY['wellness', 'learning', 'spa'], 'weather-partly-cloudy', '84', '30', ARRAY[7.8804, 98.3923], 'Asia/Bangkok', auth_user_id, thailand_trip_id);
     
     -- Create Iceland Road Trip Itinerary (shorter, past trip)
     iceland_trip_id := gen_random_uuid();
@@ -476,41 +474,42 @@ BEGIN
     );
     
     -- Iceland Activities
-    INSERT INTO public.activities (title, description, location, start_time, end_time, image_url, tags, created_by, itinerary_id)
+    INSERT INTO public.activities (title, description, location, start_time, end_time, image_url, tags, weather, temperature, precipitation_chance, gps_coords, timezone, created_by, itinerary_id)
     VALUES 
       ('Blue Lagoon', 'Relax in the famous geothermal spa', 'Grindavík',
        '2023-09-15 14:00:00+00', '2023-09-15 17:00:00+00', 'https://images.unsplash.com/photo-1518176258769-f227c798150e?w=600',
-       ARRAY['spa', 'geothermal', 'relaxation'], auth_user_id, iceland_trip_id),
+       ARRAY['spa', 'geothermal', 'relaxation'], 'weather-cloudy', '50', '40', ARRAY[63.8804, -22.4495], 'Atlantic/Reykjavik', auth_user_id, iceland_trip_id),
        
       ('Golden Circle Tour', 'Gullfoss, Geysir, and Thingvellir National Park', 'Reykjavik Region',
        '2023-09-16 08:00:00+00', '2023-09-16 18:00:00+00', 'https://images.unsplash.com/photo-1504214208698-ea1916a2195a?w=600',
-       ARRAY['nature', 'waterfall', 'geyser'], auth_user_id, iceland_trip_id),
+       ARRAY['nature', 'waterfall', 'geyser'], 'weather-partly-cloudy', '48', '30', ARRAY[64.3271, -20.1199], 'Atlantic/Reykjavik', auth_user_id, iceland_trip_id),
        
       ('Northern Lights Hunt', 'Chase the Aurora Borealis away from city lights', 'South Coast',
-       '2023-09-17 21:00:00+00', '2023-09-18 01:00:00+00', NULL,
-       ARRAY['aurora', 'night', 'photography'], auth_user_id, iceland_trip_id);
+       '2023-09-17 21:00:00+00', '2023-09-18 01:00:00+00', 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=600',
+       ARRAY['aurora', 'night', 'photography'], 'weather-night', '42', '20', ARRAY[63.4424, -19.0068], 'Atlantic/Reykjavik', auth_user_id, iceland_trip_id);
     
     -- Create Peru Machu Picchu Trek (future trip with minimal activities)
     peru_trip_id := gen_random_uuid();
-    INSERT INTO public.itineraries (id, title, description, start_time, end_time, created_by, created_at)
+    INSERT INTO public.itineraries (id, title, description, start_time, end_time, cover_image_url, created_by, created_at)
     VALUES (
       peru_trip_id,
       'Peru & Machu Picchu Trek',
       'Inca Trail adventure to the lost city of Machu Picchu',
       '2025-05-10 06:00:00+00',
       '2025-05-20 23:00:00+00',
+      'https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=800',
       auth_user_id,
       now() - interval '5 days'
     );
     
     -- Peru Activities (just planning items)
-    INSERT INTO public.activities (title, description, location, start_time, end_time, tags, created_by, itinerary_id)
+    INSERT INTO public.activities (title, description, location, start_time, end_time, image_url, tags, weather, temperature, precipitation_chance, gps_coords, timezone, created_by, itinerary_id)
     VALUES 
       ('Book Inca Trail permits', 'Need to book 6 months in advance!', NULL,
-       NULL, NULL, ARRAY['planning', 'urgent'], auth_user_id, peru_trip_id),
+       NULL, NULL, NULL, ARRAY['planning', 'urgent'], NULL, NULL, NULL, NULL, NULL, auth_user_id, peru_trip_id),
        
       ('Altitude acclimatization', 'Spend 2-3 days in Cusco before starting trek', 'Cusco',
-       NULL, NULL, ARRAY['health', 'preparation'], auth_user_id, peru_trip_id);
+       NULL, NULL, NULL, ARRAY['health', 'preparation'], NULL, NULL, NULL, ARRAY[-13.5319, -71.9675], 'America/Lima', auth_user_id, peru_trip_id);
     
   -- Count the created records
   SELECT COUNT(*) INTO itinerary_count FROM public.itineraries WHERE created_by = auth_user_id;

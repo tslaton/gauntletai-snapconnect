@@ -81,19 +81,12 @@ export function getMaterialIcon(wmoCode: number, time: string) {
   }
 }
 
-const wmoCodesToMaterialIcons = {
-  0: "sunny",
-  1: "partly-cloudy-day",
-  2: "cloudy",
-  3: "cloudy",
-  45: "foggy",
-}
-
 export async function getWeather(
   latitude: number, 
   longitude: number, 
-  hourly: string[] = ["temperature_2m", "precipitation_probability"],
+  hourly: string[] = ["temperature_2m", "precipitation_probability", "weather_code"],
   timezone: string = "GMT",
+  temperature_unit: string = "fahrenheit",
   start_date: string,
   end_date: string,
 ) {
@@ -103,15 +96,21 @@ export async function getWeather(
     longitude,
     hourly,
     timezone,
+    temperature_unit,
     start_date,
     end_date,
   };
 
   try {
+    console.log('Weather API Request Parameters:', JSON.stringify(params, null, 2));
+    
     const responses = await fetchWeatherApi(url, params);
+    console.log('Weather API Response Count:', responses.length);
 
     // Process first location. Add a for-loop for multiple locations or weather models
     const response = responses[0];
+    console.log('Raw response object type:', typeof response);
+    console.log('Raw response object methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(response)));
     
     // Attributes for timezone and location
     const utcOffsetSeconds = response.utcOffsetSeconds();
@@ -120,19 +119,89 @@ export async function getWeather(
     const latitude = response.latitude();
     const longitude = response.longitude();
     
+    console.log('Response metadata:', {
+      utcOffsetSeconds,
+      timezone,
+      timezoneAbbreviation,
+      latitude,
+      longitude
+    });
+    
     const hourly = response.hourly()!;
+    console.log('Hourly object:', hourly);
+    console.log('Hourly variables count:', hourly.variablesLength ? hourly.variablesLength() : 'variablesLength method not found');
+    
+    // Debug each variable
+    console.log('=== Debugging Variables ===');
+    console.log('Requested hourly parameters:', params.hourly);
+    
+    // Check each variable index
+    const numVariables = params.hourly.length;
+    console.log(`Expected number of variables: ${numVariables}`);
+    
+    for (let i = 0; i < numVariables; i++) {
+      try {
+        const variable = hourly.variables(i);
+        console.log(`Variable ${i} (${params.hourly[i]}):`, variable);
+        if (variable) {
+          const values = variable.valuesArray();
+          console.log(`Variable ${i} valuesArray:`, values);
+          console.log(`Variable ${i} first 5 values:`, values ? values.slice(0, 5) : 'null/undefined');
+          console.log(`Variable ${i} values type:`, values ? typeof values : 'null/undefined');
+          console.log(`Variable ${i} values length:`, values ? values.length : 'null/undefined');
+          console.log(`Variable ${i} is Float32Array?:`, values instanceof Float32Array);
+        } else {
+          console.log(`Variable ${i} is null/undefined`);
+        }
+      } catch (error) {
+        console.log(`Error accessing variable ${i}:`, error);
+      }
+    }
     
     // Note: The order of weather variables in the URL query and the indices below need to match!
+    // Find the indices for each expected variable
+    const tempIndex = params.hourly.indexOf('temperature_2m');
+    const precipIndex = params.hourly.indexOf('precipitation_probability');
+    const weatherCodeIndex = params.hourly.indexOf('weather_code');
+    
+    console.log('Variable indices:', {
+      temperature: tempIndex,
+      precipitation: precipIndex,
+      weatherCode: weatherCodeIndex
+    });
+    
+    // Helper function to safely convert values to array
+    const safeArrayConvert = (values: any): number[] => {
+      if (!values) return [];
+      if (values instanceof Float32Array) {
+        return Array.from(values);
+      }
+      if (Array.isArray(values)) {
+        return values;
+      }
+      console.warn('Unexpected values type:', typeof values, values);
+      return [];
+    };
+    
     const weatherData = {
       hourly: {
         time: [...Array((Number(hourly.timeEnd()) - Number(hourly.time())) / hourly.interval())].map(
           (_, i) => new Date((Number(hourly.time()) + i * hourly.interval() + utcOffsetSeconds) * 1000)
         ),
-        temperature: hourly.variables(0)!.valuesArray()!,
-        precipitationProbability: hourly.variables(1)!.valuesArray()!,
-        weatherCode: hourly.variables(2)!.valuesArray()!,
+        temperature: tempIndex >= 0 ? safeArrayConvert(hourly.variables(tempIndex)!.valuesArray()!) : [],
+        precipitationProbability: precipIndex >= 0 ? safeArrayConvert(hourly.variables(precipIndex)!.valuesArray()!) : [],
+        weatherCode: weatherCodeIndex >= 0 ? safeArrayConvert(hourly.variables(weatherCodeIndex)!.valuesArray()!) : [],
       },
     };
+    
+    console.log('=== Processed Weather Data ===');
+    console.log('Time array length:', weatherData.hourly.time.length);
+    console.log('Temperature array length:', weatherData.hourly.temperature.length);
+    console.log('First 5 temperatures:', weatherData.hourly.temperature.slice(0, 5));
+    console.log('Precipitation array length:', weatherData.hourly.precipitationProbability.length);
+    console.log('First 5 precipitation values:', weatherData.hourly.precipitationProbability.slice(0, 5));
+    console.log('Weather code array length:', weatherData.hourly.weatherCode.length);
+    console.log('First 5 weather codes:', weatherData.hourly.weatherCode.slice(0, 5));
     
     // `weatherData` now contains a simple structure with arrays for datetime and weather data
     console.log('retrieved weather data: ');
@@ -145,6 +214,15 @@ export async function getWeather(
       );
     }
     
+    // Check if any values are NaN (which happens when requesting historical data or dates too far in the future)
+    const hasNaNTemperature = Array.from(weatherData.hourly.temperature).some(val => isNaN(val));
+    const hasNaNPrecipitation = Array.from(weatherData.hourly.precipitationProbability).some(val => isNaN(val));
+    const hasNaNWeatherCode = Array.from(weatherData.hourly.weatherCode).some(val => isNaN(val));
+    
+    if (hasNaNTemperature || hasNaNPrecipitation || hasNaNWeatherCode) {
+      console.log('[getWeather] Weather data contains NaN values - likely requesting historical data or dates beyond forecast range');
+      return null;
+    }
 
     return weatherData;
   } catch (error) {

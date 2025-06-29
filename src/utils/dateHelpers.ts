@@ -3,6 +3,7 @@
  */
 
 import type { Activity } from '@/api/activities';
+import { getTimezoneOffset } from 'date-fns-tz';
 
 /**
  * Groups activities by day based on their start_time
@@ -175,4 +176,11 @@ export function calculateTripDuration(startDate?: string | null, endDate?: strin
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
   return diffDays + 1; // Inclusive of both start and end days
+}
+
+// Convert timezone offset from milliseconds to minutes
+// https://www.perplexity.ai/search/use-date-fns-tz-to-convert-tim-gMiVnS6WQVCvqO5vayuI1w
+export function getTimezoneOffsetInMinutes(timeZoneName: string, date = new Date()) {
+  const offsetInMs = getTimezoneOffset(timeZoneName, date)
+  return offsetInMs / (60 * 1000) // Convert milliseconds to minutes
 }

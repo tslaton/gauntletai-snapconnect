@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { formatTimeRange } from '@/utils/dateHelpers';
 import type { Activity } from '@/api/activities';
@@ -42,9 +42,28 @@ export function ActivityCard({ activity, onPress }: ActivityCardProps) {
         <View className="flex-1 p-3">
           {/* Title and Location */}
           <View className="mb-1">
-            <Text className="text-base font-semibold text-foreground" numberOfLines={1}>
-              {activity.title}
-            </Text>
+            <View className="flex-row items-start justify-between">
+              <Text className="text-base font-semibold text-foreground flex-1 mr-2" numberOfLines={1}>
+                {activity.title}
+              </Text>
+              {/* Weather Info */}
+              {(activity.weather || activity.temperature) && (
+                <View className="flex-row items-center">
+                  {activity.temperature && (
+                    <Text className="text-sm text-muted-foreground mr-1">
+                      {activity.temperature}°F
+                    </Text>
+                  )}
+                  {activity.weather && (
+                    <MaterialCommunityIcons
+                      name={activity.weather as any}
+                      size={20}
+                      color={colors.mutedForeground}
+                    />
+                  )}
+                </View>
+              )}
+            </View>
             {activity.location && (
               <View className="flex-row items-center mt-1">
                 <Ionicons name="location-outline" size={14} color={colors.mutedForeground} />

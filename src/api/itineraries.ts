@@ -15,7 +15,6 @@ export interface Itinerary {
   start_time?: string | null;
   end_time?: string | null;
   cover_image_url?: string | null;
-  weather?: any[];
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -41,7 +40,6 @@ export interface UpdateItineraryData {
   start_time?: string | null;
   end_time?: string | null;
   cover_image_url?: string | null;
-  weather?: any[];
 }
 
 /**
@@ -137,7 +135,6 @@ export async function createItinerary(itineraryData: CreateItineraryData): Promi
     .insert({
       ...itineraryData,
       created_by: user.id,
-      weather: []
     })
     .select()
     .single();
