@@ -10,6 +10,7 @@ import {
   Alert,
   Platform,
   Image,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -221,17 +222,27 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
   };
 
   const handleStartDateChange = (_event: any, selectedDate?: Date) => {
+    // On Android, hide picker after selection
     setShowStartPicker(Platform.OS === 'ios');
     if (selectedDate) {
       setStartDate(selectedDate);
+      // Clear end date if it's before the new start date
+      if (endDate && selectedDate > endDate) {
+        setEndDate(null);
+      }
       setErrors({ ...errors, dates: undefined });
     }
   };
 
   const handleEndDateChange = (_event: any, selectedDate?: Date) => {
+    // On Android, hide picker after selection
     setShowEndPicker(Platform.OS === 'ios');
     if (selectedDate) {
       setEndDate(selectedDate);
+      // Clear start date if it's after the new end date
+      if (startDate && selectedDate < startDate) {
+        setStartDate(null);
+      }
       setErrors({ ...errors, dates: undefined });
     }
   };
@@ -288,7 +299,11 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
         <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 40 }}>
           {/* Cover Image */}
           <TouchableOpacity
-            onPress={handleSelectImage}
+            onPress={() => {
+              setShowStartPicker(false);
+              setShowEndPicker(false);
+              handleSelectImage();
+            }}
             disabled={isUploadingImage}
             className="h-48 bg-muted m-4 rounded-lg overflow-hidden"
           >
@@ -317,6 +332,10 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
                   setTitle(text);
                   if (errors.title) setErrors({ ...errors, title: undefined });
                 }}
+                onFocus={() => {
+                  setShowStartPicker(false);
+                  setShowEndPicker(false);
+                }}
                 placeholder="Give your itinerary a name"
                 placeholderTextColor={colors.mutedForeground}
                 className="bg-muted px-3 py-3 rounded-lg text-foreground"
@@ -333,6 +352,10 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
               <TextInput
                 value={description}
                 onChangeText={setDescription}
+                onFocus={() => {
+                  setShowStartPicker(false);
+                  setShowEndPicker(false);
+                }}
                 placeholder="What's this itinerary about?"
                 placeholderTextColor={colors.mutedForeground}
                 className="bg-muted px-3 py-3 rounded-lg text-foreground"
@@ -347,7 +370,10 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
             <View>
               <Text className="text-sm font-medium text-foreground mb-1">Start Date</Text>
               <TouchableOpacity
-                onPress={() => setShowStartPicker(true)}
+                onPress={() => {
+                  setShowEndPicker(false);
+                  setShowStartPicker(true);
+                }}
                 className="bg-muted px-3 py-3 rounded-lg flex-row items-center justify-between"
               >
                 <Text className={startDate ? 'text-foreground' : 'text-muted-foreground'}>
@@ -361,7 +387,10 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
             <View>
               <Text className="text-sm font-medium text-foreground mb-1">End Date</Text>
               <TouchableOpacity
-                onPress={() => setShowEndPicker(true)}
+                onPress={() => {
+                  setShowStartPicker(false);
+                  setShowEndPicker(true);
+                }}
                 className="bg-muted px-3 py-3 rounded-lg flex-row items-center justify-between"
               >
                 <Text className={endDate ? 'text-foreground' : 'text-muted-foreground'}>
@@ -378,22 +407,80 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
         </ScrollView>
 
         {/* Date Pickers */}
-        {showStartPicker && startDate && (
-          <DateTimePicker
-            value={startDate}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleStartDateChange}
-          />
+        {showStartPicker && (
+          <>
+            {Platform.OS === 'ios' && (
+              <TouchableWithoutFeedback onPress={() => setShowStartPicker(false)}>
+                <View className="absolute inset-0 bg-black/30" style={{ zIndex: 999 }}>
+                  <TouchableWithoutFeedback>
+                    <View className="absolute bottom-0 left-0 right-0 bg-background border-t border-border">
+                      <View className="flex-row justify-between items-center px-4 py-2">
+                        <TouchableOpacity onPress={() => setShowStartPicker(false)}>
+                          <Text className="text-primary text-base">Cancel</Text>
+                        </TouchableOpacity>
+                        <Text className="text-foreground font-medium">Start Date</Text>
+                        <TouchableOpacity onPress={() => setShowStartPicker(false)}>
+                          <Text className="text-primary text-base font-medium">Done</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <DateTimePicker
+                        value={startDate || new Date()}
+                        mode="date"
+                        display="spinner"
+                        onChange={handleStartDateChange}
+                      />
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            )}
+            {Platform.OS === 'android' && (
+              <DateTimePicker
+                value={startDate || new Date()}
+                mode="date"
+                display="default"
+                onChange={handleStartDateChange}
+              />
+            )}
+          </>
         )}
 
-        {showEndPicker && endDate && (
-          <DateTimePicker
-            value={endDate}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleEndDateChange}
-          />
+        {showEndPicker && (
+          <>
+            {Platform.OS === 'ios' && (
+              <TouchableWithoutFeedback onPress={() => setShowEndPicker(false)}>
+                <View className="absolute inset-0 bg-black/30" style={{ zIndex: 999 }}>
+                  <TouchableWithoutFeedback>
+                    <View className="absolute bottom-0 left-0 right-0 bg-background border-t border-border">
+                      <View className="flex-row justify-between items-center px-4 py-2">
+                        <TouchableOpacity onPress={() => setShowEndPicker(false)}>
+                          <Text className="text-primary text-base">Cancel</Text>
+                        </TouchableOpacity>
+                        <Text className="text-foreground font-medium">End Date</Text>
+                        <TouchableOpacity onPress={() => setShowEndPicker(false)}>
+                          <Text className="text-primary text-base font-medium">Done</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <DateTimePicker
+                        value={endDate || new Date()}
+                        mode="date"
+                        display="spinner"
+                        onChange={handleEndDateChange}
+                      />
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            )}
+            {Platform.OS === 'android' && (
+              <DateTimePicker
+                value={endDate || new Date()}
+                mode="date"
+                display="default"
+                onChange={handleEndDateChange}
+              />
+            )}
+          </>
         )}
       </View>
     </Modal>

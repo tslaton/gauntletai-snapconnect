@@ -11,6 +11,7 @@ import {
   Platform,
   Image,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -246,13 +247,10 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
     }
     
     if (selectedDate) {
-      if (startPickerMode === 'date' && Platform.OS === 'ios') {
-        setStartDateTime(selectedDate);
-        setStartPickerMode('time');
-      } else {
-        setStartDateTime(selectedDate);
-        setShowStartPicker(false);
-        setStartPickerMode('date');
+      setStartDateTime(selectedDate);
+      // Clear end date/time if it's before the new start date/time
+      if (endDateTime && selectedDate > endDateTime) {
+        setEndDateTime(null);
       }
       setErrors({ ...errors, dates: undefined });
     }
@@ -264,13 +262,10 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
     }
     
     if (selectedDate) {
-      if (endPickerMode === 'date' && Platform.OS === 'ios') {
-        setEndDateTime(selectedDate);
-        setEndPickerMode('time');
-      } else {
-        setEndDateTime(selectedDate);
-        setShowEndPicker(false);
-        setEndPickerMode('date');
+      setEndDateTime(selectedDate);
+      // Clear start date/time if it's after the new end date/time
+      if (startDateTime && selectedDate < startDateTime) {
+        setStartDateTime(null);
       }
       setErrors({ ...errors, dates: undefined });
     }
@@ -337,7 +332,11 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
         <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 40 }}>
           {/* Activity Image */}
           <TouchableOpacity
-            onPress={handleSelectImage}
+            onPress={() => {
+              setShowStartPicker(false);
+              setShowEndPicker(false);
+              handleSelectImage();
+            }}
             disabled={isUploadingImage}
             className="h-48 bg-muted m-4 rounded-lg overflow-hidden"
           >
@@ -366,6 +365,10 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
                   setTitle(text);
                   if (errors.title) setErrors({ ...errors, title: undefined });
                 }}
+                onFocus={() => {
+                  setShowStartPicker(false);
+                  setShowEndPicker(false);
+                }}
                 placeholder="What are you doing?"
                 placeholderTextColor={colors.mutedForeground}
                 className="bg-muted px-3 py-3 rounded-lg text-foreground"
@@ -382,6 +385,10 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               <TextInput
                 value={description}
                 onChangeText={setDescription}
+                onFocus={() => {
+                  setShowStartPicker(false);
+                  setShowEndPicker(false);
+                }}
                 placeholder="Add more details..."
                 placeholderTextColor={colors.mutedForeground}
                 className="bg-muted px-3 py-3 rounded-lg text-foreground"
@@ -398,6 +405,10 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               <TextInput
                 value={location}
                 onChangeText={setLocation}
+                onFocus={() => {
+                  setShowStartPicker(false);
+                  setShowEndPicker(false);
+                }}
                 placeholder="Where is this happening?"
                 placeholderTextColor={colors.mutedForeground}
                 className="bg-muted px-3 py-3 rounded-lg text-foreground"
@@ -410,6 +421,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               <Text className="text-sm font-medium text-foreground mb-1">Start Time</Text>
               <TouchableOpacity
                 onPress={() => {
+                  setShowEndPicker(false);
                   setShowStartPicker(true);
                   setStartPickerMode('date');
                 }}
@@ -427,6 +439,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               <Text className="text-sm font-medium text-foreground mb-1">End Time</Text>
               <TouchableOpacity
                 onPress={() => {
+                  setShowStartPicker(false);
                   setShowEndPicker(true);
                   setEndPickerMode('date');
                 }}
@@ -449,6 +462,10 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               <TextInput
                 value={tagsText}
                 onChangeText={setTagsText}
+                onFocus={() => {
+                  setShowStartPicker(false);
+                  setShowEndPicker(false);
+                }}
                 placeholder="food; shopping; museum (separate with semicolons)"
                 placeholderTextColor={colors.mutedForeground}
                 className="bg-muted px-3 py-3 rounded-lg text-foreground"
@@ -463,21 +480,115 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
 
         {/* Date/Time Pickers */}
         {showStartPicker && (
-          <DateTimePicker
-            value={startDateTime || new Date()}
-            mode={startPickerMode}
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleStartDateTimeChange}
-          />
+          <>
+            {Platform.OS === 'ios' && (
+              <TouchableWithoutFeedback onPress={() => setShowStartPicker(false)}>
+                <View className="absolute inset-0 bg-black/30" style={{ zIndex: 999 }}>
+                  <TouchableWithoutFeedback>
+                    <View className="absolute bottom-0 left-0 right-0 bg-background border-t border-border">
+                      <View className="flex-row justify-between items-center px-4 py-2">
+                        <TouchableOpacity 
+                          onPress={() => {
+                            setShowStartPicker(false);
+                            setStartPickerMode('date');
+                          }}
+                        >
+                          <Text className="text-primary text-base">Cancel</Text>
+                        </TouchableOpacity>
+                        <Text className="text-foreground font-medium">
+                          {startPickerMode === 'date' ? 'Start Date' : 'Start Time'}
+                        </Text>
+                        <TouchableOpacity 
+                          onPress={() => {
+                            if (startPickerMode === 'date') {
+                              setStartPickerMode('time');
+                            } else {
+                              setShowStartPicker(false);
+                              setStartPickerMode('date');
+                            }
+                          }}
+                        >
+                          <Text className="text-primary text-base font-medium">
+                            {startPickerMode === 'date' ? 'Next' : 'Done'}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <DateTimePicker
+                        value={startDateTime || new Date()}
+                        mode={startPickerMode}
+                        display="spinner"
+                        onChange={handleStartDateTimeChange}
+                      />
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            )}
+            {Platform.OS === 'android' && (
+              <DateTimePicker
+                value={startDateTime || new Date()}
+                mode={startPickerMode}
+                display="default"
+                onChange={handleStartDateTimeChange}
+              />
+            )}
+          </>
         )}
 
         {showEndPicker && (
-          <DateTimePicker
-            value={endDateTime || new Date()}
-            mode={endPickerMode}
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleEndDateTimeChange}
-          />
+          <>
+            {Platform.OS === 'ios' && (
+              <TouchableWithoutFeedback onPress={() => setShowEndPicker(false)}>
+                <View className="absolute inset-0 bg-black/30" style={{ zIndex: 999 }}>
+                  <TouchableWithoutFeedback>
+                    <View className="absolute bottom-0 left-0 right-0 bg-background border-t border-border">
+                      <View className="flex-row justify-between items-center px-4 py-2">
+                        <TouchableOpacity 
+                          onPress={() => {
+                            setShowEndPicker(false);
+                            setEndPickerMode('date');
+                          }}
+                        >
+                          <Text className="text-primary text-base">Cancel</Text>
+                        </TouchableOpacity>
+                        <Text className="text-foreground font-medium">
+                          {endPickerMode === 'date' ? 'End Date' : 'End Time'}
+                        </Text>
+                        <TouchableOpacity 
+                          onPress={() => {
+                            if (endPickerMode === 'date') {
+                              setEndPickerMode('time');
+                            } else {
+                              setShowEndPicker(false);
+                              setEndPickerMode('date');
+                            }
+                          }}
+                        >
+                          <Text className="text-primary text-base font-medium">
+                            {endPickerMode === 'date' ? 'Next' : 'Done'}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <DateTimePicker
+                        value={endDateTime || new Date()}
+                        mode={endPickerMode}
+                        display="spinner"
+                        onChange={handleEndDateTimeChange}
+                      />
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            )}
+            {Platform.OS === 'android' && (
+              <DateTimePicker
+                value={endDateTime || new Date()}
+                mode={endPickerMode}
+                display="default"
+                onChange={handleEndDateTimeChange}
+              />
+            )}
+          </>
         )}
       </KeyboardAvoidingView>
     </Modal>
