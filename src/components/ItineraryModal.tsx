@@ -1,4 +1,5 @@
 import type { CreateItineraryData, Itinerary, UpdateItineraryData } from '@/api/itineraries';
+import { fillItineraryDataWithAI, generateItineraryImageWithAI } from '@/api/ai';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useItinerariesStore } from '@/stores/itinerariesStore';
 import { deletePhoto, uploadPhoto } from '@/utils/photoStorage';
@@ -52,6 +53,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; dates?: string }>({});
+  const [isFillingWithAI, setIsFillingWithAI] = useState(false);
 
   // Track keyboard visibility to hide bottom bar
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -206,6 +208,88 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleFillWithAI = async () => {
+    try {
+      setIsFillingWithAI(true);
+
+      // Prepare current itinerary data
+      const currentItinerary: Partial<Itinerary> = {
+        title: title.trim() || undefined,
+        description: description.trim() || undefined,
+        start_time: startDate?.toISOString() || undefined,
+        end_time: endDate?.toISOString() || undefined,
+        cover_image_url: coverImageUrl || undefined,
+      };
+
+      // Make parallel requests for data and image
+      const promises: Promise<any>[] = [];
+      
+      // Request 1: Get AI suggestions for itinerary data
+      const needsDataFill = !title.trim() || !description.trim();
+      if (needsDataFill) {
+        promises.push(fillItineraryDataWithAI(currentItinerary));
+      }
+      
+      // Request 2: Generate AI image if no image exists
+      const needsImage = !coverImageUrl;
+      if (needsImage) {
+        promises.push(generateItineraryImageWithAI(currentItinerary));
+      }
+
+      if (promises.length === 0) {
+        return;
+      }
+
+      const results = await Promise.allSettled(promises);
+      
+      // Process data suggestions
+      if (needsDataFill && results[0]?.status === 'fulfilled') {
+        const dataSuggestions = (results[0] as PromiseFulfilledResult<any>).value;
+        
+        // Apply suggestions only for empty fields
+        if (dataSuggestions.title && !title.trim()) {
+          setTitle(dataSuggestions.title);
+        }
+        if (dataSuggestions.description && !description.trim()) {
+          setDescription(dataSuggestions.description);
+        }
+        if (dataSuggestions.start_time && !startDate) {
+          setStartDate(new Date(dataSuggestions.start_time));
+        }
+        if (dataSuggestions.end_time && !endDate) {
+          setEndDate(new Date(dataSuggestions.end_time));
+        }
+      } else if (needsDataFill && results[0]?.status === 'rejected') {
+        console.error('Failed to get data suggestions:', results[0].reason);
+      }
+      
+      // Process image generation
+      const imageResultIndex = needsDataFill ? 1 : 0;
+      if (needsImage && results[imageResultIndex]?.status === 'fulfilled') {
+        const imageResult = (results[imageResultIndex] as PromiseFulfilledResult<any>).value;
+        if (imageResult.image_url) {
+          setCoverImageUrl(imageResult.image_url);
+          setImageError(false);
+        }
+      } else if (needsImage && results[imageResultIndex]?.status === 'rejected') {
+        console.error('Failed to generate image:', results[imageResultIndex].reason);
+      }
+
+      // Only alert on complete failure
+      const dataSuccess = needsDataFill && results[0]?.status === 'fulfilled';
+      const imageSuccess = needsImage && results[imageResultIndex]?.status === 'fulfilled';
+      
+      if (!dataSuccess && !imageSuccess) {
+        Alert.alert('Error', 'Failed to get AI suggestions. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error filling with AI:', error);
+      Alert.alert('Error', 'Failed to get AI suggestions. Please try again.');
+    } finally {
+      setIsFillingWithAI(false);
     }
   };
 
@@ -463,6 +547,37 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
             )}
           </View>
         </ScrollView>
+
+        {/* AI Fill button overlay */}
+        {!keyboardVisible && (
+          <View
+            className="absolute left-0 right-0 px-4"
+            style={{ bottom: isEditMode ? 72 + insets.bottom : 16 + insets.bottom }}
+          >
+            <View className="items-center">
+              <TouchableOpacity
+                onPress={handleFillWithAI}
+                disabled={isLoading || isFillingWithAI}
+                className="px-8 py-2 rounded-lg border border-primary bg-primary/10 flex-row items-center"
+              >
+                {isFillingWithAI ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <>
+                    <Ionicons 
+                      name="color-wand" 
+                      size={18} 
+                      color={colors.primary} 
+                    />
+                    <Text className="text-center font-medium ml-2 text-primary">
+                      Fill with AI
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {/* Delete button overlay – hidden when keyboard visible */}
         {isEditMode && !keyboardVisible && (

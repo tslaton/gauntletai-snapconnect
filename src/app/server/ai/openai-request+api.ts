@@ -51,6 +51,55 @@ function getActivityDataSchema() {
   };
 }
 
+// Helper function to get itinerary schema
+function getItineraryDataSchema(includeActivities = false) {
+  const schema: any = {
+    type: "object",
+    properties: {
+      title: {
+        type: "string",
+        description: "Itinerary title starting with destination (City, State, or Country)"
+      },
+      description: {
+        type: "string",
+        description: "Brief description of the itinerary"
+      },
+      start_time: {
+        type: "string",
+        description: "Start date/time in ISO 8601 format (YYYY-MM-DDTHH:mm:ss)"
+      },
+      end_time: {
+        type: "string",
+        description: "End date/time in ISO 8601 format (YYYY-MM-DDTHH:mm:ss)"
+      }
+    },
+    required: ["title", "description"],
+    additionalProperties: false
+  };
+
+  if (includeActivities) {
+    schema.properties.activities = {
+      type: "array",
+      description: "List of activities with non-overlapping times within itinerary bounds",
+      items: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          description: { type: "string" },
+          location: { type: "string" },
+          tags: { type: "array", items: { type: "string" } },
+          start_time: { type: "string", description: "ISO 8601 format" },
+          end_time: { type: "string", description: "ISO 8601 format" }
+        },
+        required: ["title", "description", "location", "tags"]
+      }
+    };
+    schema.required.push("activities");
+  }
+
+  return schema;
+}
+
 const headers = {
   'Content-Type': 'application/json',
 }
@@ -76,6 +125,21 @@ interface CreateActivityFromPromptRequest extends OpenAIRequestsBody {
   type: 'create-activity-from-prompt'
   prompt: string
   itinerary: Itinerary
+}
+
+interface FillItineraryDataRequest extends OpenAIRequestsBody {
+  type: 'fill-itinerary-data'
+  itinerary: Partial<Itinerary>
+}
+
+interface GenerateItineraryImageRequest extends OpenAIRequestsBody {
+  type: 'generate-itinerary-image'
+  itinerary: Partial<Itinerary>
+}
+
+interface CreateItineraryFromPromptRequest extends OpenAIRequestsBody {
+  type: 'create-itinerary-from-prompt'
+  prompt: string
 }
 
 export async function POST(req: Request) {
@@ -235,6 +299,134 @@ Provide a vivid, detailed description that would create an appealing travel phot
         const activityData = JSON.parse(response.output_text || '{}');
 
         return new Response(JSON.stringify({ activity: activityData }), { headers })
+      }
+      case 'fill-itinerary-data': {
+        const { itinerary } = rest as FillItineraryDataRequest;
+        
+        const prompt = `You are helping to fill in missing information for a travel itinerary.
+
+Current Itinerary Information:
+- Title: ${itinerary.title || '[MISSING]'}
+- Description: ${itinerary.description || '[MISSING]'}
+- Start Date: ${itinerary.start_time ? new Date(itinerary.start_time).toLocaleDateString() : '[MISSING]'}
+- End Date: ${itinerary.end_time ? new Date(itinerary.end_time).toLocaleDateString() : '[MISSING]'}
+
+Please provide suggestions to fill in the missing fields. If the title is missing or doesn't start with a destination, suggest a title that begins with the destination (City, State, or Country).
+
+Only include fields that need to be filled or improved.`;
+
+        const response = await openai.responses.create({
+          model: "gpt-4.1-nano",
+          input: [
+            { role: "system", content: "You are a helpful travel planning assistant." },
+            { role: "user", content: prompt }
+          ],
+          text: {
+            format: {
+              type: "json_schema",
+              name: "itinerary_data_suggestions",
+              strict: false,
+              schema: getItineraryDataSchema(false)
+            }
+          }
+        });
+        
+        const suggestions = JSON.parse(response.output_text || '{}');
+
+        return new Response(JSON.stringify({ suggestions }), { headers })
+      }
+      case 'generate-itinerary-image': {
+        const { itinerary } = rest as GenerateItineraryImageRequest;
+        
+        // First, get a summary for the image generation
+        const summaryPrompt = `Create a concise, visual description for a DALL-E image that represents this travel itinerary:
+
+Itinerary: ${itinerary.title || 'Travel itinerary'}
+Description: ${itinerary.description || ''}
+Duration: ${itinerary.start_time ? new Date(itinerary.start_time).toLocaleDateString() : ''} to ${itinerary.end_time ? new Date(itinerary.end_time).toLocaleDateString() : ''}
+
+Provide a vivid, detailed description that would create an appealing travel cover photo for this itinerary. Focus on the destination's most iconic elements, atmosphere, and experiences.`;
+
+        const summaryResponse = await openai.responses.create({
+          model: "gpt-4.1-nano",
+          input: summaryPrompt
+        });
+        
+        // Generate the image using DALL-E-3
+        const imageResponse = await openai.images.generate({
+          model: 'dall-e-3',
+          prompt: summaryResponse.output_text || '',
+          n: 1,
+          size: '1024x1024',
+          quality: 'hd',
+          style: 'vivid',
+          response_format: 'b64_json'
+        });
+        
+        const b64Json = imageResponse.data?.[0]?.b64_json as string;
+        if (!b64Json) {
+          throw new Error('Failed to generate image data from OpenAI.');
+        }
+        
+        // Convert base64 to buffer
+        const buffer = new Uint8Array(
+          atob(b64Json)
+            .split("")
+            .map(char => char.charCodeAt(0))
+        );
+        
+        // Upload to Supabase storage
+        const filePath = `itineraries/${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
+        const { error } = await supabase.storage
+          .from('photos')
+          .upload(filePath, buffer, {
+            contentType: 'image/png'
+          });
+          
+        if (error) {
+          throw new Error(`Supabase upload error: ${error.message}`);
+        }
+        
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('photos')
+          .getPublicUrl(filePath);
+        
+        return new Response(JSON.stringify({ image_url: publicUrl }), { headers })
+      }
+      case 'create-itinerary-from-prompt': {
+        const { prompt: userPrompt } = rest as CreateItineraryFromPromptRequest;
+        
+        const prompt = `Based on the user's travel request below, create a complete itinerary with title, description, dates, and a suggested list of activities.
+
+User Request: ${userPrompt}
+
+IMPORTANT:
+1. The itinerary title MUST start with the destination (City, State, or Country)
+2. Parse any dates mentioned in the request and format them as ISO 8601
+3. Create a logical sequence of activities with non-overlapping times
+4. Activities should fit within the itinerary's start and end dates
+5. If no dates are mentioned, leave start_time and end_time as null`;
+
+        const response = await openai.responses.create({
+          model: "gpt-4.1-nano",
+          input: [
+            { role: "system", content: "You are an expert travel planner. Create detailed, practical itineraries with well-timed activities." },
+            { role: "user", content: prompt }
+          ],
+          text: {
+            format: {
+              type: "json_schema",
+              name: "new_itinerary",
+              strict: false,
+              schema: getItineraryDataSchema(true)
+            }
+          }
+        });
+        
+        const itineraryData = JSON.parse(response.output_text || '{}');
+
+        return new Response(JSON.stringify({ itinerary: itineraryData }), { headers })
       }
       default:
         return new Response(JSON.stringify({ error: 'Invalid task type' }), {

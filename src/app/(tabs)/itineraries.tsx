@@ -7,6 +7,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { ItineraryCard } from '@/components/ItineraryCard';
 import { ItineraryModal } from '@/components/ItineraryModal';
+import { AIItineraryPromptModal } from '@/components/AIItineraryPromptModal';
 import { Header } from '@/components/Header';
 import MoreOptionsMenu from '@/components/MoreOptionsMenu';
 import type { Itinerary } from '@/api/itineraries';
@@ -19,6 +20,7 @@ export default function ItinerariesScreen() {
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [editingItinerary, setEditingItinerary] = useState<Itinerary | null>(null);
+  const [showAIPromptModal, setShowAIPromptModal] = useState(false);
   const debouncedSearch = useDebounce(searchInput, 300);
   
   const {
@@ -45,6 +47,10 @@ export default function ItinerariesScreen() {
   const handleNewItinerary = () => {
     setEditingItinerary(null);
     setShowCreateModal(true);
+  };
+
+  const handleAIItinerary = () => {
+    setShowAIPromptModal(true);
   };
 
   const handleItinerarySaved = (itinerary: Itinerary) => {
@@ -134,6 +140,12 @@ export default function ItinerariesScreen() {
             )}
           </View>
           <TouchableOpacity
+            onPress={handleAIItinerary}
+            className="bg-primary/10 px-3 py-2 rounded-full flex-row items-center mr-2 border border-primary"
+          >
+            <FontAwesome name="magic" size={16} color={colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={handleNewItinerary}
             className="bg-primary px-4 py-2 rounded-full flex-row items-center"
           >
@@ -196,6 +208,13 @@ export default function ItinerariesScreen() {
         onClose={() => setShowMoreOptions(false)}
         context="itineraries"
         onNewItinerary={handleNewItinerary}
+      />
+
+      {/* AI Itinerary Prompt Modal */}
+      <AIItineraryPromptModal
+        visible={showAIPromptModal}
+        onClose={() => setShowAIPromptModal(false)}
+        onItineraryCreated={() => fetchItineraries()}
       />
     </View>
   );
