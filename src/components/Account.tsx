@@ -19,6 +19,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { CompactThemeSelector } from './CompactThemeSelector';
 import Spacer from './Spacer';
 import UserAvatar from './UserAvatar';
 
@@ -28,7 +30,8 @@ export default function Account({ session }: { session: Session }) {
   // Profile store state
   const isLoading = useProfileStore((state) => state.isLoading);
   const username = useProfileStore((state) => state.username);
-  const website = useProfileStore((state) => state.website);
+  const fullName = useProfileStore((state) => state.fullName);
+  const about = useProfileStore((state) => state.about);
   const error = useProfileStore((state) => state.error);
   const avatarUrl = useProfileStore((state) => state.avatarUrl);
 
@@ -36,7 +39,8 @@ export default function Account({ session }: { session: Session }) {
   const fetchProfile = useProfileStore((state) => state.fetchProfile);
   const saveProfile = useProfileStore((state) => state.saveProfile);
   const setUsername = useProfileStore((state) => state.setUsername);
-  const setWebsite = useProfileStore((state) => state.setWebsite);
+  const setFullName = useProfileStore((state) => state.setFullName);
+  const setAbout = useProfileStore((state) => state.setAbout);
   const setAvatarUrl = useProfileStore((state) => state.setAvatarUrl);
   const clearError = useProfileStore((state) => state.clearError);
 
@@ -182,74 +186,102 @@ export default function Account({ session }: { session: Session }) {
   );
 
   return (
-    <View className="flex-1 px-6 py-8">
-      {/* Centered container with max width */}
-      <View className="flex-1 justify-center max-w-sm mx-auto w-full">
-        {/* Avatar Section */}
-        <View className="items-center mb-8">
-          {renderAvatar()}
-        </View>
-
-        {/* Form Fields with better spacing */}
-        <View className="space-y-5">
-          {/* Email Field */}
-          <View>
-            <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Email</Text>
-            <TextInput
-              className="border border-border rounded-xl px-4 py-3 bg-muted text-muted-foreground text-base"
-              value={session?.user?.email}
-              editable={false}
-              placeholderTextColor={colors.mutedForeground}
-            />
+    <KeyboardAwareScrollView
+      className="flex-1"
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid={true}
+      extraScrollHeight={20}
+      enableAutomaticScroll={true}
+    >
+      <View className="px-6 py-8">
+        {/* Centered container with max width */}
+        <View className="max-w-sm mx-auto w-full">
+          {/* Avatar Section */}
+          <View className="items-center mb-8">
+            {renderAvatar()}
           </View>
 
-          {/* Username Field */}
-          <View>
-            <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Username</Text>
-            <TextInput
-              className="border border-border rounded-xl px-4 py-3 bg-card text-foreground text-base"
-              value={username || ''}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-              placeholder="Enter username"
-              placeholderTextColor={colors.mutedForeground}
-            />
+          {/* Form Fields with better spacing */}
+          <View className="space-y-5">
+            {/* Email Field */}
+            <View>
+              <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Email</Text>
+              <TextInput
+                className="border border-border rounded-xl px-4 py-3 bg-muted text-muted-foreground text-base"
+                value={session?.user?.email}
+                editable={false}
+                placeholderTextColor={colors.mutedForeground}
+              />
+            </View>
+
+            {/* Full Name Field */}
+            <View>
+              <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Full Name</Text>
+              <TextInput
+                className="border border-border rounded-xl px-4 py-3 bg-card text-foreground text-base"
+                value={fullName || ''}
+                onChangeText={setFullName}
+                autoCapitalize="words"
+                placeholder="Enter your full name"
+                placeholderTextColor={colors.mutedForeground}
+              />
+            </View>
+
+            {/* Username Field */}
+            <View>
+              <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Username</Text>
+              <TextInput
+                className="border border-border rounded-xl px-4 py-3 bg-card text-foreground text-base"
+                value={username || ''}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+                placeholder="Enter username"
+                placeholderTextColor={colors.mutedForeground}
+              />
+            </View>
+
+            {/* About Field */}
+            <View>
+              <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">About</Text>
+              <TextInput
+                className="border border-border rounded-xl px-4 py-3 bg-card text-foreground text-base"
+                value={about || ''}
+                onChangeText={setAbout}
+                placeholder="Tell others what kind of content you share..."
+                placeholderTextColor={colors.mutedForeground}
+                multiline={true}
+                numberOfLines={3}
+                textAlignVertical="top"
+                style={{ minHeight: 80 }}
+              />
+            </View>
+
+            {/* Theme Selector */}
+            <CompactThemeSelector />
           </View>
 
-          {/* Website Field */}
-          <View>
-            <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Website</Text>
-            <TextInput
-              className="border border-border rounded-xl px-4 py-3 bg-card text-foreground text-base"
-              value={website || ''}
-              onChangeText={setWebsite}
-              autoCapitalize="none"
-              placeholder="Enter website URL"
-              placeholderTextColor={colors.mutedForeground}
-            />
+          {/* Action Buttons with better styling */}
+          <View className="mt-8 space-y-3">
+            <TouchableOpacity
+              disabled={isLoading}
+              onPress={() => saveProfile(session)}
+              className="bg-primary rounded-xl py-4 items-center justify-center active:opacity-90 disabled:bg-muted shadow-sm"
+            >
+              <Text className="text-primary-foreground text-base font-semibold">
+                {isLoading ? 'Updating...' : 'Update Profile'}
+              </Text>
+            </TouchableOpacity>
+            <Spacer size={8} />
+            <TouchableOpacity
+              onPress={handleSignOut}
+              className="bg-card border border-border rounded-xl py-4 items-center justify-center active:opacity-90"
+            >
+              <Text className="text-foreground text-base font-semibold">Sign Out</Text>
+            </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Action Buttons with better styling */}
-        <View className="mt-8 space-y-3">
-          <TouchableOpacity
-            disabled={isLoading}
-            onPress={() => saveProfile(session)}
-            className="bg-primary rounded-xl py-4 items-center justify-center active:opacity-90 disabled:bg-muted shadow-sm"
-          >
-            <Text className="text-primary-foreground text-base font-semibold">
-              {isLoading ? 'Updating...' : 'Update Profile'}
-            </Text>
-          </TouchableOpacity>
-          <Spacer size={8} />
-          <TouchableOpacity
-            onPress={handleSignOut}
-            className="bg-card border border-border rounded-xl py-4 items-center justify-center active:opacity-90"
-          >
-            <Text className="text-foreground text-base font-semibold">Sign Out</Text>
-          </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </KeyboardAwareScrollView>
   );
 }

@@ -4,7 +4,6 @@
  */
 
 import Account from '@/components/Account';
-import { ThemeSettings } from '@/components/ThemeSettings';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
@@ -73,7 +72,6 @@ export default function AccountScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <Account key={session.user.id} session={session} />
-          <ThemeSettings />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

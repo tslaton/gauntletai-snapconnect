@@ -15,10 +15,12 @@ interface ProfileState {
   isLoading: boolean;
   error: string | null;
   username: string | null;
-  website: string | null;
+  fullName: string | null;
+  about: string | null;
   avatarUrl: string | null;
   setUsername: (username: string) => void;
-  setWebsite: (website: string) => void;
+  setFullName: (fullName: string) => void;
+  setAbout: (about: string) => void;
   setAvatarUrl: (avatarUrl: string) => void;
   clearError: () => void;
   fetchProfile: (session: Session) => Promise<void>;
@@ -35,7 +37,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   isLoading: false,
   error: null,
   username: null,
-  website: null,
+  fullName: null,
+  about: null,
   avatarUrl: null,
 
   // --- ACTIONS ---
@@ -47,10 +50,16 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   setUsername: (username) => set({ username }),
 
   /**
-   * Sets the website URL in the store.
-   * @param {string} website - The new website URL.
+   * Sets the full name in the store.
+   * @param {string} fullName - The new full name.
    */
-  setWebsite: (website) => set({ website }),
+  setFullName: (fullName) => set({ fullName }),
+
+  /**
+   * Sets the about text in the store.
+   * @param {string} about - The new about text.
+   */
+  setAbout: (about) => set({ about }),
 
   /**
    * Sets the avatar URL in the store.
@@ -75,7 +84,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
       const { data, error, status } = await supabase
         .from('profiles')
-        .select(`username, website, avatar_url`)
+        .select(`username, full_name, about, avatar_url`)
         .eq('id', user.id)
         .single();
 
@@ -87,7 +96,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         // Batch state updates to avoid multiple re-renders
         set({
           username: data.username,
-          website: data.website,
+          fullName: data.full_name,
+          about: data.about,
           avatarUrl: data.avatar_url,
         });
       }
@@ -111,12 +121,13 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       if (!user) throw new Error('No user on the session!');
 
       // Get current state from the store for the update
-      const { username, website, avatarUrl } = get();
+      const { username, fullName, about, avatarUrl } = get();
 
       const updates = {
         id: user.id,
         username,
-        website,
+        full_name: fullName,
+        about,
         avatar_url: avatarUrl,
         updated_at: new Date(),
       };
@@ -130,7 +141,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       // Sync the updated profile data to userStore so AvatarButton updates
       useUserStore.getState().updateUser({
         username,
-        website,
+        fullName,
+        about,
         avatarUrl,
       });
     } catch (error) {

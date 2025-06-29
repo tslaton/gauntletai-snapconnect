@@ -7,12 +7,14 @@ import { sendMessage } from '@/api/messages';
 import { useConversationsStore } from '@/stores/conversations';
 import { useFriendsStore } from '@/stores/friends';
 import { useUserStore } from '@/stores/user';
+import { useStoriesStore } from '@/stores/stories';
 import { uploadPhoto, validatePhoto } from '@/utils/photoStorage';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function PhotoEditScreen() {
   const router = useRouter();
@@ -22,9 +24,10 @@ export default function PhotoEditScreen() {
   const [isUploading, setIsUploading] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
   
-  const { friends, isLoading: friendsLoading, fetchFriends } = useFriendsStore();
+  const { friends, isFriendsLoading: friendsLoading, fetchFriends } = useFriendsStore();
   const { conversations, startDirectConversation } = useConversationsStore();
   const { currentUser } = useUserStore();
+  const { addStoryContent } = useStoriesStore();
 
   // Load friends when component mounts
   useEffect(() => {
@@ -113,16 +116,43 @@ export default function PhotoEditScreen() {
    * Handles sharing photo to stories
    */
   const handleShareToStories = async () => {
-    if (!photoUri) return;
+    if (!photoUri || !currentUser?.id) return;
     
     try {
       setIsUploading(true);
       
-      // TODO: Implement stories upload
+      // Validate photo first
+      const validation = await validatePhoto(photoUri);
+      if (!validation.valid) {
+        Alert.alert('Invalid Photo', validation.error || 'Photo is not valid');
+        return;
+      }
+
+      // Upload photo to Supabase Storage
+      const uploadResult = await uploadPhoto(photoUri, currentUser.id, {
+        quality: 0.8,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        compress: true
+      });
+
+      if (!uploadResult.success || !uploadResult.publicUrl) {
+        Alert.alert('Upload Failed', uploadResult.error || 'Failed to upload photo');
+        return;
+      }
+
+      // Add photo to story
+      await addStoryContent({
+        type: 'photo',
+        content_url: uploadResult.publicUrl,
+        story_id: '', // This will be set by the store
+        user_id: currentUser.id
+      });
+
       Alert.alert(
-        'Stories Feature',
-        'Stories feature coming soon! For now, share with friends.',
-        [{ text: 'OK' }]
+        'Story Updated!',
+        'Your photo has been added to your story.',
+        [{ text: 'OK', onPress: () => router.back() }]
       );
     } catch (error) {
       console.error('Error sharing to stories:', error);
@@ -222,9 +252,13 @@ export default function PhotoEditScreen() {
                     disabled={isUploading}
                     className="flex-row items-center bg-gray-800 rounded-lg p-3 mb-2"
                   >
-                    <View className="w-10 h-10 bg-gray-600 rounded-full items-center justify-center mr-3">
-                      <Ionicons name="person" size={16} color="#ffffff" />
-                    </View>
+                    <UserAvatar 
+                      uri={friend.friend.avatarUrl}
+                      size={40}
+                      className="mr-3"
+                      fallbackIcon="user"
+                      fallbackIconSize={16}
+                    />
                     <Text className="text-white font-medium">
                       {friend.friend.fullName || friend.friend.username || 'Unknown Friend'}
                     </Text>

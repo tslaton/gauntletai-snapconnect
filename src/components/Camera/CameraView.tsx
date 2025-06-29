@@ -161,6 +161,7 @@ export function CameraView({ onGoBack, onPhotoTaken }: CameraViewProps) {
           cameraType={cameraType}
           zoom={zoom}
           onZoomChange={setZoom}
+          onPhotoSelected={onPhotoTaken}
         />
       </View>
     </View>

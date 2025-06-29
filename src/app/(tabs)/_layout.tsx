@@ -32,20 +32,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="map"
-        options={{
-          title: 'Map',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome name="map-marker" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="chat"
         options={{
           title: 'Chat',
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="comments" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="stories"
+        options={{
+          title: 'Stories',
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="film" size={size} color={color} />
           ),
         }}
       />

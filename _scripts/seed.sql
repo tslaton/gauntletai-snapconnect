@@ -90,27 +90,146 @@ BEGIN
   FROM test_users
   ON CONFLICT (id) DO NOTHING;
   
-  -- Update profiles with username, full_name, and avatar_url (trigger only sets minimal fields)
-  UPDATE public.profiles SET username = 'alexchen', full_name = 'Alex Chen', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=alex' WHERE id = '11111111-1111-1111-1111-111111111111'::uuid;
-  UPDATE public.profiles SET username = 'sarahjohnson', full_name = 'Sarah Johnson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=sarah' WHERE id = '22222222-2222-2222-2222-222222222222'::uuid;
-  UPDATE public.profiles SET username = 'mikewilliams', full_name = 'Mike Williams', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=mike' WHERE id = '33333333-3333-3333-3333-333333333333'::uuid;
-  UPDATE public.profiles SET username = 'emilydavis', full_name = 'Emily Davis', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=emily' WHERE id = '44444444-4444-4444-4444-444444444444'::uuid;
-  UPDATE public.profiles SET username = 'chrisbrown', full_name = 'Chris Brown', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=chris' WHERE id = '55555555-5555-5555-5555-555555555555'::uuid;
-  UPDATE public.profiles SET username = 'jessicamiller', full_name = 'Jessica Miller', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=jessica' WHERE id = '66666666-6666-6666-6666-666666666666'::uuid;
-  UPDATE public.profiles SET username = 'davidwilson', full_name = 'David Wilson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=david' WHERE id = '77777777-7777-7777-7777-777777777777'::uuid;
-  UPDATE public.profiles SET username = 'lisaanderson', full_name = 'Lisa Anderson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=lisa' WHERE id = '88888888-8888-8888-8888-888888888888'::uuid;
-  UPDATE public.profiles SET username = 'jamestaylor', full_name = 'James Taylor', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=james' WHERE id = '99999999-9999-9999-9999-999999999999'::uuid;
-  UPDATE public.profiles SET username = 'mariagarcia', full_name = 'Maria Garcia', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=maria' WHERE id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid;
-  UPDATE public.profiles SET username = 'robertlee', full_name = 'Robert Lee', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=robert' WHERE id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid;
-  UPDATE public.profiles SET username = 'lindamartin', full_name = 'Linda Martin', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=linda' WHERE id = 'cccccccc-cccc-cccc-cccc-cccccccccccc'::uuid;
-  UPDATE public.profiles SET username = 'kevinwhite', full_name = 'Kevin White', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=kevin' WHERE id = 'dddddddd-dddd-dddd-dddd-dddddddddddd'::uuid;
-  UPDATE public.profiles SET username = 'amythomas', full_name = 'Amy Thomas', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=amy' WHERE id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'::uuid;
-  UPDATE public.profiles SET username = 'brianjackson', full_name = 'Brian Jackson', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=brian' WHERE id = 'ffffffff-ffff-ffff-ffff-ffffffffffff'::uuid;
-  UPDATE public.profiles SET username = 'nancyharris', full_name = 'Nancy Harris', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=nancy' WHERE id = '11111111-2222-3333-4444-555555555555'::uuid;
-  UPDATE public.profiles SET username = 'steveclark', full_name = 'Steve Clark', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=steve' WHERE id = '22222222-3333-4444-5555-666666666666'::uuid;
-  UPDATE public.profiles SET username = 'karenlewis', full_name = 'Karen Lewis', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=karen' WHERE id = '33333333-4444-5555-6666-777777777777'::uuid;
-  UPDATE public.profiles SET username = 'jasonwalker', full_name = 'Jason Walker', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=jason' WHERE id = '44444444-5555-6666-7777-888888888888'::uuid;
-  UPDATE public.profiles SET username = 'michellehall', full_name = 'Michelle Hall', avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=michelle' WHERE id = '55555555-6666-7777-8888-999999999999'::uuid;
+  -- Update profiles with username, full_name, avatar_url, and about sections
+  UPDATE public.profiles SET 
+    username = 'alexchen', 
+    full_name = 'Alex Chen', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=alex',
+    about = 'Travel photographer and adventure seeker. I love capturing breathtaking landscapes and sharing hidden gems from around the world. Always planning my next hiking expedition or cultural immersion trip.'
+  WHERE id = '11111111-1111-1111-1111-111111111111'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'sarahjohnson', 
+    full_name = 'Sarah Johnson', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=sarah',
+    about = 'Food enthusiast and culinary explorer. I post about local cuisines, cooking experiments, and the best restaurants I discover during my travels. Currently obsessed with Southeast Asian street food.'
+  WHERE id = '22222222-2222-2222-2222-222222222222'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'mikewilliams', 
+    full_name = 'Mike Williams', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=mike',
+    about = 'Digital nomad and tech professional. Sharing my experiences working remotely from different countries, coworking spaces reviews, and tips for maintaining work-life balance while traveling.'
+  WHERE id = '33333333-3333-3333-3333-333333333333'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'emilydavis', 
+    full_name = 'Emily Davis', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=emily',
+    about = 'Nature lover and wildlife photographer. I share stunning shots from national parks, wildlife encounters, and eco-friendly travel tips. Passionate about conservation and sustainable tourism.'
+  WHERE id = '44444444-4444-4444-4444-444444444444'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'chrisbrown', 
+    full_name = 'Chris Brown', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=chris',
+    about = 'Urban explorer and architecture enthusiast. I document interesting buildings, street art, and city vibes. Love finding unique coffee shops and local music venues in every city I visit.'
+  WHERE id = '55555555-5555-5555-5555-555555555555'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'jessicamiller', 
+    full_name = 'Jessica Miller', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=jessica',
+    about = 'Beach lover and water sports enthusiast. Sharing my favorite coastal destinations, surfing spots, and underwater photography. Always chasing the perfect wave and sunset.'
+  WHERE id = '66666666-6666-6666-6666-666666666666'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'davidwilson', 
+    full_name = 'David Wilson', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=david',
+    about = 'History buff and cultural explorer. I post about historical sites, museums, and cultural experiences. Love sharing interesting facts and stories from the places I visit.'
+  WHERE id = '77777777-7777-7777-7777-777777777777'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'lisaanderson', 
+    full_name = 'Lisa Anderson', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=lisa',
+    about = 'Wellness traveler and yoga instructor. Sharing retreat recommendations, meditation spots, and healthy travel tips. Passionate about finding balance and mindfulness in every journey.'
+  WHERE id = '88888888-8888-8888-8888-888888888888'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'jamestaylor', 
+    full_name = 'James Taylor', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=james',
+    about = 'Adventure sports enthusiast. From mountain biking to skydiving, I share adrenaline-pumping experiences and extreme sports destinations. Always looking for the next thrill.'
+  WHERE id = '99999999-9999-9999-9999-999999999999'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'mariagarcia', 
+    full_name = 'Maria Garcia', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=maria',
+    about = 'Fashion and lifestyle blogger. I share travel outfits, packing tips, and stylish destinations. Love exploring local fashion scenes and boutique hotels around the world.'
+  WHERE id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'robertlee', 
+    full_name = 'Robert Lee', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=robert',
+    about = 'Train enthusiast and slow travel advocate. Documenting scenic train routes, railway stations, and the joy of overland travel. Believer in the journey being as important as the destination.'
+  WHERE id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'lindamartin', 
+    full_name = 'Linda Martin', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=linda',
+    about = 'Family travel expert. Sharing kid-friendly destinations, travel hacks for parents, and memorable family adventures. Making travel with children fun and stress-free.'
+  WHERE id = 'cccccccc-cccc-cccc-cccc-cccccccccccc'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'kevinwhite', 
+    full_name = 'Kevin White', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=kevin',
+    about = 'Budget traveler and hostel connoisseur. Proving that amazing adventures don''t need to break the bank. Sharing money-saving tips and affordable destination guides.'
+  WHERE id = 'dddddddd-dddd-dddd-dddd-dddddddddddd'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'amythomas', 
+    full_name = 'Amy Thomas', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=amy',
+    about = 'Wine and vineyard explorer. Posting about wine regions, tasting experiences, and scenic vineyard stays. Love pairing local wines with regional cuisines.'
+  WHERE id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'brianjackson', 
+    full_name = 'Brian Jackson', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=brian',
+    about = 'Music festival traveler. Following festivals around the globe, sharing lineup reviews, and festival survival tips. Always chasing the perfect beat and summer vibes.'
+  WHERE id = 'ffffffff-ffff-ffff-ffff-ffffffffffff'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'nancyharris', 
+    full_name = 'Nancy Harris', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=nancy',
+    about = 'Luxury travel consultant. Curating high-end experiences, five-star hotel reviews, and exclusive destination guides. Helping travelers indulge in the finer things.'
+  WHERE id = '11111111-2222-3333-4444-555555555555'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'steveclark', 
+    full_name = 'Steve Clark', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=steve',
+    about = 'Motorcycle touring enthusiast. Documenting epic road trips, scenic routes, and biker-friendly destinations. Two wheels, endless adventures.'
+  WHERE id = '22222222-3333-4444-5555-666666666666'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'karenlewis', 
+    full_name = 'Karen Lewis', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=karen',
+    about = 'Solo female traveler. Empowering women to explore the world safely and confidently. Sharing solo travel tips, safety advice, and inspiring stories from the road.'
+  WHERE id = '33333333-4444-5555-6666-777777777777'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'jasonwalker', 
+    full_name = 'Jason Walker', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=jason',
+    about = 'Drone pilot and aerial photographer. Capturing destinations from above, sharing unique perspectives and breathtaking aerial views. Licensed drone operator with a passion for heights.'
+  WHERE id = '44444444-5555-6666-7777-888888888888'::uuid;
+  
+  UPDATE public.profiles SET 
+    username = 'michellehall', 
+    full_name = 'Michelle Hall', 
+    avatar_url = 'https://api.dicebear.com/7.x/avataaars/png?seed=michelle',
+    about = 'Cruise specialist and island hopper. Reviewing cruise lines, shore excursions, and tropical paradise destinations. Helping you find your perfect floating vacation.'
+  WHERE id = '55555555-6666-7777-8888-999999999999'::uuid;
   
   -- Make first 10 test users friends with auth user
   FOR test_user_id IN 
@@ -521,4 +640,197 @@ BEGIN
   RAISE NOTICE 'Activities created: %', activity_count;
   RAISE NOTICE '';
   RAISE NOTICE 'To run this again: DELETE FROM profiles WHERE email != ''dev@snapconnect.com'';';
+END $$;
+
+-- =============================================
+-- STORIES SEED DATA
+-- =============================================
+
+DO $$
+DECLARE
+  auth_user_id uuid;
+  story_count integer := 0;
+  story_content_count integer := 0;
+  user_story_id uuid;
+  content_index integer;
+BEGIN
+  -- Find the authenticated dev user by email (needed for count and any user-specific logic)
+  SELECT id INTO auth_user_id
+  FROM public.profiles
+  WHERE email = 'dev@snapconnect.com';
+
+  IF auth_user_id IS NULL THEN
+    RAISE EXCEPTION 'No user found with email dev@snapconnect.com. Please sign up with this email first.';
+  END IF;
+
+  -- Create stories for users with travel-themed content
+  -- Note: Stories are automatically created by trigger, so we just need to add content
+  -- Ensure stories exist for all test users
+  INSERT INTO public.stories (user_id)
+  SELECT id FROM public.profiles
+  WHERE id IN (
+    '11111111-1111-1111-1111-111111111111'::uuid,
+    '22222222-2222-2222-2222-222222222222'::uuid,
+    '44444444-4444-4444-4444-444444444444'::uuid,
+    '55555555-5555-5555-5555-555555555555'::uuid,
+    '66666666-6666-6666-6666-666666666666'::uuid,
+    '77777777-7777-7777-7777-777777777777'::uuid,
+    '88888888-8888-8888-8888-888888888888'::uuid,
+    '99999999-9999-9999-9999-999999999999'::uuid,
+    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid
+  )
+  ON CONFLICT (user_id) DO NOTHING;
+  
+  -- Alex Chen - Travel photographer
+  SELECT id INTO user_story_id FROM public.stories WHERE user_id = '11111111-1111-1111-1111-111111111111'::uuid;
+  IF user_story_id IS NOT NULL THEN
+    INSERT INTO public.story_contents (story_id, user_id, type, content_url, index, created_at)
+    VALUES 
+      (user_story_id, '11111111-1111-1111-1111-111111111111'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=900&fit=crop', 0, now() - interval '2 hours'),
+      (user_story_id, '11111111-1111-1111-1111-111111111111'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=600&h=900&fit=crop', 1, now() - interval '2 hours'),
+      (user_story_id, '11111111-1111-1111-1111-111111111111'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1454391304352-2bf4678b1a7a?w=600&h=900&fit=crop', 2, now() - interval '2 hours');
+    story_content_count := story_content_count + 3;
+  END IF;
+  
+  -- Sarah Johnson - Food enthusiast
+  SELECT id INTO user_story_id FROM public.stories WHERE user_id = '22222222-2222-2222-2222-222222222222'::uuid;
+  IF user_story_id IS NOT NULL THEN
+    INSERT INTO public.story_contents (story_id, user_id, type, content_url, index, created_at)
+    VALUES 
+      (user_story_id, '22222222-2222-2222-2222-222222222222'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=900&fit=crop', 0, now() - interval '4 hours'),
+      (user_story_id, '22222222-2222-2222-2222-222222222222'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=900&fit=crop', 1, now() - interval '4 hours'),
+      (user_story_id, '22222222-2222-2222-2222-222222222222'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&h=900&fit=crop', 2, now() - interval '4 hours'),
+      (user_story_id, '22222222-2222-2222-2222-222222222222'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=900&fit=crop', 3, now() - interval '4 hours');
+    story_content_count := story_content_count + 4;
+  END IF;
+  
+  -- Emily Davis - Nature photographer
+  SELECT id INTO user_story_id FROM public.stories WHERE user_id = '44444444-4444-4444-4444-444444444444'::uuid;
+  IF user_story_id IS NOT NULL THEN
+    INSERT INTO public.story_contents (story_id, user_id, type, content_url, index, created_at)
+    VALUES 
+      (user_story_id, '44444444-4444-4444-4444-444444444444'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=900&fit=crop', 0, now() - interval '6 hours'),
+      (user_story_id, '44444444-4444-4444-4444-444444444444'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=600&h=900&fit=crop', 1, now() - interval '6 hours'),
+      (user_story_id, '44444444-4444-4444-4444-444444444444'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=600&h=900&fit=crop', 2, now() - interval '6 hours');
+    story_content_count := story_content_count + 3;
+  END IF;
+  
+  -- Jessica Miller - Beach lover
+  SELECT id INTO user_story_id FROM public.stories WHERE user_id = '66666666-6666-6666-6666-666666666666'::uuid;
+  IF user_story_id IS NOT NULL THEN
+    INSERT INTO public.story_contents (story_id, user_id, type, content_url, index, created_at)
+    VALUES 
+      (user_story_id, '66666666-6666-6666-6666-666666666666'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=900&fit=crop', 0, now() - interval '8 hours'),
+      (user_story_id, '66666666-6666-6666-6666-666666666666'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&h=900&fit=crop', 1, now() - interval '8 hours'),
+      (user_story_id, '66666666-6666-6666-6666-666666666666'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=600&h=900&fit=crop', 2, now() - interval '8 hours'),
+      (user_story_id, '66666666-6666-6666-6666-666666666666'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1514832049050-c85c0c07bd16?w=600&h=900&fit=crop', 3, now() - interval '8 hours'),
+      (user_story_id, '66666666-6666-6666-6666-666666666666'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=600&h=900&fit=crop', 4, now() - interval '8 hours');
+    story_content_count := story_content_count + 5;
+  END IF;
+  
+  -- Chris Brown - Urban explorer
+  SELECT id INTO user_story_id FROM public.stories WHERE user_id = '55555555-5555-5555-5555-555555555555'::uuid;
+  IF user_story_id IS NOT NULL THEN
+    INSERT INTO public.story_contents (story_id, user_id, type, content_url, index, created_at)
+    VALUES 
+      (user_story_id, '55555555-5555-5555-5555-555555555555'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=600&h=900&fit=crop', 0, now() - interval '12 hours'),
+      (user_story_id, '55555555-5555-5555-5555-555555555555'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&h=900&fit=crop', 1, now() - interval '12 hours'),
+      (user_story_id, '55555555-5555-5555-5555-555555555555'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=600&h=900&fit=crop', 2, now() - interval '12 hours');
+    story_content_count := story_content_count + 3;
+  END IF;
+  
+  -- David Wilson - History buff
+  SELECT id INTO user_story_id FROM public.stories WHERE user_id = '77777777-7777-7777-7777-777777777777'::uuid;
+  IF user_story_id IS NOT NULL THEN
+    INSERT INTO public.story_contents (story_id, user_id, type, content_url, index, created_at)
+    VALUES 
+      (user_story_id, '77777777-7777-7777-7777-777777777777'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&h=900&fit=crop', 0, now() - interval '1 day'),
+      (user_story_id, '77777777-7777-7777-7777-777777777777'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&h=900&fit=crop', 1, now() - interval '1 day');
+    story_content_count := story_content_count + 2;
+  END IF;
+  
+  -- Lisa Anderson - Wellness traveler
+  SELECT id INTO user_story_id FROM public.stories WHERE user_id = '88888888-8888-8888-8888-888888888888'::uuid;
+  IF user_story_id IS NOT NULL THEN
+    INSERT INTO public.story_contents (story_id, user_id, type, content_url, index, created_at)
+    VALUES 
+      (user_story_id, '88888888-8888-8888-8888-888888888888'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1545389336-cf090694435e?w=600&h=900&fit=crop', 0, now() - interval '1 day'),
+      (user_story_id, '88888888-8888-8888-8888-888888888888'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&h=900&fit=crop', 1, now() - interval '1 day'),
+      (user_story_id, '88888888-8888-8888-8888-888888888888'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=900&fit=crop', 2, now() - interval '1 day');
+    story_content_count := story_content_count + 3;
+  END IF;
+  
+  -- James Taylor - Adventure sports
+  SELECT id INTO user_story_id FROM public.stories WHERE user_id = '99999999-9999-9999-9999-999999999999'::uuid;
+  IF user_story_id IS NOT NULL THEN
+    INSERT INTO public.story_contents (story_id, user_id, type, content_url, index, created_at)
+    VALUES 
+      (user_story_id, '99999999-9999-9999-9999-999999999999'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1540324155974-7523202daa3f?w=600&h=900&fit=crop', 0, now() - interval '2 days'),
+      (user_story_id, '99999999-9999-9999-9999-999999999999'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1551632811-561732d1e306?w=600&h=900&fit=crop', 1, now() - interval '2 days');
+    story_content_count := story_content_count + 2;
+  END IF;
+  
+  -- Maria Garcia - Fashion blogger
+  SELECT id INTO user_story_id FROM public.stories WHERE user_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid;
+  IF user_story_id IS NOT NULL THEN
+    INSERT INTO public.story_contents (story_id, user_id, type, content_url, index, created_at)
+    VALUES 
+      (user_story_id, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600&h=900&fit=crop', 0, now() - interval '3 days'),
+      (user_story_id, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=600&h=900&fit=crop', 1, now() - interval '3 days'),
+      (user_story_id, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1490650404312-a2175773bbf5?w=600&h=900&fit=crop', 2, now() - interval '3 days'),
+      (user_story_id, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid, 'photo', 
+       'https://images.unsplash.com/photo-1512813195386-6cf811ad3542?w=600&h=900&fit=crop', 3, now() - interval '3 days');
+    story_content_count := story_content_count + 4;
+  END IF;
+  
+  -- Update story timestamps
+  UPDATE public.stories 
+  SET updated_at = now() - (random() * interval '3 days')
+  WHERE user_id IN (
+    '11111111-1111-1111-1111-111111111111'::uuid,
+    '22222222-2222-2222-2222-222222222222'::uuid,
+    '44444444-4444-4444-4444-444444444444'::uuid,
+    '55555555-5555-5555-5555-555555555555'::uuid,
+    '66666666-6666-6666-6666-666666666666'::uuid,
+    '77777777-7777-7777-7777-777777777777'::uuid,
+    '88888888-8888-8888-8888-888888888888'::uuid,
+    '99999999-9999-9999-9999-999999999999'::uuid,
+    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid
+  );
+  
+  SELECT COUNT(*) INTO story_count FROM public.stories WHERE user_id != auth_user_id;
+  
+  RAISE NOTICE '';
+  RAISE NOTICE '=== STORIES SEED DATA CREATED SUCCESSFULLY ===';
+  RAISE NOTICE 'Stories with content: %', story_count;
+  RAISE NOTICE 'Story contents created: %', story_content_count;
+  RAISE NOTICE '';
 END $$;

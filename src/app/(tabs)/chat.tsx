@@ -60,6 +60,7 @@ export default function ChatScreen() {
   const [filter, setFilter] = useState<'All' | 'Unread'>('All');
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const { conversations, isLoading, error, fetchConversations } = useConversationsStore();
   const { currentUser } = useUserStore();
   const colors = useThemeColors();
@@ -74,6 +75,16 @@ export default function ChatScreen() {
     setShowMoreOptions(true);
   };
 
+  const handleRefresh = async () => {
+    if (!currentUser?.id) return;
+    
+    setRefreshing(true);
+    try {
+      await fetchConversations(currentUser.id);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const filteredConversations = useMemo(() => {
     if (filter === 'Unread') {
@@ -160,6 +171,8 @@ export default function ChatScreen() {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => <ConversationItem item={item} currentUserId={currentUser?.id || ''} />}
             contentContainerStyle={{ paddingBottom: 20 }}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
           />
         ) : (
           <View className="flex-1 items-center justify-center -mt-16">
