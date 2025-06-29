@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useRouter } from 'expo-router';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useItinerariesStore } from '@/stores/itinerariesStore';
 import { uploadItineraryCover, deleteItineraryCover } from '@/utils/itineraryImageUpload';
@@ -29,7 +30,8 @@ interface ItineraryModalProps {
 
 export function ItineraryModal({ visible, onClose, itinerary, onSave }: ItineraryModalProps) {
   const colors = useThemeColors();
-  const { createItinerary, updateItinerary } = useItinerariesStore();
+  const { createItinerary, updateItinerary, deleteItinerary } = useItinerariesStore();
+  const router = useRouter();
 
   // Form state
   const [title, setTitle] = useState('');
@@ -176,7 +178,49 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
     }
   };
 
-  const handleStartDateChange = (event: any, selectedDate?: Date) => {
+  const handleDelete = async () => {
+    if (!itinerary) return;
+
+    Alert.alert(
+      'Delete Itinerary',
+      `Are you sure you want to delete "${itinerary.title}"? This will also delete all activities in this itinerary. This action cannot be undone.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsLoading(true);
+              await deleteItinerary(itinerary.id);
+              
+              // Delete associated image if exists
+              if (itinerary.cover_image_url) {
+                const imagePath = itinerary.cover_image_url.split('/').slice(-2).join('/');
+                await deleteItineraryCover(imagePath);
+              }
+              
+              resetForm();
+              onClose();
+              
+              // Navigate back to itineraries list
+              router.replace('/itineraries');
+            } catch (error) {
+              console.error('Error deleting itinerary:', error);
+              Alert.alert('Error', 'Failed to delete itinerary');
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleStartDateChange = (_event: any, selectedDate?: Date) => {
     setShowStartPicker(Platform.OS === 'ios');
     if (selectedDate) {
       setStartDate(selectedDate);
@@ -184,7 +228,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
     }
   };
 
-  const handleEndDateChange = (event: any, selectedDate?: Date) => {
+  const handleEndDateChange = (_event: any, selectedDate?: Date) => {
     setShowEndPicker(Platform.OS === 'ios');
     if (selectedDate) {
       setEndDate(selectedDate);
@@ -209,22 +253,35 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
     >
       <View className="flex-1 bg-background">
         {/* Header */}
-        <View className="px-4 py-3 border-b border-border flex-row items-center justify-between">
-          <TouchableOpacity onPress={onClose} disabled={isLoading}>
-            <Text className="text-muted-foreground text-base">Cancel</Text>
-          </TouchableOpacity>
-          <Text className="text-lg font-semibold text-foreground">
-            {isEditMode ? 'Edit Itinerary' : 'New Itinerary'}
-          </Text>
-          <TouchableOpacity onPress={handleSave} disabled={isLoading || !title.trim()}>
-            {isLoading ? (
-              <ActivityIndicator size="small" color={colors.primary} />
-            ) : (
-              <Text className={`text-base ${title.trim() ? 'text-primary' : 'text-muted-foreground'}`}>
-                Save
+        <View className="px-4 py-3 border-b border-border">
+          <View className="flex-row items-center justify-between">
+            <TouchableOpacity onPress={onClose} disabled={isLoading}>
+              <Text className="text-muted-foreground text-base">Cancel</Text>
+            </TouchableOpacity>
+            <Text className="text-lg font-semibold text-foreground">
+              {isEditMode ? 'Edit Itinerary' : 'New Itinerary'}
+            </Text>
+            <TouchableOpacity onPress={handleSave} disabled={isLoading || !title.trim()}>
+              {isLoading ? (
+                <ActivityIndicator size="small" color={colors.primary} />
+              ) : (
+                <Text className={`text-base ${title.trim() ? 'text-primary' : 'text-muted-foreground'}`}>
+                  Save
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+          {isEditMode && (
+            <TouchableOpacity
+              onPress={handleDelete}
+              disabled={isLoading}
+              className="mt-3 py-2 rounded-lg border border-destructive"
+            >
+              <Text className="text-destructive text-center font-medium">
+                Delete Itinerary
               </Text>
-            )}
-          </TouchableOpacity>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Form */}

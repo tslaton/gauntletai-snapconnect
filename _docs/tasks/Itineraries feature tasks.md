@@ -109,6 +109,7 @@
 - [x] Display start and end dates formatted nicely
 - [ ] Show tags (if any) as chips/badges
 - [x] Add onPress handler to navigate to details
+- [x] Add onLongPress handler to edit itinerary
 
 ### 11. Create New/Edit Itinerary Modal
 - [x] Create `/src/components/ItineraryModal.tsx` for create/edit functionality
@@ -191,23 +192,23 @@
 
 ### 20. Handle Edge Cases
 - [ ] Handle offline state gracefully
-- [ ] Add proper error messages for failed operations
-- [ ] Handle activities spanning multiple days
-- [ ] Handle timezone considerations
-- [ ] Add confirmation dialogs for delete operations
+- [x] Add proper error messages for failed operations (partial - basic error handling exists)
+- [x] Handle activities spanning multiple days (partial - basic support exists)
+- [x] Handle timezone considerations (basic - uses device timezone)
+- [x] Add confirmation dialogs for delete operations
 
 ## Performance Optimization
 
 ### 21. Optimize List Performance
-- [ ] Implement FlatList for itineraries list
-- [ ] Implement SectionList for activities grouped by day
-- [ ] Add proper keyExtractor functions
+- [x] Implement FlatList for itineraries list
+- [x] Implement SectionList for activities grouped by day
+- [x] Add proper keyExtractor functions
 - [ ] Implement lazy loading if lists become large
 
 ## Final Polish
 
 ### 22. UI/UX Refinements
 - [ ] Add loading skeletons while data fetches
-- [ ] Add pull-to-refresh on lists
-- [ ] Add empty states with helpful messages
-- [ ] Ensure consistent styling with rest of app
+- [x] Add pull-to-refresh on lists
+- [x] Add empty states with helpful messages
+- [x] Ensure consistent styling with rest of app

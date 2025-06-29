@@ -8,9 +8,10 @@ import type { Itinerary } from '@/api/itineraries';
 interface ItineraryCardProps {
   itinerary: Itinerary;
   onPress: (id: string) => void;
+  onLongPress?: (itinerary: Itinerary) => void;
 }
 
-export function ItineraryCard({ itinerary, onPress }: ItineraryCardProps) {
+export function ItineraryCard({ itinerary, onPress, onLongPress }: ItineraryCardProps) {
   const colors = useThemeColors();
 
   const dateRange = formatDateRange(itinerary.start_time, itinerary.end_time);
@@ -18,6 +19,7 @@ export function ItineraryCard({ itinerary, onPress }: ItineraryCardProps) {
   return (
     <TouchableOpacity
       onPress={() => onPress(itinerary.id)}
+      onLongPress={() => onLongPress?.(itinerary)}
       className="bg-card rounded-xl overflow-hidden mb-4 shadow-sm"
       activeOpacity={0.7}
     >

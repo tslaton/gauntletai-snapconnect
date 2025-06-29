@@ -17,6 +17,8 @@ export default function ItinerariesScreen() {
   const [searchInput, setSearchInput] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [editingItinerary, setEditingItinerary] = useState<Itinerary | null>(null);
   const debouncedSearch = useDebounce(searchInput, 300);
   
   const {
@@ -41,24 +43,53 @@ export default function ItinerariesScreen() {
   }, [debouncedSearch]);
 
   const handleNewItinerary = () => {
+    setEditingItinerary(null);
     setShowCreateModal(true);
   };
 
   const handleItinerarySaved = (itinerary: Itinerary) => {
-    // Navigate to the newly created itinerary
-    router.push(`/itineraries/${itinerary.id}`);
+    // Only navigate to the itinerary if it's newly created
+    if (!editingItinerary) {
+      router.push(`/itineraries/${itinerary.id}`);
+    }
+    // For edits, just refresh the list
+    fetchItineraries();
   };
 
   const handleItineraryPress = (itineraryId: string) => {
     router.push(`/itineraries/${itineraryId}`);
   };
 
+  const handleItineraryLongPress = (itinerary: Itinerary) => {
+    setEditingItinerary(itinerary);
+    setShowCreateModal(true);
+  };
+
   const handleMoreOptions = () => {
     setShowMoreOptions(true);
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      if (debouncedSearch) {
+        await searchItineraries(debouncedSearch);
+      } else {
+        await fetchItineraries();
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const renderItinerary = ({ item }: { item: Itinerary }) => {
-    return <ItineraryCard itinerary={item} onPress={handleItineraryPress} />;
+    return (
+      <ItineraryCard 
+        itinerary={item} 
+        onPress={handleItineraryPress}
+        onLongPress={handleItineraryLongPress}
+      />
+    );
   };
 
   if (error) {
@@ -122,6 +153,8 @@ export default function ItinerariesScreen() {
             renderItem={renderItinerary}
             keyExtractor={(item) => item.id}
             contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
             ListEmptyComponent={
               <View className="flex-1 justify-center items-center py-20">
                 <Ionicons name="calendar-outline" size={64} color={colors.mutedForeground} />
@@ -133,14 +166,27 @@ export default function ItinerariesScreen() {
                 </Text>
               </View>
             }
+            ListFooterComponent={
+              itineraries.length > 0 ? (
+                <View className="py-4 px-4">
+                  <Text className="text-xs text-muted-foreground text-center">
+                    Tip: Long press an itinerary to edit it
+                  </Text>
+                </View>
+              ) : null
+            }
           />
         )}
       </View>
 
-      {/* Create Itinerary Modal */}
+      {/* Create/Edit Itinerary Modal */}
       <ItineraryModal
         visible={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={() => {
+          setShowCreateModal(false);
+          setEditingItinerary(null);
+        }}
+        itinerary={editingItinerary}
         onSave={handleItinerarySaved}
       />
 

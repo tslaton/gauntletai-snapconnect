@@ -32,7 +32,7 @@ interface ActivityModalProps {
 
 export function ActivityModal({ visible, onClose, activity, itineraryId, onSave }: ActivityModalProps) {
   const colors = useThemeColors();
-  const { createActivity, updateActivity } = useActivitiesStore();
+  const { createActivity, updateActivity, deleteActivity } = useActivitiesStore();
 
   // Form state
   const [title, setTitle] = useState('');
@@ -201,7 +201,46 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
     }
   };
 
-  const handleStartDateTimeChange = (event: any, selectedDate?: Date) => {
+  const handleDelete = async () => {
+    if (!activity) return;
+
+    Alert.alert(
+      'Delete Activity',
+      `Are you sure you want to delete "${activity.title}"? This action cannot be undone.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsLoading(true);
+              await deleteActivity(activity.id);
+              
+              // Delete associated image if exists
+              if (activity.image_url) {
+                const imagePath = activity.image_url.split('/').slice(-2).join('/');
+                await deleteActivityImage(imagePath);
+              }
+              
+              resetForm();
+              onClose();
+            } catch (error) {
+              console.error('Error deleting activity:', error);
+              Alert.alert('Error', 'Failed to delete activity');
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleStartDateTimeChange = (_event: any, selectedDate?: Date) => {
     if (Platform.OS === 'android') {
       setShowStartPicker(false);
     }
@@ -219,7 +258,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
     }
   };
 
-  const handleEndDateTimeChange = (event: any, selectedDate?: Date) => {
+  const handleEndDateTimeChange = (_event: any, selectedDate?: Date) => {
     if (Platform.OS === 'android') {
       setShowEndPicker(false);
     }
@@ -263,22 +302,35 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Header */}
-        <View className="px-4 py-3 border-b border-border flex-row items-center justify-between">
-          <TouchableOpacity onPress={onClose} disabled={isLoading}>
-            <Text className="text-muted-foreground text-base">Cancel</Text>
-          </TouchableOpacity>
-          <Text className="text-lg font-semibold text-foreground">
-            {isEditMode ? 'Edit Activity' : 'New Activity'}
-          </Text>
-          <TouchableOpacity onPress={handleSave} disabled={isLoading || !title.trim()}>
-            {isLoading ? (
-              <ActivityIndicator size="small" color={colors.primary} />
-            ) : (
-              <Text className={`text-base ${title.trim() ? 'text-primary' : 'text-muted-foreground'}`}>
-                Save
+        <View className="px-4 py-3 border-b border-border">
+          <View className="flex-row items-center justify-between">
+            <TouchableOpacity onPress={onClose} disabled={isLoading}>
+              <Text className="text-muted-foreground text-base">Cancel</Text>
+            </TouchableOpacity>
+            <Text className="text-lg font-semibold text-foreground">
+              {isEditMode ? 'Edit Activity' : 'New Activity'}
+            </Text>
+            <TouchableOpacity onPress={handleSave} disabled={isLoading || !title.trim()}>
+              {isLoading ? (
+                <ActivityIndicator size="small" color={colors.primary} />
+              ) : (
+                <Text className={`text-base ${title.trim() ? 'text-primary' : 'text-muted-foreground'}`}>
+                  Save
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+          {isEditMode && (
+            <TouchableOpacity
+              onPress={handleDelete}
+              disabled={isLoading}
+              className="mt-3 py-2 rounded-lg border border-destructive"
+            >
+              <Text className="text-destructive text-center font-medium">
+                Delete Activity
               </Text>
-            )}
-          </TouchableOpacity>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Form */}

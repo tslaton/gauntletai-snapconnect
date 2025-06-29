@@ -8,6 +8,7 @@ import { useItinerariesStore } from '@/stores/itinerariesStore';
 import { useActivitiesStore } from '@/stores/activitiesStore';
 import { ActivityList } from '@/components/ActivityList';
 import { ActivityModal } from '@/components/ActivityModal';
+import { ItineraryModal } from '@/components/ItineraryModal';
 import type { Activity } from '@/api/activities';
 
 export default function ItineraryDetailsScreen() {
@@ -18,6 +19,8 @@ export default function ItineraryDetailsScreen() {
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [filter, setFilter] = useState<'All' | 'Unscheduled'>('All');
+  const [refreshing, setRefreshing] = useState(false);
+  const [showItineraryModal, setShowItineraryModal] = useState(false);
 
   const { 
     getItineraryById, 
@@ -69,7 +72,7 @@ export default function ItineraryDetailsScreen() {
   };
 
   const handleMoreOptions = () => {
-    console.log('More options pressed for Itinerary details');
+    setShowItineraryModal(true);
   };
 
   const handleActivityPress = (activity: Activity) => {
@@ -83,10 +86,15 @@ export default function ItineraryDetailsScreen() {
   };
 
   const handleRefresh = async () => {
-    await Promise.all([
-      fetchItinerary(id),
-      fetchActivitiesForItinerary(id)
-    ]);
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchItinerary(id),
+        fetchActivitiesForItinerary(id)
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   if (isInitialLoading) {
@@ -213,6 +221,8 @@ export default function ItineraryDetailsScreen() {
             activities={filteredActivities}
             onActivityPress={handleActivityPress}
             itineraryStartDate={itinerary.start_time}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
           />
         )}
       </View>
@@ -228,6 +238,18 @@ export default function ItineraryDetailsScreen() {
           activity={editingActivity}
           itineraryId={itinerary.id}
           onSave={handleActivitySaved}
+        />
+      )}
+
+      {/* Itinerary Modal */}
+      {itinerary && (
+        <ItineraryModal
+          visible={showItineraryModal}
+          onClose={() => setShowItineraryModal(false)}
+          itinerary={itinerary}
+          onSave={() => {
+            fetchItinerary(id);
+          }}
         />
       )}
     </SafeAreaView>

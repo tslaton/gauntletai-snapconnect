@@ -10,6 +10,8 @@ interface ActivityListProps {
   activities: Activity[];
   onActivityPress: (activity: Activity) => void;
   itineraryStartDate?: string | null;
+  refreshing?: boolean;
+  onRefresh?: () => void;
 }
 
 interface GroupedActivity {
@@ -17,7 +19,7 @@ interface GroupedActivity {
   data: Activity[];
 }
 
-export function ActivityList({ activities, onActivityPress, itineraryStartDate }: ActivityListProps) {
+export function ActivityList({ activities, onActivityPress, itineraryStartDate, refreshing = false, onRefresh }: ActivityListProps) {
   const colors = useThemeColors();
 
   const getGroupedActivities = (): GroupedActivity[] => {
@@ -81,6 +83,9 @@ export function ActivityList({ activities, onActivityPress, itineraryStartDate }
       <Text className="text-muted-foreground text-center mt-2">
         Tap the + button to add activities to your itinerary
       </Text>
+      <Text className="text-muted-foreground text-center mt-4 text-xs">
+        Tip: Tap any activity to edit or delete it
+      </Text>
     </View>
   );
 
@@ -99,6 +104,17 @@ export function ActivityList({ activities, onActivityPress, itineraryStartDate }
       stickySectionHeadersEnabled={true}
       contentContainerStyle={{ paddingBottom: 20 }}
       SectionSeparatorComponent={() => <View className="h-2" />}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      ListFooterComponent={
+        activities.length > 0 ? (
+          <View className="py-4 px-4">
+            <Text className="text-xs text-muted-foreground text-center">
+              Tip: Tap any activity to edit or delete it
+            </Text>
+          </View>
+        ) : null
+      }
     />
   );
 }
