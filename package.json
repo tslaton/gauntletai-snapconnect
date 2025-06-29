@@ -40,6 +40,7 @@
     "expo-system-ui": "~5.0.9",
     "expo-web-browser": "~14.2.0",
     "nativewind": "^4.1.23",
+    "openai": "^5.8.2",
     "openmeteo": "^1.2.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
