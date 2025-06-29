@@ -108,15 +108,29 @@ export function calculateDayNumber(activityDate: string, itineraryStartDate?: st
  * Formats a time range nicely
  * @param startTime Start time string
  * @param endTime End time string
+ * @param timezone Optional timezone to display the time in (e.g., 'America/New_York')
  * @returns Formatted time range string
  */
-export function formatTimeRange(startTime?: string | null, endTime?: string | null): string {
+export function formatTimeRange(startTime?: string | null, endTime?: string | null, timezone?: string | null): string {
   if (!startTime && !endTime) {
     return '';
   }
   
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
+    
+    // If timezone is provided, format in that timezone
+    // TODO: use this later... the seed data and most UX looks best in local time
+    // if (timezone) {
+    //   try {
+    //     return formatInTimeZone(date, timezone, 'h:mm a');
+    //   } catch (error) {
+    //     console.error('Error formatting time in timezone:', error);
+    //     // Fall back to default formatting
+    //   }
+    // }
+    
+    // Default formatting using browser's locale
     return date.toLocaleTimeString('en-US', { 
       hour: 'numeric',
       minute: '2-digit',

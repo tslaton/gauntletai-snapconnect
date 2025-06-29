@@ -14,7 +14,7 @@ export function ActivityCard({ activity, onPress }: ActivityCardProps) {
   const colors = useThemeColors();
   const [imageError, setImageError] = useState(false);
 
-  const timeRange = formatTimeRange(activity.start_time, activity.end_time);
+  const timeRange = formatTimeRange(activity.start_time, activity.end_time, activity.timezone);
 
   return (
     <TouchableOpacity
