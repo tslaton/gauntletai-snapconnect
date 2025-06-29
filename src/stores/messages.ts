@@ -370,8 +370,11 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
 
     // Don't subscribe if already subscribed
     if (realtimeState.subscriptions.has(conversationId)) {
+      console.log(`Already subscribed to conversation ${conversationId}`);
       return;
     }
+
+    console.log(`Subscribing to real-time updates for conversation ${conversationId}`);
 
     const channel = supabase
       .channel(`messages:${conversationId}`)
@@ -383,52 +386,64 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        (payload) => {
+        async (payload) => {
+          console.log('Received real-time message insert:', payload);
           const newMessage = payload.new as any;
           
           // Don't add our own messages (they're already added optimistically)
           if (newMessage.sender_id === currentUserId) {
+            console.log('Skipping own message');
             return;
           }
 
-          // Fetch the complete message with sender info
-          apiFetchMessages(conversationId, currentUserId, 1)
-            .then((messages) => {
-              if (messages.length > 0) {
-                const latestMessage = messages[0];
+          try {
+            // Fetch the complete message with sender info
+            const messages = await apiFetchMessages(conversationId, currentUserId, 1);
+            
+            if (messages.length > 0) {
+              const latestMessage = messages[0];
+              
+              // Add to conversation messages if it's the new message
+              if (latestMessage.id === newMessage.id) {
+                const { conversationMessages } = get();
+                const currentState = conversationMessages[conversationId] || createInitialConversationState();
                 
-                // Add to conversation messages if it's the new message
-                if (latestMessage.id === newMessage.id) {
-                  const { conversationMessages } = get();
-                  const currentState = conversationMessages[conversationId] || createInitialConversationState();
-                  
-                  // Check if message already exists (prevent duplicates)
-                  const existingMessage = currentState.messages.find(msg => msg.id === latestMessage.id);
-                  if (!existingMessage) {
-                    set({
-                      conversationMessages: {
-                        ...conversationMessages,
-                        [conversationId]: {
-                          ...currentState,
-                          messages: [latestMessage, ...currentState.messages],
-                          unreadCount: currentState.unreadCount + 1,
-                        },
+                // Check if message already exists (prevent duplicates)
+                const existingMessage = currentState.messages.find(msg => msg.id === latestMessage.id);
+                if (!existingMessage) {
+                  console.log('Adding new message to store');
+                  set({
+                    conversationMessages: {
+                      ...conversationMessages,
+                      [conversationId]: {
+                        ...currentState,
+                        messages: [latestMessage, ...currentState.messages],
+                        unreadCount: currentState.unreadCount + 1,
                       },
-                    });
-                    
-                    // Update the conversations store with the new unread count
-                    const conversationsStore = useConversationsStore.getState();
-                    conversationsStore.updateConversationUnreadCount(conversationId, currentState.unreadCount + 1);
-                  }
+                    },
+                  });
+                  
+                  // Update the conversations store with the new unread count
+                  const conversationsStore = useConversationsStore.getState();
+                  conversationsStore.updateConversationUnreadCount(conversationId, currentState.unreadCount + 1);
+                } else {
+                  console.log('Message already exists, skipping');
                 }
               }
-            })
-            .catch((error) => {
-              console.error('Error fetching new message details:', error);
-            });
+            }
+          } catch (error) {
+            console.error('Error fetching new message details:', error);
+          }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Subscription status for ${conversationId}:`, status);
+        if (status === 'SUBSCRIBED') {
+          console.log(`Successfully subscribed to conversation ${conversationId}`);
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error(`Failed to subscribe to conversation ${conversationId}`);
+        }
+      });
 
     // Update subscriptions
     const newSubscriptions = new Map(realtimeState.subscriptions);

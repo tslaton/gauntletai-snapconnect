@@ -6,6 +6,19 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Create admin client with service key to bypass RLS
+  const supabaseAdmin = createClient(
+    process.env.EXPO_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    }
+  );
+  
+  // Create user client for auth checks
   const supabase = createClient(
     process.env.EXPO_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_KEY!,
@@ -66,7 +79,9 @@ export async function POST(request: Request) {
 
     // Define types for better readability and type safety
     type Profile = { id: string; username: string; full_name: string };
-    type Participant = { user_id: string; profiles: Profile[] };
+    type Participant = { user_id: string; profiles: Profile | Profile[] };
+
+    console.log('participants', conversation.conversation_participants);
 
     // Verify the user is a participant in this conversation
     const participants = conversation.conversation_participants as Participant[];
@@ -91,11 +106,24 @@ export async function POST(request: Request) {
 
     // Randomly select one of the other participants
     const sender = otherParticipants[Math.floor(Math.random() * otherParticipants.length)];
-    const senderProfile = sender.profiles[0];
 
-    if (!senderProfile) {
+    if (!sender.profiles) {
       return Response.json({ error: 'Sender profile not found' }, { status: 500 });
     }
+
+    console.log('sender.profiles', sender.profiles);
+
+    // Handle both single object and array cases
+    let senderProfile: Profile;
+    if (Array.isArray(sender.profiles)) {
+      senderProfile = sender.profiles[0];
+    } else {
+      // When there's a single profile, Supabase returns it as an object
+      senderProfile = sender.profiles;
+    }
+    
+    console.log('senderProfile', senderProfile);
+    console.log('sender.user_id', sender.user_id);
 
     // Array of test messages to randomly select from
     const testMessages = [
@@ -113,8 +141,8 @@ export async function POST(request: Request) {
 
     const randomMessage = testMessages[Math.floor(Math.random() * testMessages.length)];
 
-    // Send a message from the selected participant
-    const { data: message, error: messageError } = await supabase
+    // Send a message from the selected participant using admin client to bypass RLS
+    const { data: message, error: messageError } = await supabaseAdmin
       .from('messages')
       .insert({
         conversation_id: conversationId,
@@ -126,7 +154,12 @@ export async function POST(request: Request) {
       .single();
 
     if (messageError) {
-      return Response.json({ error: 'Failed to send message' }, { status: 500 });
+      console.error('Message insert error:', messageError);
+      return Response.json({ 
+        error: 'Failed to send message', 
+        details: messageError.message,
+        code: messageError.code 
+      }, { status: 500 });
     }
 
     return Response.json({
