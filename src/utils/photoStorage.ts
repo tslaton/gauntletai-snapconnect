@@ -226,31 +226,20 @@ export async function uploadMultiplePhotos(
 export async function validatePhoto(photoUri: string): Promise<{ valid: boolean; error?: string }> {
   try {
     // Check if file exists and is accessible
-    const response = await fetch(photoUri);
-    
-    if (!response.ok) {
+    const fileInfo = await FileSystem.getInfoAsync(photoUri);
+    if (!fileInfo.exists) {
       return {
         valid: false,
-        error: 'Photo file is not accessible',
+        error: 'Photo file is not accessible or does not exist.',
       };
     }
 
-    const blob = await response.blob();
-    
     // Check file size (max 10MB)
     const maxSize = 10 * 1024 * 1024; // 10MB
-    if (blob.size > maxSize) {
+    if (fileInfo.size > maxSize) {
       return {
         valid: false,
-        error: 'Photo is too large (max 10MB)',
-      };
-    }
-
-    // Check if it's an image
-    if (!blob.type.startsWith('image/')) {
-      return {
-        valid: false,
-        error: 'File is not a valid image',
+        error: `Photo is too large (max 10MB). Size: ${Math.round(fileInfo.size / 1024 / 1024)}MB`,
       };
     }
 
