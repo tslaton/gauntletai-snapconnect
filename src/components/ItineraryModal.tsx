@@ -1,27 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import type { CreateItineraryData, Itinerary, UpdateItineraryData } from '@/api/itineraries';
+import { useThemeColors } from '@/hooks/useThemeColors';
+import { useItinerariesStore } from '@/stores/itinerariesStore';
+import { deleteItineraryCover, uploadItineraryCover } from '@/utils/itineraryImageUpload';
+import { supabase } from '@/utils/supabase';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
   Alert,
-  Platform,
   Image,
+  Keyboard,
+  Modal,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
   TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useRouter } from 'expo-router';
-import { useThemeColors } from '@/hooks/useThemeColors';
-import Spacer from '@/components/Spacer';
-import { useItinerariesStore } from '@/stores/itinerariesStore';
-import { uploadItineraryCover, deleteItineraryCover } from '@/utils/itineraryImageUpload';
-import { supabase } from '@/utils/supabase';
-import type { Itinerary, CreateItineraryData, UpdateItineraryData } from '@/api/itineraries';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ItineraryModalProps {
   visible: boolean;
@@ -32,8 +33,9 @@ interface ItineraryModalProps {
 
 export function ItineraryModal({ visible, onClose, itinerary, onSave }: ItineraryModalProps) {
   const colors = useThemeColors();
-  const { createItinerary, updateItinerary, deleteItinerary } = useItinerariesStore();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { createItinerary, updateItinerary, deleteItinerary } = useItinerariesStore();
 
   // Form state
   const [title, setTitle] = useState('');
@@ -50,6 +52,9 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; dates?: string }>({});
 
+  // Track keyboard visibility to hide bottom bar
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
   const isEditMode = !!itinerary;
 
   useEffect(() => {
@@ -64,6 +69,15 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
       resetForm();
     }
   }, [itinerary, visible]);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const resetForm = () => {
     setTitle('');
@@ -286,7 +300,13 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
         </View>
 
         {/* Form */}
-        <ScrollView className="flex-1">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            paddingBottom:
+              isEditMode && !keyboardVisible ? 96 + insets.bottom : 32 + insets.bottom,
+          }}
+        >
           {/* Cover Image */}
           <TouchableOpacity
             onPress={() => {
@@ -361,6 +381,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
               <Text className="text-sm font-medium text-foreground mb-1">Start Date</Text>
               <TouchableOpacity
                 onPress={() => {
+                  Keyboard.dismiss();
                   setShowEndPicker(false);
                   setShowStartPicker(true);
                 }}
@@ -378,6 +399,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
               <Text className="text-sm font-medium text-foreground mb-1">End Date</Text>
               <TouchableOpacity
                 onPress={() => {
+                  Keyboard.dismiss();
                   setShowStartPicker(false);
                   setShowEndPicker(true);
                 }}
@@ -396,21 +418,23 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
           </View>
         </ScrollView>
 
-        {/* Delete Button - Only in Edit Mode, fixed at bottom */}
-        {isEditMode && (
-          <View className="px-4">
+        {/* Delete button overlay – hidden when keyboard visible */}
+        {isEditMode && !keyboardVisible && (
+          <View
+            className="absolute left-0 right-0 px-4"
+            style={{ bottom: 16 + insets.bottom }}
+          >
             <View className="items-center">
               <TouchableOpacity
                 onPress={handleDelete}
                 disabled={isLoading}
-                className="px-8 py-2 rounded-lg border border-destructive"
+                className="px-8 py-2 rounded-lg border border-destructive bg-background"
               >
                 <Text className="text-destructive text-center font-medium">
                   Delete Itinerary
                 </Text>
               </TouchableOpacity>
             </View>
-            <Spacer size={96} />
           </View>
         )}
 

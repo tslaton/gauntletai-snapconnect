@@ -1,28 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-  Platform,
-  Image,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import type { Activity, CreateActivityData, UpdateActivityData } from '@/api/activities';
+import { parseTagsString, tagsToString } from '@/api/activities';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useActivitiesStore } from '@/stores/activitiesStore';
-import { uploadActivityImage, deleteActivityImage } from '@/utils/itineraryImageUpload';
-import { parseTagsString, tagsToString } from '@/api/activities';
-import Spacer from '@/components/Spacer';
+import { deleteActivityImage, uploadActivityImage } from '@/utils/itineraryImageUpload';
 import { supabase } from '@/utils/supabase';
-import type { Activity, CreateActivityData, UpdateActivityData } from '@/api/activities';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import * as ImagePicker from 'expo-image-picker';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ActivityModalProps {
   visible: boolean;
@@ -34,6 +35,7 @@ interface ActivityModalProps {
 
 export function ActivityModal({ visible, onClose, activity, itineraryId, onSave }: ActivityModalProps) {
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
   const { createActivity, updateActivity, deleteActivity } = useActivitiesStore();
 
   // Form state
@@ -55,6 +57,9 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
   const [endPickerMode, setEndPickerMode] = useState<'date' | 'time'>('date');
   const [errors, setErrors] = useState<{ title?: string; dates?: string }>({});
 
+  // Track keyboard visibility to conditionally hide bottom actions
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
   const isEditMode = !!activity;
 
   useEffect(() => {
@@ -71,6 +76,15 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
       resetForm();
     }
   }, [activity, visible]);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const resetForm = () => {
     setTitle('');
@@ -296,6 +310,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
       <KeyboardAvoidingView 
         className="flex-1 bg-background"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.select({ ios: 60 + insets.top, android: 0 })}
       >
         {/* Header */}
         <View className="px-4 py-3 border-b border-border">
@@ -319,7 +334,18 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
         </View>
 
         {/* Form */}
-        <ScrollView className="flex-1">
+        <KeyboardAwareScrollView
+          className="flex-1"
+          enableOnAndroid
+          keyboardShouldPersistTaps="handled"
+          extraScrollHeight={32}
+          contentContainerStyle={{
+            paddingBottom:
+              isEditMode && !keyboardVisible
+                ? 96 + insets.bottom // leave room for the Delete bar
+                : 32 + insets.bottom,
+          }}
+        >
           {/* Activity Image */}
           <TouchableOpacity
             onPress={() => {
@@ -411,6 +437,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               <Text className="text-sm font-medium text-foreground mb-1">Start Time</Text>
               <TouchableOpacity
                 onPress={() => {
+                  Keyboard.dismiss();
                   setShowEndPicker(false);
                   setShowStartPicker(true);
                   setStartPickerMode('date');
@@ -429,6 +456,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               <Text className="text-sm font-medium text-foreground mb-1">End Time</Text>
               <TouchableOpacity
                 onPress={() => {
+                  Keyboard.dismiss();
                   setShowStartPicker(false);
                   setShowEndPicker(true);
                   setEndPickerMode('date');
@@ -466,23 +494,25 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               </Text>
             </View>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
-        {/* Delete Button - Only in Edit Mode, fixed at bottom */}
-        {isEditMode && (
-          <View className="px-4">
+        {/* Delete button overlay – outside scroll so layout doesn't shift */}
+        {isEditMode && !keyboardVisible && (
+          <View
+            className="absolute left-0 right-0 px-4"
+            style={{ bottom: 16 + insets.bottom }}
+          >
             <View className="items-center">
               <TouchableOpacity
                 onPress={handleDelete}
                 disabled={isLoading}
-                className="px-8 py-2 rounded-lg border border-destructive"
+                className="px-8 py-2 rounded-lg border border-destructive bg-background"
               >
                 <Text className="text-destructive text-center font-medium">
                   Delete Activity
                 </Text>
               </TouchableOpacity>
             </View>
-            <Spacer size={96} />
           </View>
         )}
 
