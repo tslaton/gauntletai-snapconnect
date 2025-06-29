@@ -20,6 +20,7 @@ import { useThemeColors } from '@/hooks/useThemeColors';
 import { useActivitiesStore } from '@/stores/activitiesStore';
 import { uploadActivityImage, deleteActivityImage } from '@/utils/itineraryImageUpload';
 import { parseTagsString, tagsToString } from '@/api/activities';
+import Spacer from '@/components/Spacer';
 import { supabase } from '@/utils/supabase';
 import type { Activity, CreateActivityData, UpdateActivityData } from '@/api/activities';
 
@@ -315,21 +316,10 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               )}
             </TouchableOpacity>
           </View>
-          {isEditMode && (
-            <TouchableOpacity
-              onPress={handleDelete}
-              disabled={isLoading}
-              className="mt-3 py-2 rounded-lg border border-destructive"
-            >
-              <Text className="text-destructive text-center font-medium">
-                Delete Activity
-              </Text>
-            </TouchableOpacity>
-          )}
         </View>
 
         {/* Form */}
-        <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 40 }}>
+        <ScrollView className="flex-1">
           {/* Activity Image */}
           <TouchableOpacity
             onPress={() => {
@@ -477,6 +467,24 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
             </View>
           </View>
         </ScrollView>
+
+        {/* Delete Button - Only in Edit Mode, fixed at bottom */}
+        {isEditMode && (
+          <View className="px-4">
+            <View className="items-center">
+              <TouchableOpacity
+                onPress={handleDelete}
+                disabled={isLoading}
+                className="px-8 py-2 rounded-lg border border-destructive"
+              >
+                <Text className="text-destructive text-center font-medium">
+                  Delete Activity
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Spacer size={96} />
+          </View>
+        )}
 
         {/* Date/Time Pickers */}
         {showStartPicker && (

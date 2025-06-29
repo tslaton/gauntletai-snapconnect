@@ -17,6 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import Spacer from '@/components/Spacer';
 import { useItinerariesStore } from '@/stores/itinerariesStore';
 import { uploadItineraryCover, deleteItineraryCover } from '@/utils/itineraryImageUpload';
 import { supabase } from '@/utils/supabase';
@@ -282,21 +283,10 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
               )}
             </TouchableOpacity>
           </View>
-          {isEditMode && (
-            <TouchableOpacity
-              onPress={handleDelete}
-              disabled={isLoading}
-              className="mt-3 py-2 rounded-lg border border-destructive"
-            >
-              <Text className="text-destructive text-center font-medium">
-                Delete Itinerary
-              </Text>
-            </TouchableOpacity>
-          )}
         </View>
 
         {/* Form */}
-        <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 40 }}>
+        <ScrollView className="flex-1">
           {/* Cover Image */}
           <TouchableOpacity
             onPress={() => {
@@ -405,6 +395,24 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
             )}
           </View>
         </ScrollView>
+
+        {/* Delete Button - Only in Edit Mode, fixed at bottom */}
+        {isEditMode && (
+          <View className="px-4">
+            <View className="items-center">
+              <TouchableOpacity
+                onPress={handleDelete}
+                disabled={isLoading}
+                className="px-8 py-2 rounded-lg border border-destructive"
+              >
+                <Text className="text-destructive text-center font-medium">
+                  Delete Itinerary
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Spacer size={96} />
+          </View>
+        )}
 
         {/* Date Pickers */}
         {showStartPicker && (
