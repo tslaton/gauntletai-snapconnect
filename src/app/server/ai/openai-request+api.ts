@@ -1,5 +1,5 @@
-import type { Activity } from '@/api/activities';
-import type { Itinerary } from '@/api/itineraries';
+import type { Activity } from '@/types/activities';
+import type { Itinerary } from '@/types/itineraries';
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 
@@ -142,6 +142,11 @@ interface CreateItineraryFromPromptRequest extends OpenAIRequestsBody {
   prompt: string
 }
 
+interface GenerateImageCaptionRequest extends OpenAIRequestsBody {
+  type: 'generate-image-caption'
+  image: string // base64 encoded image
+}
+
 export async function POST(req: Request) {
   try {
     const authHeader = req.headers.get('Authorization');
@@ -169,11 +174,29 @@ export async function POST(req: Request) {
     console.log(`Successfully authenticated request: ${authHeader}`)
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    // Create a _stateless_ Supabase client. By disabling both `persistSession` and
+    // `autoRefreshToken`, the auth library will **not** attempt to read from
+    // `AsyncStorage` (which relies on a `window` global) when this code runs in
+    // the Node/Expo "server" runtime.
+    // const supabase = createSupabaseClientForServer(authHeader)
+    
     const supabase = createClient(
       process.env.EXPO_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_KEY!
-    )
-
+      process.env.SUPABASE_SERVICE_KEY!,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+        global: {
+          headers: {
+            Authorization: authHeader,
+          },
+        },
+      }
+    );
+    console.log('supabase', supabase)
+    
     switch (type) {
       case 'fill-activity-data': {
         const { activity, itinerary } = rest as FillActivityDataRequest;
@@ -427,6 +450,35 @@ IMPORTANT:
         const itineraryData = JSON.parse(response.output_text || '{}');
 
         return new Response(JSON.stringify({ itinerary: itineraryData }), { headers })
+      }
+      case 'generate-image-caption': {
+        const { image } = rest as GenerateImageCaptionRequest;
+        
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: "Generate a fun, engaging caption for this photo. Keep it concise (under 100 characters), casual, and suitable for social media. Don't describe the image literally, instead create something witty, emotional, or thought-provoking that complements the photo."
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:image/jpeg;base64,${image}`
+                  }
+                }
+              ]
+            }
+          ],
+          max_tokens: 150
+        });
+        
+        const caption = response.choices[0]?.message?.content || "Picture perfect moment! ✨";
+        
+        return new Response(JSON.stringify({ caption }), { headers })
       }
       default:
         return new Response(JSON.stringify({ error: 'Invalid task type' }), {

@@ -5,6 +5,7 @@
 
 import { sendMessage } from '@/api/messages';
 import UserAvatar from '@/components/UserAvatar';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useConversationsStore } from '@/stores/conversations';
 import { useFriendsStore } from '@/stores/friends';
 import { useStoriesStore } from '@/stores/stories';
@@ -34,12 +35,14 @@ export default function PhotoEditScreen() {
   const insets = useSafeAreaInsets();
   const { photoUri } = useLocalSearchParams<{ photoUri: string }>();
   const viewShotRef = useRef<ViewShot>(null);
+  const colors = useThemeColors();
 
   const [isUploading, setIsUploading] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [caption, setCaption] = useState('');
   const [showCaption, setShowCaption] = useState(false);
   const [imageLayout, setImageLayout] = useState<{ width: number; height: number } | null>(null);
+  const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
 
   const { friends, isFriendsLoading: friendsLoading, fetchFriends } = useFriendsStore();
   const { conversations, startDirectConversation } = useConversationsStore();
@@ -68,6 +71,59 @@ export default function PhotoEditScreen() {
     } catch (error) {
       console.error('Failed to capture edited photo:', error);
       return null;
+    }
+  };
+
+  /**
+   * Generate AI caption for the image
+   */
+  const generateAICaption = async () => {
+    if (!photoUri || isGeneratingCaption) return;
+
+    setIsGeneratingCaption(true);
+    setShowCaption(true);
+
+    try {
+      // Convert photo URI to base64
+      const response = await fetch(photoUri);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          resolve(base64String.split(',')[1]); // Remove data:image/jpeg;base64, prefix
+        };
+        reader.onerror = reject;
+      });
+      
+      reader.readAsDataURL(blob);
+      const base64Image = await base64Promise;
+
+      // Call OpenAI API
+      const apiResponse = await fetch('/server/ai/openai-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentUser?.id}`
+        },
+        body: JSON.stringify({
+          type: 'generate-image-caption',
+          image: base64Image
+        })
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error('Failed to generate caption');
+      }
+
+      const { caption: generatedCaption } = await apiResponse.json();
+      setCaption(generatedCaption);
+    } catch (error) {
+      console.error('Error generating AI caption:', error);
+      Alert.alert('Error', 'Failed to generate caption. Please try again.');
+    } finally {
+      setIsGeneratingCaption(false);
     }
   };
 
@@ -302,16 +358,42 @@ export default function PhotoEditScreen() {
         <View className="bg-black">
           {/* Caption Input – placed ABOVE filter bar for better visibility */}
           <View className="border-t border-gray-800 px-6 py-3" style={{ paddingBottom: 12 }}>
-            <TouchableOpacity
-              onPress={() => setShowCaption(!showCaption)}
-              className="flex-row items-center justify-between">
+            <View className="flex-row items-center justify-between w-full">
+              {/* Label */}
               <Text className="font-medium text-white">Add Caption</Text>
-              <Ionicons
-                name={showCaption ? 'checkmark-circle' : 'add-circle-outline'}
-                size={24}
-                color={showCaption ? '#9333ea' : '#9ca3af'}
-              />
-            </TouchableOpacity>
+
+              {/* Right-aligned action buttons */}
+              <View className="flex-row items-center gap-3">
+                {/* Magic Wand Button */}
+                <TouchableOpacity
+                  onPress={generateAICaption}
+                  disabled={isGeneratingCaption}
+                  className="rounded-full p-2"
+                  style={{ backgroundColor: colors.primary }}>
+                  {isGeneratingCaption ? (
+                    <ActivityIndicator size="small" color={colors.primaryForeground} />
+                  ) : (
+                    <Ionicons
+                      name="sparkles"
+                      size={20}
+                      color={colors.primaryForeground}
+                    />
+                  )}
+                </TouchableOpacity>
+
+                {/* Add-Caption Toggle Button */}
+                <TouchableOpacity
+                  onPress={() => setShowCaption(!showCaption)}
+                  className="rounded-full p-2"
+                  style={{ backgroundColor: colors.primary }}>
+                  <Ionicons
+                    name={showCaption ? 'checkmark' : 'add'}
+                    size={20}
+                    color={colors.primaryForeground}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
 
             {showCaption && (
               <TextInput
