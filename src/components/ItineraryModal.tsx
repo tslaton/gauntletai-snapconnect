@@ -164,25 +164,32 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
     try {
       setIsLoading(true);
 
-      const data: CreateItineraryData | UpdateItineraryData = {
-        title: title.trim(),
-        description: description.trim() || undefined,
-        start_time: startDate?.toISOString() || undefined,
-        end_time: endDate?.toISOString() || undefined,
-        cover_image_url: coverImageUrl || undefined,
-      };
-
       let savedItinerary: Itinerary;
 
       if (isEditMode && itinerary) {
-        savedItinerary = await updateItinerary(itinerary.id, data);
+        // For updates, explicitly set null for cleared fields
+        const updateData: UpdateItineraryData = {
+          title: title.trim(),
+          description: description.trim() || null,
+          start_time: startDate?.toISOString() || null,
+          end_time: endDate?.toISOString() || null,
+          cover_image_url: coverImageUrl || null,
+        };
+        savedItinerary = await updateItinerary(itinerary.id, updateData);
         
         // Delete old image if it was replaced
         if (oldImagePath) {
           await deletePhoto(oldImagePath);
         }
       } else {
-        savedItinerary = await createItinerary(data as CreateItineraryData);
+        const createData: CreateItineraryData = {
+          title: title.trim(),
+          description: description.trim() || undefined,
+          start_time: startDate?.toISOString() || undefined,
+          end_time: endDate?.toISOString() || undefined,
+          cover_image_url: coverImageUrl || undefined,
+        };
+        savedItinerary = await createItinerary(createData);
       }
 
       if (onSave) {
@@ -316,40 +323,60 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
           }}
         >
           {/* Cover Image */}
-          <TouchableOpacity
-            onPress={() => {
-              setShowStartPicker(false);
-              setShowEndPicker(false);
-              handleSelectImage();
-            }}
-            disabled={isUploadingImage}
-            className="h-48 bg-muted m-4 rounded-lg overflow-hidden"
-          >
-            {coverImageUrl && !imageError ? (
-              <Image 
-                source={{ uri: coverImageUrl }} 
-                className="w-full h-full" 
-                resizeMode="cover"
-                onError={() => {
-                  console.error('ItineraryModal - Failed to load image:', coverImageUrl);
-                  setImageError(true);
+          <View className="relative">
+            <TouchableOpacity
+              onPress={() => {
+                setShowStartPicker(false);
+                setShowEndPicker(false);
+                handleSelectImage();
+              }}
+              disabled={isUploadingImage}
+              className="h-48 bg-muted m-4 rounded-lg overflow-hidden"
+            >
+              {coverImageUrl && !imageError ? (
+                <Image 
+                  source={{ uri: coverImageUrl }} 
+                  className="w-full h-full" 
+                  resizeMode="cover"
+                  onError={() => {
+                    console.error('ItineraryModal - Failed to load image:', coverImageUrl);
+                    setImageError(true);
+                  }}
+                  onLoad={() => setImageError(false)}
+                />
+              ) : (
+                <View className="flex-1 items-center justify-center">
+                  <Ionicons name="image-outline" size={48} color={colors.mutedForeground} />
+                  <Text className="text-muted-foreground mt-2">
+                    {imageError ? 'Failed to load image' : 'Tap to add cover image'}
+                  </Text>
+                </View>
+              )}
+              {isUploadingImage && (
+                <View className="absolute inset-0 bg-black/50 items-center justify-center">
+                  <ActivityIndicator size="large" color={colors.primaryForeground} />
+                </View>
+              )}
+            </TouchableOpacity>
+            
+            {/* Remove Image Button */}
+            {coverImageUrl && !imageError && !isUploadingImage && (
+              <TouchableOpacity
+                onPress={() => {
+                  setCoverImageUrl(null);
+                  setImageError(false);
+                  // Mark the old image for deletion on save
+                  if (itinerary?.cover_image_url && !oldImagePath) {
+                    setOldImagePath(itinerary.cover_image_url);
+                  }
                 }}
-                onLoad={() => setImageError(false)}
-              />
-            ) : (
-              <View className="flex-1 items-center justify-center">
-                <Ionicons name="image-outline" size={48} color={colors.mutedForeground} />
-                <Text className="text-muted-foreground mt-2">
-                  {imageError ? 'Failed to load image' : 'Tap to add cover image'}
-                </Text>
-              </View>
+                className="absolute top-6 left-6 bg-black/60 rounded-full p-2"
+                style={{ zIndex: 10 }}
+              >
+                <Ionicons name="close" size={20} color="white" />
+              </TouchableOpacity>
             )}
-            {isUploadingImage && (
-              <View className="absolute inset-0 bg-black/50 items-center justify-center">
-                <ActivityIndicator size="large" color={colors.primaryForeground} />
-              </View>
-            )}
-          </TouchableOpacity>
+          </View>
 
           <View className="px-4 space-y-4">
             {/* Title */}

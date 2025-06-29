@@ -9,6 +9,7 @@ import { useActivitiesStore } from '@/stores/activitiesStore';
 import { ActivityList } from '@/components/ActivityList';
 import { ActivityModal } from '@/components/ActivityModal';
 import { ItineraryModal } from '@/components/ItineraryModal';
+import { AIActivityPromptModal } from '@/components/AIActivityPromptModal';
 import type { Activity } from '@/api/activities';
 
 export default function ItineraryDetailsScreen() {
@@ -21,6 +22,7 @@ export default function ItineraryDetailsScreen() {
   const [filter, setFilter] = useState<'All' | 'Unscheduled'>('All');
   const [refreshing, setRefreshing] = useState(false);
   const [showItineraryModal, setShowItineraryModal] = useState(false);
+  const [showAIPromptModal, setShowAIPromptModal] = useState(false);
 
   const { 
     getItineraryById, 
@@ -69,6 +71,10 @@ export default function ItineraryDetailsScreen() {
   const handleNewActivity = () => {
     setEditingActivity(null);
     setShowActivityModal(true);
+  };
+
+  const handleAIActivity = () => {
+    setShowAIPromptModal(true);
   };
 
   const handleMoreOptions = () => {
@@ -201,13 +207,21 @@ export default function ItineraryDetailsScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={handleNewActivity}
-              className="bg-primary px-4 py-2 rounded-full flex-row items-center"
-            >
-              <FontAwesome name="plus" size={14} color={colors.primaryForeground} />
-              <Text className="text-primary-foreground font-semibold ml-2">New</Text>
-            </TouchableOpacity>
+            <View className="flex-row items-center">
+              <TouchableOpacity
+                onPress={handleAIActivity}
+                className="bg-primary/10 px-3 py-2 rounded-full flex-row items-center mr-2 border border-primary"
+              >
+                <FontAwesome name="magic" size={16} color={colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleNewActivity}
+                className="bg-primary px-4 py-2 rounded-full flex-row items-center"
+              >
+                <FontAwesome name="plus" size={14} color={colors.primaryForeground} />
+                <Text className="text-primary-foreground font-semibold ml-2">New</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -250,6 +264,16 @@ export default function ItineraryDetailsScreen() {
           onSave={() => {
             fetchItinerary(id);
           }}
+        />
+      )}
+
+      {/* AI Activity Prompt Modal */}
+      {itinerary && (
+        <AIActivityPromptModal
+          visible={showAIPromptModal}
+          onClose={() => setShowAIPromptModal(false)}
+          itinerary={itinerary}
+          onActivityCreated={handleActivitySaved}
         />
       )}
     </SafeAreaView>

@@ -1,5 +1,7 @@
 import type { Activity, CreateActivityData, UpdateActivityData } from '@/api/activities';
 import { parseTagsString, tagsToString } from '@/api/activities';
+import { fillActivityDataWithAI, generateActivityImageWithAI } from '@/api/ai';
+import { getItinerary } from '@/api/itineraries';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useActivitiesStore } from '@/stores/activitiesStore';
 import { deletePhoto, uploadPhoto } from '@/utils/photoStorage';
@@ -57,6 +59,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
   const [startPickerMode, setStartPickerMode] = useState<'date' | 'time'>('date');
   const [endPickerMode, setEndPickerMode] = useState<'date' | 'time'>('date');
   const [errors, setErrors] = useState<{ title?: string; dates?: string }>({});
+  const [isFillingWithAI, setIsFillingWithAI] = useState(false);
 
   // Track keyboard visibility to conditionally hide bottom actions
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -175,20 +178,20 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
 
       const tags = parseTagsString(tagsText);
 
-      const data: CreateActivityData | UpdateActivityData = {
-        title: title.trim(),
-        description: description.trim() || undefined,
-        location: location.trim() || undefined,
-        start_time: startDateTime?.toISOString() || undefined,
-        end_time: endDateTime?.toISOString() || undefined,
-        image_url: imageUrl || undefined,
-        tags: tags.length > 0 ? tags : undefined,
-      };
-
       let savedActivity: Activity;
 
       if (isEditMode && activity) {
-        savedActivity = await updateActivity(activity.id, data);
+        // For updates, explicitly set null for cleared fields
+        const updateData: UpdateActivityData = {
+          title: title.trim(),
+          description: description.trim() || null,
+          location: location.trim() || null,
+          start_time: startDateTime?.toISOString() || null,
+          end_time: endDateTime?.toISOString() || null,
+          image_url: imageUrl || null,
+          tags: tags,  // Always send the array, even if empty
+        };
+        savedActivity = await updateActivity(activity.id, updateData);
         
         // Delete old image if it was replaced
         if (oldImagePath) {
@@ -202,7 +205,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
           start_time: startDateTime?.toISOString() || undefined,
           end_time: endDateTime?.toISOString() || undefined,
           image_url: imageUrl || undefined,
-          tags: tags.length > 0 ? tags : undefined,
+          tags: tags,  // Always send the array, even if empty
           itinerary_id: itineraryId,
         };
         savedActivity = await createActivity(createData);
@@ -262,6 +265,96 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
         },
       ]
     );
+  };
+
+  const handleFillWithAI = async () => {
+    try {
+      setIsFillingWithAI(true);
+      
+      // Get itinerary context
+      const itinerary = await getItinerary(itineraryId);
+      if (!itinerary) {
+        Alert.alert('Error', 'Could not load itinerary information');
+        return;
+      }
+
+      // Prepare current activity data
+      const currentActivity: Partial<Activity> = {
+        title: title.trim() || undefined,
+        description: description.trim() || undefined,
+        location: location.trim() || undefined,
+        tags: parseTagsString(tagsText).length > 0 ? parseTagsString(tagsText) : undefined,
+        image_url: imageUrl || undefined,
+      };
+
+      // Make parallel requests for data and image
+      const promises: Promise<any>[] = [];
+      
+      // Request 1: Get AI suggestions for activity data
+      const needsDataFill = !title.trim() || !description.trim() || !location.trim() || parseTagsString(tagsText).length === 0;
+      if (needsDataFill) {
+        promises.push(fillActivityDataWithAI(currentActivity, itinerary));
+      }
+      
+      // Request 2: Generate AI image if no image exists
+      const needsImage = !imageUrl;
+      if (needsImage) {
+        promises.push(generateActivityImageWithAI(currentActivity, itinerary));
+      }
+
+      if (promises.length === 0) {
+        Alert.alert('Info', 'All fields are already filled');
+        return;
+      }
+
+      const results = await Promise.allSettled(promises);
+      
+      // Process data suggestions
+      if (needsDataFill && results[0]?.status === 'fulfilled') {
+        const dataSuggestions = (results[0] as PromiseFulfilledResult<any>).value;
+        
+        // Apply suggestions only for empty fields
+        if (dataSuggestions.title && !title.trim()) {
+          setTitle(dataSuggestions.title);
+        }
+        if (dataSuggestions.description && !description.trim()) {
+          setDescription(dataSuggestions.description);
+        }
+        if (dataSuggestions.location && !location.trim()) {
+          setLocation(dataSuggestions.location);
+        }
+        if (dataSuggestions.tags && parseTagsString(tagsText).length === 0) {
+          setTagsText(tagsToString(dataSuggestions.tags));
+        }
+      } else if (needsDataFill && results[0]?.status === 'rejected') {
+        console.error('Failed to get data suggestions:', results[0].reason);
+      }
+      
+      // Process image generation
+      const imageResultIndex = needsDataFill ? 1 : 0;
+      if (needsImage && results[imageResultIndex]?.status === 'fulfilled') {
+        const imageResult = (results[imageResultIndex] as PromiseFulfilledResult<any>).value;
+        if (imageResult.image_url) {
+          setImageUrl(imageResult.image_url);
+          setImageError(false);
+        }
+      } else if (needsImage && results[imageResultIndex]?.status === 'rejected') {
+        console.error('Failed to generate image:', results[imageResultIndex].reason);
+      }
+
+      // Only alert on failure, success is evident from the filled fields
+      const dataSuccess = needsDataFill && results[0]?.status === 'fulfilled';
+      const imageSuccess = needsImage && results[imageResultIndex]?.status === 'fulfilled';
+      
+      if (!dataSuccess && !imageSuccess) {
+        Alert.alert('Error', 'Failed to get AI suggestions. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error filling with AI:', error);
+      Alert.alert('Error', 'Failed to get AI suggestions. Please try again.');
+    } finally {
+      setIsFillingWithAI(false);
+    }
   };
 
   const handleStartDateTimeChange = (_event: any, selectedDate?: Date) => {
@@ -349,46 +442,66 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
           extraScrollHeight={32}
           contentContainerStyle={{
             paddingBottom:
-              isEditMode && !keyboardVisible
-                ? 96 + insets.bottom // leave room for the Delete bar
+              !keyboardVisible
+                ? (isEditMode ? 140 + insets.bottom : 80 + insets.bottom) // leave room for AI Fill and Delete buttons
                 : 32 + insets.bottom,
           }}
         >
           {/* Activity Image */}
-          <TouchableOpacity
-            onPress={() => {
-              setShowStartPicker(false);
-              setShowEndPicker(false);
-              handleSelectImage();
-            }}
-            disabled={isUploadingImage}
-            className="h-48 bg-muted m-4 rounded-lg overflow-hidden"
-          >
-            {imageUrl && !imageError ? (
-              <Image 
-                source={{ uri: imageUrl }} 
-                className="w-full h-full" 
-                resizeMode="cover"
-                onError={() => {
-                  console.error('ActivityModal - Failed to load image:', imageUrl);
-                  setImageError(true);
+          <View className="relative">
+            <TouchableOpacity
+              onPress={() => {
+                setShowStartPicker(false);
+                setShowEndPicker(false);
+                handleSelectImage();
+              }}
+              disabled={isUploadingImage}
+              className="h-48 bg-muted m-4 rounded-lg overflow-hidden"
+            >
+              {imageUrl && !imageError ? (
+                <Image 
+                  source={{ uri: imageUrl }} 
+                  className="w-full h-full" 
+                  resizeMode="cover"
+                  onError={() => {
+                    console.error('ActivityModal - Failed to load image:', imageUrl);
+                    setImageError(true);
+                  }}
+                  onLoad={() => setImageError(false)}
+                />
+              ) : (
+                <View className="flex-1 items-center justify-center">
+                  <Ionicons name="image-outline" size={48} color={colors.mutedForeground} />
+                  <Text className="text-muted-foreground mt-2">
+                    {imageError ? 'Failed to load image' : 'Tap to add photo'}
+                  </Text>
+                </View>
+              )}
+              {isUploadingImage && (
+                <View className="absolute inset-0 bg-black/50 items-center justify-center">
+                  <ActivityIndicator size="large" color={colors.primaryForeground} />
+                </View>
+              )}
+            </TouchableOpacity>
+            
+            {/* Remove Image Button */}
+            {imageUrl && !isUploadingImage && (
+              <TouchableOpacity
+                onPress={() => {
+                  setImageUrl(null);
+                  setImageError(false);
+                  // Mark the old image for deletion on save
+                  if (activity?.image_url && !oldImagePath) {
+                    setOldImagePath(activity.image_url);
+                  }
                 }}
-                onLoad={() => setImageError(false)}
-              />
-            ) : (
-              <View className="flex-1 items-center justify-center">
-                <Ionicons name="image-outline" size={48} color={colors.mutedForeground} />
-                <Text className="text-muted-foreground mt-2">
-                  {imageError ? 'Failed to load image' : 'Tap to add photo'}
-                </Text>
-              </View>
+                className="absolute top-6 left-6 bg-black/60 rounded-full p-2"
+                style={{ zIndex: 10 }}
+              >
+                <Ionicons name="close" size={20} color="white" />
+              </TouchableOpacity>
             )}
-            {isUploadingImage && (
-              <View className="absolute inset-0 bg-black/50 items-center justify-center">
-                <ActivityIndicator size="large" color={colors.primaryForeground} />
-              </View>
-            )}
-          </TouchableOpacity>
+          </View>
 
           <View className="px-4 space-y-4">
             {/* Title */}
@@ -514,6 +627,43 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
             </View>
           </View>
         </KeyboardAwareScrollView>
+
+        {/* AI Fill button overlay */}
+        {!keyboardVisible && (
+          <View
+            className="absolute left-0 right-0 px-4"
+            style={{ bottom: isEditMode ? 72 + insets.bottom : 16 + insets.bottom }}
+          >
+            <View className="items-center">
+              <TouchableOpacity
+                onPress={handleFillWithAI}
+                disabled={isLoading || isFillingWithAI || !title.trim()}
+                className={`px-8 py-2 rounded-lg border flex-row items-center ${
+                  !title.trim() 
+                    ? 'border-muted bg-muted opacity-50' 
+                    : 'border-primary bg-primary/10'
+                }`}
+              >
+                {isFillingWithAI ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <>
+                    <Ionicons 
+                      name="color-wand" 
+                      size={18} 
+                      color={!title.trim() ? colors.mutedForeground : colors.primary} 
+                    />
+                    <Text className={`text-center font-medium ml-2 ${
+                      !title.trim() ? 'text-muted-foreground' : 'text-primary'
+                    }`}>
+                      Fill with AI
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {/* Delete button overlay – outside scroll so layout doesn't shift */}
         {isEditMode && !keyboardVisible && (

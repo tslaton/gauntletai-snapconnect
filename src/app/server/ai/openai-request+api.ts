@@ -1,5 +1,55 @@
-// import { createClient } from "@supabase/supabase-js"
+import type { Activity } from '@/api/activities';
+import type { Itinerary } from '@/api/itineraries';
+import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
+
+// Helper function to create activity generation prompt
+function createActivityGenerationPrompt(itinerary: Itinerary, userPrompt?: string): string {
+  const itineraryContext = `Itinerary Context:
+- Title: ${itinerary.title}
+- Description: ${itinerary.description || 'No description'}
+- Duration: ${itinerary.start_time ? new Date(itinerary.start_time).toLocaleDateString() : 'Not specified'} to ${itinerary.end_time ? new Date(itinerary.end_time).toLocaleDateString() : 'Not specified'}`;
+
+  if (userPrompt) {
+    return `${itineraryContext}
+
+User Request: ${userPrompt}
+
+Based on the user's request and the itinerary context, create a complete activity with title, description, location, and relevant tags.`;
+  }
+
+  return itineraryContext;
+}
+
+// Helper function to get activity schema
+function getActivityDataSchema() {
+  return {
+    type: "object",
+    properties: {
+      title: {
+        type: "string",
+        description: "Suggested title for the activity"
+      },
+      description: {
+        type: "string",
+        description: "Description of the activity. Target ~50 words or fewer"
+      },
+      location: {
+        type: "string",
+        description: "Location for the activity. Favor giving this as a city, landmark, or point of interest over an exact street address"
+      },
+      tags: {
+        type: "array",
+        items: {
+          type: "string"
+        },
+        description: "Relevant tags for the activity"
+      }
+    },
+    required: ["title", "description", "location", "tags"],
+    additionalProperties: false
+  };
+}
 
 const headers = {
   'Content-Type': 'application/json',
@@ -8,6 +58,24 @@ const headers = {
 interface OpenAIRequestsBody {
   type: string
   [key: string]: unknown
+}
+
+interface FillActivityDataRequest extends OpenAIRequestsBody {
+  type: 'fill-activity-data'
+  activity: Partial<Activity>
+  itinerary: Itinerary
+}
+
+interface GenerateActivityImageRequest extends OpenAIRequestsBody {
+  type: 'generate-activity-image'
+  activity: Partial<Activity>
+  itinerary: Itinerary
+}
+
+interface CreateActivityFromPromptRequest extends OpenAIRequestsBody {
+  type: 'create-activity-from-prompt'
+  prompt: string
+  itinerary: Itinerary
 }
 
 export async function POST(req: Request) {
@@ -37,22 +105,136 @@ export async function POST(req: Request) {
     console.log(`Successfully authenticated request: ${authHeader}`)
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-    // const supabase = createClient(
-    //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    //   process.env.SUPABASE_SERVICE_KEY!
-    // )
-
-    const prompt = `To be determined...`
+    const supabase = createClient(
+      process.env.EXPO_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY!
+    )
 
     switch (type) {
-      case 'generate-project-cover': {
-        const response = await openai.responses.create({
-          model: "gpt-4.1",
-          input: prompt,
-        })
-        const responseContent = response.output_text
+      case 'fill-activity-data': {
+        const { activity, itinerary } = rest as FillActivityDataRequest;
+        
+        const basePrompt = createActivityGenerationPrompt(itinerary);
+        const prompt = `You are helping to fill in missing information for an activity within a travel itinerary.
 
-        return new Response(JSON.stringify({ responseContent }), { headers })
+${basePrompt}
+
+Current Activity Information:
+- Title: ${activity.title || '[MISSING]'}
+- Description: ${activity.description || '[MISSING]'}
+- Location: ${activity.location || '[MISSING]'}
+- Tags: ${activity.tags?.join(', ') || '[MISSING]'}
+
+Please provide suggestions to fill in the missing fields for this activity. Consider the context of the itinerary and make reasonable suggestions that would enhance the travel experience. Do not suggest start_time or end_time.
+
+Only include fields that need to be filled or improved. Ensure suggestions are relevant to the itinerary context.`;
+
+        const response = await openai.responses.create({
+          model: "gpt-4.1-nano",
+          input: [
+            { role: "system", content: "You are a helpful travel planning assistant." },
+            { role: "user", content: prompt }
+          ],
+          text: {
+            format: {
+              type: "json_schema",
+              name: "activity_data_suggestions",
+              strict: false,
+              schema: getActivityDataSchema()
+            }
+          }
+        });
+        
+        const suggestions = JSON.parse(response.output_text || '{}');
+
+        return new Response(JSON.stringify({ suggestions }), { headers })
+      }
+      case 'generate-activity-image': {
+        const { activity, itinerary } = rest as GenerateActivityImageRequest;
+        
+        // First, get a summary for the image generation
+        const summaryPrompt = `Create a concise, visual description for a DALL-E image that represents this travel activity:
+
+Activity: ${activity.title || 'Travel activity'}
+Description: ${activity.description || ''}
+Location: ${activity.location || ''}
+Tags: ${activity.tags?.join(', ') || ''}
+
+Itinerary Context: ${itinerary.title} - ${itinerary.description || ''}
+
+Provide a vivid, detailed description that would create an appealing travel photo for this activity. Focus on visual elements, atmosphere, and the experience.`;
+
+        const summaryResponse = await openai.responses.create({
+          model: "gpt-4.1-nano",
+          input: summaryPrompt
+        });
+        
+        // Generate the image using DALL-E-3
+        const imageResponse = await openai.images.generate({
+          model: 'dall-e-3',
+          prompt: summaryResponse.output_text || '',
+          n: 1,
+          size: '1024x1024',
+          quality: 'hd',
+          style: 'vivid',
+          response_format: 'b64_json'
+        });
+        
+        const b64Json = imageResponse.data?.[0]?.b64_json as string;
+        if (!b64Json) {
+          throw new Error('Failed to generate image data from OpenAI.');
+        }
+        
+        // Convert base64 to buffer
+        const buffer = new Uint8Array(
+          atob(b64Json)
+            .split("")
+            .map(char => char.charCodeAt(0))
+        );
+        
+        // Upload to Supabase storage
+        const filePath = `activities/${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
+        const { error } = await supabase.storage
+          .from('photos')
+          .upload(filePath, buffer, {
+            contentType: 'image/png'
+          });
+          
+        if (error) {
+          throw new Error(`Supabase upload error: ${error.message}`);
+        }
+        
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('photos')
+          .getPublicUrl(filePath);
+        
+        return new Response(JSON.stringify({ image_url: publicUrl }), { headers })
+      }
+      case 'create-activity-from-prompt': {
+        const { prompt: userPrompt, itinerary } = rest as CreateActivityFromPromptRequest;
+        
+        const prompt = createActivityGenerationPrompt(itinerary, userPrompt);
+
+        const response = await openai.responses.create({
+          model: "gpt-4.1-nano",
+          input: [
+            { role: "system", content: "You are a helpful travel planning assistant. Create activities that are specific, actionable, and enhance the travel experience." },
+            { role: "user", content: prompt }
+          ],
+          text: {
+            format: {
+              type: "json_schema",
+              name: "new_activity",
+              strict: false,
+              schema: getActivityDataSchema()
+            }
+          }
+        });
+        
+        const activityData = JSON.parse(response.output_text || '{}');
+
+        return new Response(JSON.stringify({ activity: activityData }), { headers })
       }
       default:
         return new Response(JSON.stringify({ error: 'Invalid task type' }), {
