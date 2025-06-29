@@ -1,15 +1,24 @@
 // weather.ts
-// https://open-meteo.com/en/docs?hourly=temperature_2m,precipitation_probability&forecast_days=16
+// https://open-meteo.com/en/docs?hourly=temperature_2m,precipitation_probability&timezone=GMT&time_mode=time_interval&start_date=2025-06-22&end_date=2025-07-06
 import { fetchWeatherApi } from 'openmeteo';
 
 
-export async function getWeather(lat: number, lng: number, forecastDays: number = 16, hourly: string[] = ["temperature_2m", "precipitation_probability"]) {
+export async function getWeather(
+  latitude: number, 
+  longitude: number, 
+  hourly: string[] = ["temperature_2m", "precipitation_probability"],
+  timezone: string = "GMT",
+  start_date: string,
+  end_date: string,
+) {
   const url = "https://api.open-meteo.com/v1/forecast";
   const params = {
-    latitude: lat,
-    longitude: lng,
-    hourly: hourly,
-    forecast_days: forecastDays
+    latitude,
+    longitude,
+    hourly,
+    timezone,
+    start_date,
+    end_date,
   };
 
   try {
