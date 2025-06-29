@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { formatDateRange } from '@/utils/dateHelpers';
@@ -13,6 +13,26 @@ interface ItineraryCardProps {
 
 export function ItineraryCard({ itinerary, onPress, onLongPress }: ItineraryCardProps) {
   const colors = useThemeColors();
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+
+  // Reset states when URL changes
+  useEffect(() => {
+    if (itinerary.cover_image_url) {
+      setImageError(false);
+      setImageLoading(true);
+      
+      // Set a timeout to prevent infinite loading
+      const timeout = setTimeout(() => {
+        if (imageLoading) {
+          console.warn('Image loading timeout:', itinerary.cover_image_url);
+          setImageLoading(false);
+        }
+      }, 10000); // 10 second timeout
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [itinerary.cover_image_url]);
 
   const dateRange = formatDateRange(itinerary.start_time, itinerary.end_time);
 
@@ -24,15 +44,34 @@ export function ItineraryCard({ itinerary, onPress, onLongPress }: ItineraryCard
       activeOpacity={0.7}
     >
       {/* Cover Image */}
-      {itinerary.cover_image_url ? (
-        <Image
-          source={{ uri: itinerary.cover_image_url }}
-          className="w-full h-40"
-          resizeMode="cover"
-        />
+      {itinerary.cover_image_url && !imageError ? (
+        <>
+          <Image
+            source={{ uri: itinerary.cover_image_url }}
+            className="w-full h-40"
+            resizeMode="cover"
+            onError={(error) => {
+              console.error('ItineraryCard - Image load error:', error.nativeEvent.error);
+              setImageError(true);
+              setImageLoading(false);
+            }}
+            onLoad={() => {
+              setImageLoading(false);
+              setImageError(false);
+            }}
+          />
+          {imageLoading && (
+            <View className="absolute inset-0 w-full h-40 bg-muted items-center justify-center">
+              <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+          )}
+        </>
       ) : (
         <View className="w-full h-40 bg-muted items-center justify-center">
           <Ionicons name="image-outline" size={48} color={colors.mutedForeground} />
+          {imageError && itinerary.cover_image_url && (
+            <Text className="text-xs text-muted-foreground mt-1">Failed to load image</Text>
+          )}
         </View>
       )}
 

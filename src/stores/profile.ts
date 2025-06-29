@@ -6,6 +6,7 @@
 import { supabase } from '@/utils/supabase';
 import { Session } from '@supabase/supabase-js';
 import { create } from 'zustand';
+import { useUserStore } from './user';
 
 /**
  * Interface for the Profile store state and its actions.
@@ -125,6 +126,13 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       if (error) {
         throw error;
       }
+      
+      // Sync the updated profile data to userStore so AvatarButton updates
+      useUserStore.getState().updateUser({
+        username,
+        website,
+        avatarUrl,
+      });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'An unknown error occurred.';

@@ -1,7 +1,7 @@
 import type { CreateItineraryData, Itinerary, UpdateItineraryData } from '@/api/itineraries';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useItinerariesStore } from '@/stores/itinerariesStore';
-import { deleteItineraryCover, uploadItineraryCover } from '@/utils/itineraryImageUpload';
+import { deletePhoto, uploadPhoto } from '@/utils/photoStorage';
 import { supabase } from '@/utils/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -48,6 +48,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; dates?: string }>({});
@@ -86,6 +87,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
     setEndDate(null);
     setCoverImageUrl(null);
     setOldImagePath(null);
+    setImageError(false);
     setErrors({});
   };
 
@@ -122,22 +124,28 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('User not authenticated');
 
-        // Generate a temporary ID for new itineraries
-        const itineraryId = itinerary?.id || `temp_${Date.now()}`;
-
         // Upload the image
-        const uploadResult = await uploadItineraryCover(
+        const uploadResult = await uploadPhoto(
           asset.uri,
-          itineraryId,
-          user.id
+          user.id,
+          { 
+            quality: 0.9, 
+            maxWidth: 1920, 
+            maxHeight: 1080, 
+            compress: true,
+            mimeType: asset.mimeType
+          }
         );
 
         if (uploadResult.success && uploadResult.publicUrl) {
           // Keep track of old image to delete later if this is an update
           if (coverImageUrl && coverImageUrl !== uploadResult.publicUrl) {
-            setOldImagePath(uploadResult.filePath || null);
+            // Extract the old image path from the existing URL
+            const oldPath = coverImageUrl.split('/').slice(-2).join('/');
+            setOldImagePath(oldPath);
           }
           setCoverImageUrl(uploadResult.publicUrl);
+          setImageError(false);
         } else {
           Alert.alert('Upload Error', uploadResult.error || 'Failed to upload image');
         }
@@ -171,7 +179,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
         
         // Delete old image if it was replaced
         if (oldImagePath) {
-          await deleteItineraryCover(oldImagePath);
+          await deletePhoto(oldImagePath);
         }
       } else {
         savedItinerary = await createItinerary(data as CreateItineraryData);
@@ -216,7 +224,7 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
               // Delete associated image if exists
               if (itinerary.cover_image_url) {
                 const imagePath = itinerary.cover_image_url.split('/').slice(-2).join('/');
-                await deleteItineraryCover(imagePath);
+                await deletePhoto(imagePath);
               }
               
               resetForm();
@@ -317,12 +325,23 @@ export function ItineraryModal({ visible, onClose, itinerary, onSave }: Itinerar
             disabled={isUploadingImage}
             className="h-48 bg-muted m-4 rounded-lg overflow-hidden"
           >
-            {coverImageUrl ? (
-              <Image source={{ uri: coverImageUrl }} className="w-full h-full" resizeMode="cover" />
+            {coverImageUrl && !imageError ? (
+              <Image 
+                source={{ uri: coverImageUrl }} 
+                className="w-full h-full" 
+                resizeMode="cover"
+                onError={() => {
+                  console.error('ItineraryModal - Failed to load image:', coverImageUrl);
+                  setImageError(true);
+                }}
+                onLoad={() => setImageError(false)}
+              />
             ) : (
               <View className="flex-1 items-center justify-center">
                 <Ionicons name="image-outline" size={48} color={colors.mutedForeground} />
-                <Text className="text-muted-foreground mt-2">Tap to add cover image</Text>
+                <Text className="text-muted-foreground mt-2">
+                  {imageError ? 'Failed to load image' : 'Tap to add cover image'}
+                </Text>
               </View>
             )}
             {isUploadingImage && (

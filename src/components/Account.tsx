@@ -5,6 +5,7 @@
 
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useProfileStore } from '@/stores/profile';
+import { uploadPhoto } from '@/utils/photoStorage';
 import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
 import { Session } from '@supabase/supabase-js';
@@ -111,28 +112,24 @@ export default function Account({ session }: { session: Session }) {
       const selectedImage = imagePickerResult.assets[0];
       if (!selectedImage.uri) throw new Error('No image uri!');
 
-      const imageArrayBuffer = await fetch(selectedImage.uri).then((res) => res.arrayBuffer());
-      const fileExtension = selectedImage.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
-      const storagePath = `${Date.now()}.${fileExtension}`;
-      
-      const { data, error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(storagePath, imageArrayBuffer, {
-          contentType: selectedImage.mimeType ?? 'image/jpeg',
-        });
+      const uploadResult = await uploadPhoto(
+        selectedImage.uri,
+        session.user.id,
+        {
+          bucket: 'avatars',
+          mimeType: selectedImage.mimeType,
+          compress: false, // Avatar images should maintain quality
+        }
+      );
 
-      if (uploadError) throw uploadError;
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload failed');
+      }
 
-      // After successful upload, obtain a public URL for the stored file
-      const { data: publicUrlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(storagePath);
-
-      // Fallback to storage path if public URL cannot be resolved
-      const finalUrl = publicUrlData.publicUrl ?? data.path;
-
-      setAvatarUrl(finalUrl);
-      saveProfile(session);
+      if (uploadResult.publicUrl) {
+        setAvatarUrl(uploadResult.publicUrl);
+        saveProfile(session);
+      }
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert('Upload Error', error.message);

@@ -2,7 +2,7 @@ import type { Activity, CreateActivityData, UpdateActivityData } from '@/api/act
 import { parseTagsString, tagsToString } from '@/api/activities';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useActivitiesStore } from '@/stores/activitiesStore';
-import { deleteActivityImage, uploadActivityImage } from '@/utils/itineraryImageUpload';
+import { deletePhoto, uploadPhoto } from '@/utils/photoStorage';
 import { supabase } from '@/utils/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -51,6 +51,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [startPickerMode, setStartPickerMode] = useState<'date' | 'time'>('date');
@@ -95,6 +96,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
     setImageUrl(null);
     setTagsText('');
     setOldImagePath(null);
+    setImageError(false);
     setErrors({});
   };
 
@@ -131,22 +133,28 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('User not authenticated');
 
-        // Generate a temporary ID for new activities
-        const activityId = activity?.id || `temp_${Date.now()}`;
-
         // Upload the image
-        const uploadResult = await uploadActivityImage(
+        const uploadResult = await uploadPhoto(
           asset.uri,
-          activityId,
-          user.id
+          user.id,
+          { 
+            quality: 0.85, 
+            maxWidth: 1280, 
+            maxHeight: 1280, 
+            compress: true,
+            mimeType: asset.mimeType
+          }
         );
 
         if (uploadResult.success && uploadResult.publicUrl) {
           // Keep track of old image to delete later if this is an update
           if (imageUrl && imageUrl !== uploadResult.publicUrl) {
-            setOldImagePath(uploadResult.filePath || null);
+            // Extract the old image path from the existing URL
+            const oldPath = imageUrl.split('/').slice(-2).join('/');
+            setOldImagePath(oldPath);
           }
           setImageUrl(uploadResult.publicUrl);
+          setImageError(false);
         } else {
           Alert.alert('Upload Error', uploadResult.error || 'Failed to upload image');
         }
@@ -184,7 +192,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
         
         // Delete old image if it was replaced
         if (oldImagePath) {
-          await deleteActivityImage(oldImagePath);
+          await deletePhoto(oldImagePath);
         }
       } else {
         const createData: CreateActivityData = {
@@ -239,7 +247,7 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
               // Delete associated image if exists
               if (activity.image_url) {
                 const imagePath = activity.image_url.split('/').slice(-2).join('/');
-                await deleteActivityImage(imagePath);
+                await deletePhoto(imagePath);
               }
               
               resetForm();
@@ -356,12 +364,23 @@ export function ActivityModal({ visible, onClose, activity, itineraryId, onSave 
             disabled={isUploadingImage}
             className="h-48 bg-muted m-4 rounded-lg overflow-hidden"
           >
-            {imageUrl ? (
-              <Image source={{ uri: imageUrl }} className="w-full h-full" resizeMode="cover" />
+            {imageUrl && !imageError ? (
+              <Image 
+                source={{ uri: imageUrl }} 
+                className="w-full h-full" 
+                resizeMode="cover"
+                onError={() => {
+                  console.error('ActivityModal - Failed to load image:', imageUrl);
+                  setImageError(true);
+                }}
+                onLoad={() => setImageError(false)}
+              />
             ) : (
               <View className="flex-1 items-center justify-center">
                 <Ionicons name="image-outline" size={48} color={colors.mutedForeground} />
-                <Text className="text-muted-foreground mt-2">Tap to add photo</Text>
+                <Text className="text-muted-foreground mt-2">
+                  {imageError ? 'Failed to load image' : 'Tap to add photo'}
+                </Text>
               </View>
             )}
             {isUploadingImage && (

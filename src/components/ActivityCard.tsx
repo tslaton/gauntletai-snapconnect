@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -12,6 +12,7 @@ interface ActivityCardProps {
 
 export function ActivityCard({ activity, onPress }: ActivityCardProps) {
   const colors = useThemeColors();
+  const [imageError, setImageError] = useState(false);
 
   const timeRange = formatTimeRange(activity.start_time, activity.end_time);
 
@@ -23,12 +24,13 @@ export function ActivityCard({ activity, onPress }: ActivityCardProps) {
     >
       <View className="flex-row">
         {/* Activity Image */}
-        {activity.image_url ? (
+        {activity.image_url && !imageError ? (
           <Image
             source={{ uri: activity.image_url }}
             className="w-20"
             style={{ alignSelf: 'stretch' }}
             resizeMode="cover"
+            onError={() => setImageError(true)}
           />
         ) : (
           <View className="w-20 bg-muted items-center justify-center" style={{ alignSelf: 'stretch' }}>

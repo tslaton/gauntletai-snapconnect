@@ -20,6 +20,8 @@ export interface PhotoUploadOptions {
   maxWidth?: number; // Default 1920
   maxHeight?: number; // Default 1920
   compress?: boolean; // Default true
+  bucket?: string; // Storage bucket name, default 'photos'
+  mimeType?: string; // MIME type of the image
 }
 
 /**
@@ -40,53 +42,85 @@ export async function uploadPhoto(
       maxWidth = 1920,
       maxHeight = 1920,
       compress = true,
+      bucket = 'photos',
+      mimeType,
     } = options;
 
     const timestamp = Date.now();
-    // Reverting to JPEG for smaller file sizes and faster uploads.
-    const fileName = `${userId}_${timestamp}.jpg`;
-    const filePath = `${userId}/${fileName}`;
+    
+    // Extract file extension from URI or use default based on MIME type
+    const uriExtension = photoUri.split('.').pop()?.toLowerCase();
+    let fileExtension = uriExtension || 
+                        (mimeType?.includes('png') ? 'png' : 'jpeg');
+    
+    let imageArrayBuffer: ArrayBuffer;
+    let contentType = mimeType || (fileExtension === 'png' ? 'image/png' : 'image/jpeg');
 
-    let processedUri = photoUri;
-
-    if (compress) {
+    if (compress && (!mimeType || mimeType.startsWith('image/'))) {
       try {
+        // First, get the original image dimensions
+        const imageInfo = await ImageManipulator.manipulateAsync(
+          photoUri,
+          [],
+          { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        
+        // Calculate if resizing is needed and compute new dimensions
+        let resizeOptions: any[] = [];
+        if (imageInfo.width > maxWidth || imageInfo.height > maxHeight) {
+          // Calculate scale factor to fit within max dimensions while preserving aspect ratio
+          const widthScale = maxWidth / imageInfo.width;
+          const heightScale = maxHeight / imageInfo.height;
+          const scale = Math.min(widthScale, heightScale);
+          
+          const newWidth = Math.round(imageInfo.width * scale);
+          const newHeight = Math.round(imageInfo.height * scale);
+          
+          resizeOptions = [{ resize: { width: newWidth, height: newHeight } }];
+          console.log(`Resizing image from ${imageInfo.width}x${imageInfo.height} to ${newWidth}x${newHeight}`);
+        }
+        
+        // Apply compression and optional resizing
         const manipulatedImage = await ImageManipulator.manipulateAsync(
           photoUri,
-          [{ resize: { width: maxWidth, height: maxHeight } }],
-          // Using JPEG format for compression. The quality is controlled by the 'compress' option (0-1).
+          resizeOptions,
           { compress: quality, format: ImageManipulator.SaveFormat.JPEG }
         );
-        processedUri = manipulatedImage.uri;
+        
+        // Read compressed image as base64
+        const base64 = await FileSystem.readAsStringAsync(manipulatedImage.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        
+        // Convert base64 to ArrayBuffer
+        const binary = Buffer.from(base64, 'base64');
+        imageArrayBuffer = binary.buffer.slice(
+          binary.byteOffset,
+          binary.byteOffset + binary.byteLength
+        );
+        
+        // Update content type and extension to JPEG after compression
+        contentType = 'image/jpeg';
+        fileExtension = 'jpeg';
       } catch (compressionError) {
         console.warn('Photo compression failed, using original:', compressionError);
+        // Fall back to original image
+        imageArrayBuffer = await fetch(photoUri).then((res) => res.arrayBuffer());
       }
+    } else {
+      // No compression - use original image
+      imageArrayBuffer = await fetch(photoUri).then((res) => res.arrayBuffer());
     }
 
-    const base64 = await FileSystem.readAsStringAsync(processedUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-
-    // Convert base64 string directly into binary data using Buffer. This approach avoids the
-    // React-Native fetch(data-URI) limitations that produced 0-byte Blobs.
-    const binary = Buffer.from(base64, 'base64');
-
-    const mimeType = 'image/jpeg';
-
-    // Get the underlying ArrayBuffer from the Buffer.
-    // This is necessary because React Native's Blob polyfill doesn't support
-    // creating blobs from ArrayBufferViews (like Buffers).
-    // Supabase's uploader can accept an ArrayBuffer directly.
-    const arrayBuffer = binary.buffer.slice(
-      binary.byteOffset,
-      binary.byteOffset + binary.byteLength
-    );
+    // Generate final file path with potentially updated extension
+    const fileName = `${userId}_${timestamp}.${fileExtension}`;
+    const filePath = `${userId}/${fileName}`;
 
     // Upload the ArrayBuffer to Supabase Storage.
     const { data, error } = await supabase.storage
-      .from('photos')
-      .upload(filePath, arrayBuffer, {
-        contentType: mimeType,
+      .from(bucket)
+      .upload(filePath, imageArrayBuffer, {
+        contentType,
         upsert: false,
       });
 
@@ -100,7 +134,7 @@ export async function uploadPhoto(
     }
 
     const { data: urlData } = supabase.storage
-      .from('photos')
+      .from(bucket)
       .getPublicUrl(filePath);
 
     if (!urlData?.publicUrl) {
@@ -123,7 +157,7 @@ export async function uploadPhoto(
 
 /**
  * Deletes a photo from Supabase Storage
- * @param filePath - The file path in storage (e.g., 'photos/user123/photo.jpg')
+ * @param filePath - The file path in storage (e.g., 'photos/user123/photo.jpeg')
  * @returns Promise with deletion result
  */
 export async function deletePhoto(filePath: string): Promise<{ success: boolean; error?: string }> {
