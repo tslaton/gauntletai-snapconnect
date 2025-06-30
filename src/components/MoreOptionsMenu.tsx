@@ -75,14 +75,8 @@ export default function MoreOptionsMenu({
     
     const data = await response.json();
     
-    if (!response.ok) throw new Error(data.error || 'Failed to send test message');
-    
-    Alert.alert(
-      'Test Message Sent',
-      `${data.from} sent you a message: "Hey!"`,
-      [{ text: 'OK', onPress: onClose }]
-    );
-    
+    if (!response.ok) throw new Error(data.error || 'Failed to send test message');  
+  
     // Refresh conversations to see the new message
     if (currentUser?.id) {
       fetchConversations(currentUser.id);
@@ -131,11 +125,6 @@ export default function MoreOptionsMenu({
     
     if (!response.ok) throw new Error(data.error || 'Failed to send test message');
     
-    Alert.alert(
-      'Test Message Sent',
-      `${data.from} sent: "${data.message}"`,
-      [{ text: 'OK', onPress: onClose }]
-    );
   };
 
   const allOptions: Record<MenuContext, MenuOption[]> = useMemo(() => ({

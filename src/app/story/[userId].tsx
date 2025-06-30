@@ -39,6 +39,8 @@ export default function StoryModal() {
   const searchResults = useFriendsStore((state) => state.searchResults);
   const fetchSearchResults = useFriendsStore((state) => state.fetchSearchResults);
   
+  const currentUser = useUserStore((state) => state.currentUser);
+  
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAbout, setShowAbout] = useState(false);
   const [relationshipStatus, setRelationshipStatus] = useState<{
@@ -170,45 +172,47 @@ export default function StoryModal() {
             ))}
           </View>
           
-          {/* User Info Card */}
-          <View className="absolute bottom-8 left-4 right-4">
-            <TouchableOpacity
-              onLongPress={handleLongPress}
-              className="bg-card/90 rounded-lg p-4 flex-row items-center"
-            >
-              <UserAvatar uri={currentStory.profiles?.avatar_url} size={48} />
-              <View className="flex-1 ml-3">
-                <Text className="text-foreground font-bold text-lg">
-                  {displayName}
-                </Text>
-                {currentStory.profiles?.username && (
-                  <Text className="text-muted-foreground text-sm">
-                    @{currentStory.profiles.username}
+          {/* User Info Card - Hide when viewing own story */}
+          {currentUser?.id !== userId && (
+            <View className="absolute bottom-8 left-4 right-4">
+              <TouchableOpacity
+                onLongPress={handleLongPress}
+                className="bg-card/90 rounded-lg p-4 flex-row items-center"
+              >
+                <UserAvatar uri={currentStory.profiles?.avatar_url} size={48} />
+                <View className="flex-1 ml-3">
+                  <Text className="text-foreground font-bold text-lg">
+                    {displayName}
                   </Text>
+                  {currentStory.profiles?.username && (
+                    <Text className="text-muted-foreground text-sm">
+                      @{currentStory.profiles.username}
+                    </Text>
+                  )}
+                </View>
+                {!relationshipStatus.isFriend && !relationshipStatus.hasPendingRequest && userId && (
+                  <TouchableOpacity
+                    onPress={handleAddFriend}
+                    className="bg-primary rounded-full p-3"
+                  >
+                    <FontAwesome name="user-plus" size={20} color={colors.primaryForeground} />
+                  </TouchableOpacity>
                 )}
-              </View>
-              {!relationshipStatus.isFriend && !relationshipStatus.hasPendingRequest && userId && (
-                <TouchableOpacity
-                  onPress={handleAddFriend}
-                  className="bg-primary rounded-full p-3"
-                >
-                  <FontAwesome name="user-plus" size={20} color={colors.primaryForeground} />
-                </TouchableOpacity>
-              )}
-              {relationshipStatus.hasPendingRequest && (
-                <View className="bg-muted rounded-full px-4 py-2">
-                  <Text className="text-muted-foreground text-sm">Pending</Text>
+                {relationshipStatus.hasPendingRequest && (
+                  <View className="bg-muted rounded-full px-4 py-2">
+                    <Text className="text-muted-foreground text-sm">Pending</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              
+              {/* About popup */}
+              {showAbout && currentStory.profiles?.about && (
+                <View className="bg-card/95 rounded-lg p-4 mt-2">
+                  <Text className="text-foreground">{currentStory.profiles.about}</Text>
                 </View>
               )}
-            </TouchableOpacity>
-            
-            {/* About popup */}
-            {showAbout && currentStory.profiles?.about && (
-              <View className="bg-card/95 rounded-lg p-4 mt-2">
-                <Text className="text-foreground">{currentStory.profiles.about}</Text>
-              </View>
-            )}
-          </View>
+            </View>
+          )}
           
           {/* Close Button */}
           <TouchableOpacity
