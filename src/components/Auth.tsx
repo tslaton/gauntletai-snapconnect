@@ -30,8 +30,11 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
+  const [about, setAbout] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [useFullName, setUseFullName] = useState(true); // Toggle state for Full Name vs Username
   const themeColors = useThemeColors();
 
   /**
@@ -46,9 +49,15 @@ export default function Auth() {
       Alert.alert('Validation Error', 'Password is required');
       return false;
     }
-    if (isSignUp && !fullName.trim()) {
-      Alert.alert('Validation Error', 'Full Name is required');
-      return false;
+    if (isSignUp) {
+      if (useFullName && !fullName.trim()) {
+        Alert.alert('Validation Error', 'Full Name is required');
+        return false;
+      }
+      if (!useFullName && !username.trim()) {
+        Alert.alert('Validation Error', 'Username is required');
+        return false;
+      }
     }
     if (password.length < 6) {
       Alert.alert('Validation Error', 'Password must be at least 6 characters');
@@ -100,8 +109,10 @@ export default function Auth() {
         password: password,
         options: {
           data: {
-            full_name: fullName.trim(),
+            full_name: useFullName ? fullName.trim() : '',
             email: email.trim(),
+            username: !useFullName ? username.trim() : '',
+            about: about.trim(),
           },
         },
       });
@@ -144,6 +155,8 @@ export default function Auth() {
     setPassword(''); // Clear password when switching modes
     if (!isSignUp) {
       setFullName(''); // Clear full name when switching to sign in
+      setUsername(''); // Clear username when switching to sign in
+      setAbout(''); // Clear about when switching to sign in
     }
   };
 
@@ -168,25 +181,92 @@ export default function Auth() {
             </Text>
           </View>
 
-          {/* Full Name Field - Only shown during sign up */}
+          {/* Toggle between Full Name and Username - Only shown during sign up */}
           {isSignUp && (
             <View className="py-2">
-              <Text className="mb-1 ml-1" style={{ color: themeColors.foreground }}>Full Name *</Text>
-              <View className="flex-row items-center border rounded-md p-3" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
-                <View className="w-8 items-center">
-                  <FontAwesome name="user" size={20} color={themeColors.mutedForeground} />
-                </View>
-                <TextInput
-                  className="flex-1 text-base ml-2"
-                  style={{ color: themeColors.foreground }}
-                  onChangeText={(text) => setFullName(text)}
-                  value={fullName}
-                  placeholder="Enter your full name"
-                  placeholderTextColor={themeColors.mutedForeground}
-                  autoCapitalize="words"
-                  returnKeyType="next"
-                />
+              <View className="flex-row items-center justify-center mb-3">
+                <TouchableOpacity
+                  onPress={() => setUseFullName(true)}
+                  className="flex-1 py-2 rounded-l-md"
+                  style={{ 
+                    backgroundColor: useFullName ? themeColors.primary : themeColors.muted,
+                    borderWidth: 1,
+                    borderColor: themeColors.border,
+                  }}
+                >
+                  <Text 
+                    className="text-center font-medium" 
+                    style={{ 
+                      color: useFullName ? themeColors.primaryForeground : themeColors.mutedForeground 
+                    }}
+                  >
+                    Full Name
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setUseFullName(false)}
+                  className="flex-1 py-2 rounded-r-md"
+                  style={{ 
+                    backgroundColor: !useFullName ? themeColors.primary : themeColors.muted,
+                    borderWidth: 1,
+                    borderColor: themeColors.border,
+                    marginLeft: -1,
+                  }}
+                >
+                  <Text 
+                    className="text-center font-medium" 
+                    style={{ 
+                      color: !useFullName ? themeColors.primaryForeground : themeColors.mutedForeground 
+                    }}
+                  >
+                    Username
+                  </Text>
+                </TouchableOpacity>
               </View>
+
+              {/* Full Name Field */}
+              {useFullName && (
+                <View>
+                  <Text className="mb-1 ml-1" style={{ color: themeColors.foreground }}>Full Name *</Text>
+                  <View className="flex-row items-center border rounded-md p-3" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+                    <View className="w-8 items-center">
+                      <FontAwesome name="user" size={20} color={themeColors.mutedForeground} />
+                    </View>
+                    <TextInput
+                      className="flex-1 text-base ml-2"
+                      style={{ color: themeColors.foreground }}
+                      onChangeText={(text) => setFullName(text)}
+                      value={fullName}
+                      placeholder="Enter your full name"
+                      placeholderTextColor={themeColors.mutedForeground}
+                      autoCapitalize="words"
+                      returnKeyType="next"
+                    />
+                  </View>
+                </View>
+              )}
+
+              {/* Username Field */}
+              {!useFullName && (
+                <View>
+                  <Text className="mb-1 ml-1" style={{ color: themeColors.foreground }}>Username *</Text>
+                  <View className="flex-row items-center border rounded-md p-3" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+                    <View className="w-8 items-center">
+                      <FontAwesome name="at" size={20} color={themeColors.mutedForeground} />
+                    </View>
+                    <TextInput
+                      className="flex-1 text-base ml-2"
+                      style={{ color: themeColors.foreground }}
+                      onChangeText={(text) => setUsername(text)}
+                      value={username}
+                      placeholder="Choose a username"
+                      placeholderTextColor={themeColors.mutedForeground}
+                      autoCapitalize="none"
+                      returnKeyType="next"
+                    />
+                  </View>
+                </View>
+              )}
             </View>
           )}
 
@@ -233,6 +313,27 @@ export default function Auth() {
               />
             </View>
           </View>
+
+          {/* About Field - Only shown during sign up */}
+          {isSignUp && (
+            <View className="py-2">
+              <Text className="mb-1 ml-1" style={{ color: themeColors.foreground }}>About</Text>
+              <View className="border rounded-md p-3" style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+                <TextInput
+                  className="text-base"
+                  style={{ color: themeColors.foreground, minHeight: 60 }}
+                  onChangeText={(text) => setAbout(text)}
+                  value={about}
+                  placeholder="This will appear on your public profile to let other users know what kind of content you share."
+                  placeholderTextColor={themeColors.mutedForeground}
+                  multiline={true}
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  returnKeyType="done"
+                />
+              </View>
+            </View>
+          )}
 
           {/* Sign In/Sign Up Button */}
           <View className="py-2 mt-6">

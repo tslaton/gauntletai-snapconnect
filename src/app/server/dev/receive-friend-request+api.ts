@@ -1,4 +1,4 @@
-import { createSupabaseClientForServer } from '@/utils/supabaseForServer';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
   const authHeader = request.headers.get('Authorization');
@@ -6,7 +6,21 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = createSupabaseClientForServer(authHeader);
+  const supabase = createClient(
+    process.env.EXPO_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+      global: {
+        headers: {
+          Authorization: authHeader,
+        },
+      },
+    }
+  );
 
   try {
     // Get the authenticated user

@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 
-export type MenuContext = 'conversation-list' | 'conversation';
+export type MenuContext = 'conversation-list' | 'conversation' | 'itineraries';
 
 interface MenuOption {
   id: string;
@@ -29,13 +29,15 @@ interface MoreOptionsMenuProps {
   onClose: () => void;
   context: MenuContext;
   conversationId?: string;
+  onNewItinerary?: () => void;
 }
 
 export default function MoreOptionsMenu({ 
   visible, 
   onClose, 
   context,
-  conversationId 
+  conversationId,
+  onNewItinerary 
 }: MoreOptionsMenuProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingOptionId, setLoadingOptionId] = useState<string | null>(null);
@@ -73,14 +75,8 @@ export default function MoreOptionsMenu({
     
     const data = await response.json();
     
-    if (!response.ok) throw new Error(data.error || 'Failed to send test message');
-    
-    Alert.alert(
-      'Test Message Sent',
-      `${data.from} sent you a message: "Hey!"`,
-      [{ text: 'OK', onPress: onClose }]
-    );
-    
+    if (!response.ok) throw new Error(data.error || 'Failed to send test message');  
+  
     // Refresh conversations to see the new message
     if (currentUser?.id) {
       fetchConversations(currentUser.id);
@@ -129,11 +125,6 @@ export default function MoreOptionsMenu({
     
     if (!response.ok) throw new Error(data.error || 'Failed to send test message');
     
-    Alert.alert(
-      'Test Message Sent',
-      `${data.from} sent: "${data.message}"`,
-      [{ text: 'OK', onPress: onClose }]
-    );
   };
 
   const allOptions: Record<MenuContext, MenuOption[]> = useMemo(() => ({
@@ -176,7 +167,22 @@ export default function MoreOptionsMenu({
         isDevOnly: false,
       },
     ],
-  }), [conversationId]);
+    'itineraries': [
+      {
+        id: 'new-itinerary',
+        icon: 'plus-circle',
+        title: 'New Itinerary',
+        subtitle: 'Create a new travel plan',
+        onPress: async () => {
+          if (onNewItinerary) {
+            onNewItinerary();
+          }
+          onClose();
+        },
+        isDevOnly: false,
+      },
+    ],
+  }), [conversationId, onNewItinerary]);
 
   // Filter options based on context and dev mode
   const visibleOptions = useMemo(() => {
@@ -192,7 +198,7 @@ export default function MoreOptionsMenu({
     return null;
   }
 
-  const title = context === 'conversation' ? 'Options' : 'Dev Tools';
+  const title = context === 'conversation' ? 'Options' : context === 'itineraries' ? 'Options' : 'Dev Tools';
 
   return (
     <Modal

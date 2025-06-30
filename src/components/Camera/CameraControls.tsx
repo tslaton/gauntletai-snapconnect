@@ -5,14 +5,18 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { CameraType } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import React from 'react';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-native';
 
 interface CameraControlsProps {
   onCapture: () => void;
   onToggleCamera: () => void;
   isCapturing: boolean;
   cameraType: CameraType;
+  zoom: number;
+  onZoomChange: (zoom: number) => void;
+  onPhotoSelected?: (photoUri: string) => void;
 }
 
 /**
@@ -27,17 +31,83 @@ export function CameraControls({
   onToggleCamera, 
   isCapturing, 
   cameraType,
+  zoom,
+  onZoomChange,
+  onPhotoSelected,
 }: CameraControlsProps) {
+  // Define zoom levels
+  const zoomLevels = [
+    { label: '1x', value: 0 },      // No zoom
+    { label: '2x', value: 0.25 },   // 25% zoom (approximately 2x)
+    { label: '5x', value: 0.5 },    // 50% zoom (approximately 5x)
+  ];
+
+  const handlePickImage = async () => {
+    if (!onPhotoSelected) return;
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        onPhotoSelected(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image from gallery');
+    }
+  };
 
   return (
-    <View className="flex-row items-center justify-around px-6 py-4">
-      {/* Gallery/Recent Photos Button (placeholder for future) */}
-      <View className="w-12 h-12 rounded-xl bg-white/20 items-center justify-center">
-        <Ionicons name="images-outline" size={24} color="#ffffff" />
+    <View>
+      {/* Zoom Controls - centered above shutter button */}
+      <View className="flex-row items-center justify-center mb-4">
+        {zoomLevels.map((level, index) => (
+          <TouchableOpacity
+            key={level.label}
+            onPress={() => onZoomChange(level.value)}
+            disabled={isCapturing}
+            className={`mx-2 px-4 py-2 rounded-full ${
+              zoom === level.value 
+                ? 'bg-white' 
+                : 'bg-white/20'
+            }`}
+          >
+            <Text 
+              className={`font-semibold ${
+                zoom === level.value 
+                  ? 'text-black' 
+                  : 'text-white'
+              }`}
+            >
+              {level.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {/* Main Capture Button */}
-      <View className="items-center">
+      {/* Main controls row */}
+      <View className="flex-row items-center justify-around px-6 py-4">
+        {/* Gallery/Recent Photos Button */}
+        <TouchableOpacity
+          onPress={handlePickImage}
+          disabled={isCapturing || !onPhotoSelected}
+          className={`w-12 h-12 rounded-xl items-center justify-center ${
+            isCapturing || !onPhotoSelected ? 'bg-gray-500/20' : 'bg-white/20'
+          }`}
+        >
+          <Ionicons 
+            name="images-outline" 
+            size={24} 
+            color={isCapturing || !onPhotoSelected ? "#999" : "#ffffff"} 
+          />
+        </TouchableOpacity>
+
+        {/* Main Capture Button */}
+        <View className="items-center">
         <TouchableOpacity
           onPress={onCapture}
           disabled={isCapturing}
@@ -65,20 +135,21 @@ export function CameraControls({
         </Text>
       </View>
 
-      {/* Camera Switch Button */}
-      <TouchableOpacity
-        onPress={onToggleCamera}
-        disabled={isCapturing}
-        className={`w-12 h-12 rounded-xl items-center justify-center ${
-          isCapturing ? 'bg-gray-500/20' : 'bg-white/20'
-        }`}
-      >
-        <Ionicons 
-          name="camera-reverse-outline" 
-          size={24} 
-          color={isCapturing ? "#999" : "#ffffff"} 
-        />
-      </TouchableOpacity>
+        {/* Camera Switch Button */}
+        <TouchableOpacity
+          onPress={onToggleCamera}
+          disabled={isCapturing}
+          className={`w-12 h-12 rounded-xl items-center justify-center ${
+            isCapturing ? 'bg-gray-500/20' : 'bg-white/20'
+          }`}
+        >
+          <Ionicons 
+            name="camera-reverse-outline" 
+            size={24} 
+            color={isCapturing ? "#999" : "#ffffff"} 
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 } 

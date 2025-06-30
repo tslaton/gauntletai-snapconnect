@@ -89,3 +89,20 @@ supabase db dump > schema.sql --local
 
 ## Env vars
 - check .env.example for the env vars you need to set. It is best if your local supabase url (`npx supabase start`) is your IPv4 address rather than localhost, so the phone will connect to it as if it's a remote. You can find it on Mac under TCP/IP "Details..." in the WiFi settings.
+
+## APIs
+
+### Geocoding
+- [OpenCage Data](https://opencagedata.com/guides/how-to-switch-from-nominatim)
+- Google
+	- terms of use, privacy policy and other info are linked [here](https://developers.google.com/maps/documentation/geocoding/policies)
+- [Nominatim](https://nominatim.org/)
+- [Mapbox](https://docs.mapbox.com/api/search/geocoding/)
+
+### Weather
+- [OpenMeteo](https://open-meteo.com/)
+- [OpenWeather](https://api.openweathermap.org)
+- [Tomorrow.io](https://www.tomorrow.io/blog/top-weather-apis/#ven1)
+
+### Points of interest
+- [TripAdvisor](https://tripadvisor-content-api.readme.io/reference/overview)

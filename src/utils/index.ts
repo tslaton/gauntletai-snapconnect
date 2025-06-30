@@ -42,3 +42,43 @@ export function timeAgo(dateString: string): string {
   // Less than a minute
   return 'now';
 }
+
+/**
+ * Extracts capitalized words from a string
+ * 
+ * @param text - Text to extract capitalized words from
+ * @returns Array of capitalized words
+ */
+export function extractCapitalizedWords(text: string): string[] {
+  if (!text) return [];
+  // Match words that start with a capital letter
+  const matches = text.match(/\b[A-Z][a-zA-Z]*\b/g);
+  return matches || [];
+}
+
+/**
+ * Finds the most common value in an array
+ * 
+ * @param arr - Array to find most common value in
+ * @returns Most common value or null if array is empty
+ */
+export function findMostCommon<T>(arr: T[]): T | null {
+  if (!arr || arr.length === 0) return null;
+  
+  const counts = new Map<T, number>();
+  for (const item of arr) {
+    counts.set(item, (counts.get(item) || 0) + 1);
+  }
+  
+  let maxCount = 0;
+  let mostCommon: T | null = null;
+  
+  for (const [item, count] of counts) {
+    if (count > maxCount) {
+      maxCount = count;
+      mostCommon = item;
+    }
+  }
+  
+  return mostCommon;
+}

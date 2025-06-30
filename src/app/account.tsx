@@ -4,7 +4,6 @@
  */
 
 import Account from '@/components/Account';
-import { ThemeSettings } from '@/components/ThemeSettings';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { supabase } from '@/utils/supabase';
 import { FontAwesome } from '@expo/vector-icons';
@@ -50,7 +49,7 @@ export default function AccountScreen() {
       />
       
       {/* Custom Header */}
-      <View className="relative flex-row items-center justify-center p-4 border-b border-border">
+      <View className="relative flex-row items-center justify-center p-4 border-b border-border bg-card">
         <Text className="text-lg font-semibold text-foreground">Account</Text>
         <TouchableOpacity 
           onPress={() => router.dismiss()}
@@ -73,7 +72,6 @@ export default function AccountScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <Account key={session.user.id} session={session} />
-          <ThemeSettings />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

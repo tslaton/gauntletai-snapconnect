@@ -1,7 +1,7 @@
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { FontAwesome } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { useThemeColors } from '@/hooks/useThemeColors';
 
 export default function TabLayout() {
   const colors = useThemeColors();
@@ -23,20 +23,11 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="events"
+        name="itineraries"
         options={{
-          title: 'Events',
+          title: 'Itineraries',
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="calendar" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="map"
-        options={{
-          title: 'Map',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome name="map-marker" size={size} color={color} />
           ),
         }}
       />
@@ -46,6 +37,15 @@ export default function TabLayout() {
           title: 'Chat',
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="comments" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="stories"
+        options={{
+          title: 'Stories',
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="film" size={size} color={color} />
           ),
         }}
       />

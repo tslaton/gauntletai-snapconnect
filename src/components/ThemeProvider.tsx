@@ -1,18 +1,13 @@
-import React, { useEffect } from 'react';
-import { View } from 'react-native';
 import { useThemeStore } from '@/stores/theme';
+import React from 'react';
+import { View } from 'react-native';
 
 interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const { currentTheme, initializeTheme } = useThemeStore();
-
-  useEffect(() => {
-    const cleanup = initializeTheme();
-    return cleanup;
-  }, [initializeTheme]);
+  const { currentTheme } = useThemeStore();
 
   return (
     <View className={`flex-1 ${currentTheme === 'dark' ? 'dark' : ''}`}>

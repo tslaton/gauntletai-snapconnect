@@ -13,6 +13,8 @@ interface HeaderProps {
   showAddFriend?: boolean;
   showMoreOptions?: boolean;
   onMoreOptionsPress?: () => void;
+  showMyStory?: boolean;
+  onMyStoryPress?: () => void;
 }
 
 export function Header({
@@ -22,6 +24,8 @@ export function Header({
   showAddFriend = false,
   showMoreOptions = false,
   onMoreOptionsPress,
+  showMyStory = false,
+  onMyStoryPress,
 }: HeaderProps) {
   const [friendSearchModalVisible, setFriendSearchModalVisible] = useState(false);
   const themeColors = useThemeColors();
@@ -30,6 +34,11 @@ export function Header({
 
   const RightComponent = () => (
     <View className="flex-row items-center justify-end">
+      {showMyStory && (
+        <TouchableOpacity onPress={onMyStoryPress} className="p-2">
+          <FontAwesome name="user-circle" size={20} color={iconColor} />
+        </TouchableOpacity>
+      )}
       {showAddFriend && (
         <TouchableOpacity onPress={() => setFriendSearchModalVisible(true)} className="p-2">
           <FontAwesome name="user-plus" size={20} color={iconColor} />

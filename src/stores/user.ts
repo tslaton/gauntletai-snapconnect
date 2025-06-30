@@ -17,6 +17,7 @@ export interface CurrentUser {
   email: string | null;
   avatarUrl: string | null;
   website: string | null;
+  about: string | null;
 }
 
 /**
@@ -91,7 +92,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       // Fetch user profile data
       const { data, error, status } = await supabase
         .from('profiles')
-        .select('username, full_name, email, avatar_url, website')
+        .select('username, full_name, email, avatar_url, website, about')
         .eq('id', user.id)
         .single();
 
@@ -137,6 +138,7 @@ export const useUserStore = create<UserState>((set, get) => ({
           email: user.email || null,
           avatarUrl: null,
           website: null,
+          about: null,
         };
 
         set({ 
@@ -160,6 +162,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         email: data?.email || user.email || null, // Fallback to auth email
         avatarUrl: data?.avatar_url || null,
         website: data?.website || null,
+        about: data?.about || null,
       };
 
       set({ 
